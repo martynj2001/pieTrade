@@ -1,2 +1,5 @@
 # pieTrade
-Python Trading Bot 
+
+Python Trading Bot using the OANDA trading API.
+
+
