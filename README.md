@@ -1,0 +1,2 @@
+# pieTrade
+Python Trading Bot 
