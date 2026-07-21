@@ -1,2 +1,2 @@
-temp/
-config.py
+# Do not commit config as it contains OANDA keys
+/config.py
