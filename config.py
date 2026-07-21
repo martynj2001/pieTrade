@@ -1,0 +1,2 @@
+OANDA_API_KEY = ""
+OANDA_ACCOUNT_ID = ""
