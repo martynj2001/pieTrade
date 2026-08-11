@@ -97,8 +97,8 @@ def is_uptrend(row):
 
 # Function: pullback_to_ema20                                            #
 # Description:                                                           #
-# Detects if the current candle touch or get near the 20 EMA. Returns    #
-# True is it did indicatign a Pullback has been detected.                #
+# Detects if the current candle touched or got near the 20 EMA. Returns  #
+# True if it did indicating a Pullback has been detected.                #
 
 def pullback_to_ema20(row):
 
@@ -114,18 +114,60 @@ def pullback_to_ema20(row):
 
 # Function: rejection_candle()                                           #
 # Description:                                                           #
-#                                                                        #
+# Functions to calulate if a rejection candle has formed showing         #
+# a strong rejection of a price level.
+#
+# Wick_factor is the mulitplyer to compare wick size to body size        #
+# this ensures you only detect candles with a strong rejection.          #
 
-def rejection_candle():
-    return
+def rejection_candle_uptrend(row, wick_factor=1.5):
+
+    body = abs(row["close"] - row["open"])
+    lower_wick = row["close"] - row["low"]
+    return (
+        row["close"] > row["open"] and
+        lower_wick >= wick_factor * body
+    )
+
+def rejection_candle_downtrend(row, wick_factor=1.5):
+
+    body = abs(row["close"] - row["open"])
+    upper_wick = row["high"] - row["close"]
+    return (
+        row["close"] < row["open"] and
+        upper_wick >= wick_factor * body
+    )
 
 # Function: stop_loss()                                                  #
 # Description:                                                           #
-# 
-def stop_loss():
-    return
+# A stop loss is a safety exit. Closes the trade if the price goes X far #
+# against me. Placed at the Swing Low (for buys) and Swing Low           #
+# (for sells)                                                            #
+# Swing Low is: The lowest low of the last N candles before entry.       #
+# Swing High is: The highest high of the last N candles beofre entry.    #
+# N = 5, 10, 20                                                          #
+# index = the candle no wher the entry signal began.                     #
 
-# Function: ake_profit()                                                 #
+
+def stop_loss(df, buy, index, slb=5):
+
+    if buy:
+        stop_loss = swing_low(df, index, slb)
+    else:
+        stop_loss = swing_high(df, index, slb)
+    return stop_loss
+
+def swing_low(df, slb, index):
+    start = max(0, index - slb) # check that index > 5, if so use index = 0
+    return df["low"].iloc[start:index+1].min() #retiunr the lowest of the values
+
+def swing_high(df, index, slb):
+    start = max (0, index - slb)
+    return df["high"].iloc[start:index+1].max()
+
+
+
+# Function: take_profit()                                                #
 # Description:                                                           #
 # 
 def take_profit():
@@ -144,10 +186,17 @@ def strat_5020_Pullback(df):
     # Get latest data
     row = df.iloc[-1]
 
-    # Generate Long or Short setup
+    # detect Long or Short setup
     if is_uptrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
-        # Allow long setup (Buy)
-        print (" Probably BUY")
+        if rejection_candle_uptrend(row):
+            # Allow long setup (Buy)
+            # Build Trade:
+            # sl = stop_loss(df, True, row.index())
+            # tp = take_profit()
+            # return trade_data
+            print (" Probably BUY")
+            long_setup = True
     elif is_downtrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
         # Allow short setup (Sell)
         print(" Probably SELL")
+        short_setup = True
