@@ -48,6 +48,8 @@
 import pandas as pd
 import pandas_ta_classic as ta
 
+import config
+
 def get_indicators(df, high_ind, low_ind):
 
     ema_High = "EMA_" + str(high_ind)
@@ -146,36 +148,66 @@ def rejection_candle_downtrend(row, wick_factor=1.5):
 # Swing Low is: The lowest low of the last N candles before entry.       #
 # Swing High is: The highest high of the last N candles beofre entry.    #
 # N = 5, 10, 20                                                          #
-# index = the candle no wher the entry signal began.                     #
+# index = the candle no. where the entry signal began.                   #
 
 
-def stop_loss(df, buy, index, slb=5):
+def stop_loss(df, trade_type, index, slb=5):
 
-    if buy:
+    if trade_type:
         stop_loss = swing_low(df, index, slb)
     else:
         stop_loss = swing_high(df, index, slb)
     return stop_loss
 
 def swing_low(df, slb, index):
-    start = max(0, index - slb) # check that index > 5, if so use index = 0
-    return df["low"].iloc[start:index+1].min() #retiunr the lowest of the values
+    start = max(0, index - slb) # check that index > 5, if not use index = 0
+    return df["low"].iloc[start:index+1].min() #return the lowest of the values
 
 def swing_high(df, index, slb):
     start = max (0, index - slb)
     return df["high"].iloc[start:index+1].max()
 
-
-
 # Function: take_profit()                                                #
 # Description:                                                           #
-# 
-def take_profit():
-    return
+# If price reaches the take profit, close the trade and loack in profit  #
+# Uses Fixed 2R target - you take profit at twice your risk              #
+
+def take_profit(entry_price, stop_loss, trade_type):
+
+    if trade_type:                      # Buy/Long set up
+        risk = entry_price - stop_loss
+        tp = entry_price + (2 * risk)
+    else:                               # Sell/Short set up
+        risk = stop_loss - entry_price
+        tp = entry_price - (2 * risk)
+
+    return tp
+
+# Function: order_data()                                                #
+# Description:                                                          #
+# Builds the data arguments required to place an order                  #
+
+def order_data(stop_loss, take_profit, instrument, trade_type):
+
+    if trade_type: # Buy/Long set up
+        units = 1
+    else: #Sell/Short set up
+        units = -1 
+
+    data = {
+            "order": {
+                "instrument": instrument,
+                "units": units, 
+                "type": "MARKET",
+                "stopLossOnFill": {"price": f"{stop_loss:.3f}"},
+                "takeProfitOnFill": {"price": f"{take_profit:.3f}"}
+            }
+        }
+    return data
 
 def strat_5020_Pullback(df):
 
-    long_setup, short_setup = False
+    trade_type = None
 
     # Define Take Profit ration
     tp_ratio = 1.5
@@ -185,18 +217,27 @@ def strat_5020_Pullback(df):
 
     # Get latest data
     row = df.iloc[-1]
+    index = len(df) -1 #True index
 
     # detect Long or Short setup
     if is_uptrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
         if rejection_candle_uptrend(row):
             # Allow long setup (Buy)
             # Build Trade:
-            # sl = stop_loss(df, True, row.index())
-            # tp = take_profit()
-            # return trade_data
+            trade_type = True
+            sl = stop_loss(df, trade_type, index, 5)
+            tp = take_profit(row['high'], sl, trade_type)
+            data = order_data(sl, tp, config.INSTRUMENT, trade_type)
             print (" Probably BUY")
-            long_setup = True
+            return data
     elif is_downtrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
-        # Allow short setup (Sell)
-        print(" Probably SELL")
-        short_setup = True
+        if rejection_candle_downtrend(row):
+            # Allow short setup (Sell)
+            # Build Trade:
+            trade_type = False
+            sl = stop_loss(df, trade_type, index, 5)
+            tp = take_profit(row['low'], sl, trade_type)
+            data = order_data(sl, tp, config.INSTRUMENT, trade_type)
+            print (" Probably SELL")
+            return data
+        

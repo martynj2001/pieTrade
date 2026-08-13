@@ -17,11 +17,7 @@ import oandapyV20.endpoints.orders as orders
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
 instrument = config.INSTRUMENT  # will eventually be set by GUI & then AI
 
-#Connect to Oanda API
-def connect():
-    #Set up OANDA connection
-    client =  API(access_token=config.OANDA_API_KEY)
-    return client
+
 
 # Get latest Candle Data
 def get_Candles(client):
@@ -54,7 +50,7 @@ def get_Candles(client):
 # Function: Place Order
 def place_order(client, stop_loss, take_profit):
 
-    # probaly build data structure in the strategy module
+    # probaly build data structure in the strategy module, logic to add Sell or Buy (Buy +, Sell -)
     data = {
         "order": {
             "instrument": instrument,
