@@ -18,7 +18,6 @@ timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
 instrument = config.INSTRUMENT  # will eventually be set by GUI & then AI
 
 
-
 # Get latest Candle Data
 def get_Candles(client):
 

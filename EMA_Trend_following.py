@@ -83,7 +83,7 @@ def has_clear_trend(row, k=0.5):
 
 # Functions: is_downtrend() & is_uptrend()                            #
 # Description:                                                        #
-# DEtects current trend and returns True or False                     #
+# Detects current trend and returns True or False                     #
 
 def is_downtrend(row):
     if row["close"] < row["EMA_50"]:
@@ -209,15 +209,13 @@ def strat_5020_Pullback(df):
 
     trade_type = None
 
-    # Define Take Profit ration
-    tp_ratio = 1.5
-
     # Compute EMAs
     get_indicators(df=df, high_ind=50, low_ind=20)
 
     # Get latest data
     row = df.iloc[-1]
     index = len(df) -1 #True index
+    data = {}
 
     # detect Long or Short setup
     if is_uptrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
@@ -240,4 +238,6 @@ def strat_5020_Pullback(df):
             data = order_data(sl, tp, config.INSTRUMENT, trade_type)
             print (" Probably SELL")
             return data
+    else:
+        return data
         
