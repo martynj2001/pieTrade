@@ -7,7 +7,6 @@
 #                                                        #
 ##########################################################
 import pandas as pd
-import pandas_ta_classic as ta
 import config
 from oandapyV20 import API
 import oandapyV20.endpoints.instruments as instruments
@@ -47,19 +46,9 @@ def get_Candles(client):
     return df
 
 # Function: Place Order
-def place_order(client, stop_loss, take_profit):
+def place_order(client, data):
 
-    # probaly build data structure in the strategy module, logic to add Sell or Buy (Buy +, Sell -)
-    data = {
-        "order": {
-            "instrument": instrument,
-            "units": 1, 
-            "type": "MARKET",
-            "stopLossOnFill": {"price": f"{stop_loss:.3f}"},
-            "takeProfitOnFill": {"price": f"{take_profit:.3f}"}
-        }
-    }
     r = orders.OrderCreate(config.OANDA_ACCOUNT_ID, data=data)
     client.request(r)
-    print(f"Placed order for{instrument} with stop loss at {round(stop_loss, 3)} and take profit at {round(take_profit, 3)}")
-    #print(f"Order response {r.response}")
+    print(f"Placed order for{instrument} with stop loss at {round(data["order"]["stopLossOnFill"], 3)} and take profit at {round(data["order"]["takeProfitOnFill"], 3)}")
+    

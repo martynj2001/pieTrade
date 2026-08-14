@@ -45,7 +45,6 @@
 #                                                        #
 ##########################################################
 
-import pandas as pd
 import pandas_ta_classic as ta
 
 import config
@@ -157,6 +156,7 @@ def stop_loss(df, trade_type, index, slb=5):
         stop_loss = swing_low(df, index, slb)
     else:
         stop_loss = swing_high(df, index, slb)
+    print(f'Stop Loss = {stop_loss}')
     return stop_loss
 
 def swing_low(df, slb, index):
@@ -183,16 +183,31 @@ def take_profit(entry_price, stop_loss, trade_type):
 
     return tp
 
+# Function: order_units()                                               #
+# Description:                                                          #
+# Calculates the number of units to trade using a risk based potition   #
+# sizing. DEpendent on how much you are willing to lose if the stop     #
+# is hit and how far away the stop loss is (in price units)             #
+
+def order_units(trade_type, entry_price, stop_loss):
+
+    if trade_type: # Buy/Long setup
+        sl_distence = entry_price - stop_loss
+    else:
+        sl_distence =  stop_loss - entry_price
+
+    units = config.MONEY_RISK / sl_distence
+
+    return units
+
 # Function: order_data()                                                #
 # Description:                                                          #
 # Builds the data arguments required to place an order                  #
 
-def order_data(stop_loss, take_profit, instrument, trade_type):
+def order_data(stop_loss, take_profit, instrument, units, trade_type):
 
-    if trade_type: # Buy/Long set up
-        units = 1
-    else: #Sell/Short set up
-        units = -1 
+    if not trade_type: # Sell/Short set up
+        units = -abs(units) 
 
     data = {
             "order": {
@@ -225,7 +240,8 @@ def strat_5020_Pullback(df):
             trade_type = True
             sl = stop_loss(df, trade_type, index, 5)
             tp = take_profit(row['high'], sl, trade_type)
-            data = order_data(sl, tp, config.INSTRUMENT, trade_type)
+            units = order_units(trade_type, row['high'], sl)
+            data = order_data(sl, tp, config.INSTRUMENT, units, trade_type)
             print (" Probably BUY")
             return data
     elif is_downtrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
@@ -235,9 +251,10 @@ def strat_5020_Pullback(df):
             trade_type = False
             sl = stop_loss(df, trade_type, index, 5)
             tp = take_profit(row['low'], sl, trade_type)
-            data = order_data(sl, tp, config.INSTRUMENT, trade_type)
+            units = order_units(trade_type, row['low'], sl)
+            data = order_data(sl, tp, config.INSTRUMENT, units, trade_type)
             print (" Probably SELL")
             return data
     else:
-        return data
+        return None
         
