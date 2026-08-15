@@ -8,9 +8,11 @@
 ##########################################################
 import pandas as pd
 import config
-from oandapyV20 import API
+from oandapyV20.exceptions import V20Error
 import oandapyV20.endpoints.instruments as instruments
 import oandapyV20.endpoints.orders as orders
+import time
+
 
 #define variables
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
@@ -18,16 +20,24 @@ instrument = config.INSTRUMENT  # will eventually be set by GUI & then AI
 
 
 # Get latest Candle Data
-def get_Candles(client):
+def get_Candles(client, retries=5):
 
     params = {
         "granularity": timeframe,
-        "price": "A"
+        "price": "A", 
+        "count": 200
     }
 
     r = instruments.InstrumentsCandles(instrument=instrument, params=params)
-    candles = client.request(r)['candles']
-    candles
+    for attempt in range(retries):
+        try:
+            candles = client.request(r)['candles']
+            break
+        except Exception as e:
+            print(f'Request failed (attempt: {attempt + 1}): {e}')
+            if attempt == retries:
+                return None
+            time.sleep(1)
 
     #Convert to Panda's DataFrame
     data = []
@@ -46,9 +56,17 @@ def get_Candles(client):
     return df
 
 # Function: Place Order
-def place_order(client, data):
+def place_order(client, data, retries=5):
 
     r = orders.OrderCreate(config.OANDA_ACCOUNT_ID, data=data)
-    client.request(r)
-    print(f"Placed order for{instrument} with stop loss at {round(data["order"]["stopLossOnFill"], 3)} and take profit at {round(data["order"]["takeProfitOnFill"], 3)}")
+    for attempt in range(retries):
+            try:
+                client.request(r)
+                print(f"Placed order for{instrument} with stop loss at {round(data["order"]["stopLossOnFill"], 3)} and take profit at {round(data["order"]["takeProfitOnFill"], 3)}")
+                return
+            except Exception as e:
+                print(f'Request failed (attempt: {attempt + 1}): {e}')
+                time.sleep(1)
+    return None
+   
     

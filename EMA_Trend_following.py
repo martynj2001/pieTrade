@@ -150,7 +150,7 @@ def rejection_candle_downtrend(row, wick_factor=1.5):
 # index = the candle no. where the entry signal began.                   #
 
 
-def stop_loss(df, trade_type, index, slb=5):
+def stop_loss(df, trade_type, index, slb=config.SWING_BACK):
 
     if trade_type:
         stop_loss = swing_low(df, index, slb)
