@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/images">
+    <file>logo_gui.png</file>
+  </qresource>
+</RCC>
