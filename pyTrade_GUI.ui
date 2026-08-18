@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>790</width>
-    <height>375</height>
+    <width>769</width>
+    <height>463</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,47 +17,11 @@
    <iconset>
     <normaloff>images/windows/Square44x44Logo.altform-unplated_targetsize-24.png</normaloff>images/windows/Square44x44Logo.altform-unplated_targetsize-24.png</iconset>
   </property>
-  <widget class="QLabel" name="lb_Pairs">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>30</y>
-     <width>131</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Trading Pairs:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lb_currentPairs">
-   <property name="geometry">
-    <rect>
-     <x>480</x>
-     <y>40</y>
-     <width>261</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="lb_Output">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>110</y>
+     <x>40</x>
+     <y>190</y>
      <width>171</width>
      <height>41</height>
     </rect>
@@ -71,12 +35,22 @@
     <string>Output:</string>
    </property>
   </widget>
-  <widget class="Line" name="line">
+  <widget class="QPlainTextEdit" name="pte_logOutput">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>90</y>
+     <x>40</x>
+     <y>240</y>
      <width>691</width>
+     <height>191</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="Line" name="line_2">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>180</y>
+     <width>681</width>
      <height>21</height>
     </rect>
    </property>
@@ -84,79 +58,129 @@
     <enum>Qt::Orientation::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QPlainTextEdit" name="pte_logOutput">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>160</y>
-     <width>691</width>
-     <height>191</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lb_logo">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>30</y>
-     <width>161</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="pixmap">
-    <pixmap resource="resources.qrc">:/images/logo_gui.png</pixmap>
-   </property>
-   <property name="scaledContents">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>270</x>
+     <x>40</x>
      <y>30</y>
-     <width>253</width>
-     <height>34</height>
+     <width>680</width>
+     <height>151</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QPushButton" name="pb_Start">
-      <property name="font">
-       <font>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Start</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pb_Stop">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(224, 27, 36);
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="lb_logo">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="resources.qrc">:/images/logo_gui.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>258</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="pb_Start">
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Start</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pb_Stop">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(224, 27, 36);
 color: white;
 </string>
+          </property>
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
-      <property name="text">
-       <string>Stop</string>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>678</width>
+        <height>20</height>
+       </size>
       </property>
-     </widget>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="lb_Title_1">
+        <property name="text">
+         <string>Current Market:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lb_market">
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lb_title_2">
+        <property name="text">
+         <string>Current Instrument: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lb_instr">
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

@@ -6,6 +6,7 @@ import time
 from oandapyV20 import API
 import oanda_api_handler as oanda
 import EMA_Trend_following as ema
+import pyTrade_market_session as market
 import logging
 import config
 
@@ -39,6 +40,10 @@ class pyTradeWorker(QObject):
         
         while self.running: 
             current_time = datetime.now(timezone.utc)
+            # Get Open Market
+            open_market = market.getSession()
+            self.msg.emit(f"Trading {open_market["instrument"]} in {open_market["market"]} ")    
+
             # Check for new 15 min candle
             if current_time.minute % 15 == 0 and current_time.second < 10:
                 # Check if the 15 min interval has changed since the last check
@@ -46,7 +51,7 @@ class pyTradeWorker(QObject):
             
                     self.msg.emit("Checking for trade signals")
 
-                    price = oanda.get_Candles(client)
+                    price = oanda.get_Candles(client, open_market["instrument"])
                     if price is not None:
                         price = ema.get_indicators(price, high_ind=50, low_ind=20)
                         self.msg.emit("New Candles recieved and indicators set")

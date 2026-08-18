@@ -16,11 +16,11 @@ import time
 
 #define variables
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
-instrument = config.INSTRUMENT  # will eventually be set by GUI & then AI
+#instrument = config.INSTRUMENT  # will eventually be set by GUI & then AI
 
 
 # Get latest Candle Data
-def get_Candles(client, retries=5):
+def get_Candles(client, inst, retries=5):
 
     params = {
         "granularity": timeframe,
@@ -28,7 +28,7 @@ def get_Candles(client, retries=5):
         "count": 200
     }
 
-    r = instruments.InstrumentsCandles(instrument=instrument, params=params)
+    r = instruments.InstrumentsCandles(instrument=inst, params=params)
     for attempt in range(retries):
         try:
             candles = client.request(r)['candles']
@@ -62,8 +62,7 @@ def place_order(client, data, retries=5):
     for attempt in range(retries):
             try:
                 client.request(r)
-                print(f"Placed order for{instrument} with stop loss at {round(data["order"]["stopLossOnFill"], 3)} and take profit at {round(data["order"]["takeProfitOnFill"], 3)}")
-                return
+                return #return response
             except Exception as e:
                 print(f'Request failed (attempt: {attempt + 1}): {e}')
                 time.sleep(1)
