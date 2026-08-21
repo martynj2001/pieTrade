@@ -151,6 +151,9 @@ def rejection_candle_downtrend(row, wick_factor=1.5):
 
 
 def stop_loss(df, trade_type, index, slb=config.SWING_BACK):
+	
+	#change to use an ATR based stop loss. Add check for minial 0.05. 
+	# Avoids large unit trade positions. 
 
     if trade_type:
         stop_loss = swing_low(df, index, slb)
@@ -220,7 +223,7 @@ def order_data(stop_loss, take_profit, instrument, units, trade_type):
         }
     return data
 
-def strat_5020_Pullback(df):
+def strat_5020_Pullback(df, instrument):
 
     trade_type = None
 
@@ -241,8 +244,7 @@ def strat_5020_Pullback(df):
             sl = stop_loss(df, trade_type, index, 5)
             tp = take_profit(row['high'], sl, trade_type)
             units = order_units(trade_type, row['high'], sl)
-            data = order_data(sl, tp, config.INSTRUMENT, units, trade_type)
-            print (" Probably BUY")
+            data = order_data(sl, tp, instrument, units, trade_type)
             return data
     elif is_downtrend(row) and has_clear_trend(row=row) and pullback_to_ema20(row=row):
         if rejection_candle_downtrend(row):
@@ -252,7 +254,7 @@ def strat_5020_Pullback(df):
             sl = stop_loss(df, trade_type, index, 5)
             tp = take_profit(row['low'], sl, trade_type)
             units = order_units(trade_type, row['low'], sl)
-            data = order_data(sl, tp, config.INSTRUMENT, units, trade_type)
+            data = order_data(sl, tp, instrument, units, trade_type)
             print (" Probably SELL")
             return data
     else:
