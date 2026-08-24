@@ -58,7 +58,7 @@ class pyTradeWorker(QObject):
                     else:
                         self.msg.emit("Failed to get Candles")
                     
-                    order = ema.strat_5020_Pullback(price)
+                    order = ema.strat_5020_Pullback(price, open_market["instrument"])
                     if order is None:
                         self.msg.emit("Strategy conditions not met")
                     else:
@@ -69,7 +69,8 @@ class pyTradeWorker(QObject):
                         f'Take Profit: {order["order"]["takeProfitOnFill"]}\n')
                         # Requires some error handling to confirm order placed and
                         # check there are no open orders........
-                        oanda.place_order(order)
+                        # This Fails. 
+                        oanda.place_order(client, order)
                         # Wait for order to close before continueing.
                     last_checked = current_time.minute # Update to prevent re-triggering
             time.sleep(10)
