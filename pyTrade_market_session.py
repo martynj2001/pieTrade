@@ -25,11 +25,14 @@ def getOpenInstr(session):
 def getSession():
 
     current_time = datetime.now(timezone.utc)
+    print(current_time)
     hour = current_time.hour
+    day = current_time.weekday()
 
     open_market = {
         "market": "",
-        "instrument": ""
+        "instrument": "",
+        "day": day
     }
 
     for name, hours in market_sessions.items():

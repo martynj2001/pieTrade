@@ -192,7 +192,9 @@ def take_profit(entry_price, stop_loss, trade_type):
 # sizing. DEpendent on how much you are willing to lose if the stop     #
 # is hit and how far away the stop loss is (in price units)             #
 
-def order_units(trade_type, entry_price, stop_loss):
+def order_units(trade_type, entry_price, stop_loss): 
+
+    #Change this to ATR following to avoid stupidly large bids
 
     if trade_type: # Buy/Long setup
         sl_distence = entry_price - stop_loss

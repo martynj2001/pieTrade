@@ -35,43 +35,55 @@ class pyTradeWorker(QObject):
         self.msg.emit("Log created.")
 
         last_checked = None
+        current_market = ""
+        weekend = None
 
         client =  API(access_token=config.OANDA_API_KEY, environment=config.OANDA_ENVIRON)
         
         while self.running: 
+
             current_time = datetime.now(timezone.utc)
-            # Get Open Market
-            open_market = market.getSession()
-            self.msg.emit(f"Trading {open_market["instrument"]} in {open_market["market"]} ")    
 
-            # Check for new 15 min candle
-            if current_time.minute % 15 == 0 and current_time.second < 10:
-                # Check if the 15 min interval has changed since the last check
-                if last_checked != current_time.minute:
-            
-                    self.msg.emit("Checking for trade signals")
+            if current_time.weekday() in (5,6):
+                # Its the weekend
+                self.emit("Its the Weekend - No Trading")
+                time.sleep(10)
+            else:
+                # Get Open Market
+                open_market = market.getSession()
 
-                    price = oanda.get_Candles(client, open_market["instrument"])
-                    if price is not None:
-                        price = ema.get_indicators(price, high_ind=50, low_ind=20)
-                        self.msg.emit("New Candles recieved and indicators set")
-                    else:
-                        self.msg.emit("Failed to get Candles")
-                    
-                    order = ema.strat_5020_Pullback(price, open_market["instrument"])
-                    if order is None:
-                        self.msg.emit("Strategy conditions not met")
-                    else:
-                        self.msg.emit("Entry point detected & order placed:\n"
-                        f'Instrument: {order["order"]["instrument"]}\n'
-                        f'Units: {order["order"]["units"]}\n'
-                        f'Stop Loss: {order["order"]["stopLossOnFill"]}\n'
-                        f'Take Profit: {order["order"]["takeProfitOnFill"]}\n')
-                        # Requires some error handling to confirm order placed and
-                        # check there are no open orders........
-                        # This Fails. 
-                        oanda.place_order(client, order)
-                        # Wait for order to close before continueing.
-                    last_checked = current_time.minute # Update to prevent re-triggering
-            time.sleep(10)
+                if open_market["market"] != current_market:
+                    self.msg.emit(f"Trading {open_market["instrument"]} in {open_market["market"]} ") 
+                    current_market = open_market["market"]
+
+                # Check for new 15 min candle
+                if current_time.minute % 15 == 0 and current_time.second < 10:
+                    # Check if the 15 min interval has changed since the last check
+                    if last_checked != current_time.minute:
+                
+                        self.msg.emit("Checking for trade signals")
+
+                        price = oanda.get_Candles(client, open_market["instrument"])
+                        if price is not None:
+                            price = ema.get_indicators(price, high_ind=50, low_ind=20)
+                            self.msg.emit("New Candles recieved and indicators set")
+                        else:
+                            self.msg.emit("Failed to get Candles")
+                        
+                        order = ema.strat_5020_Pullback(price, open_market["instrument"])
+                        if order is None:
+                            self.msg.emit("Strategy conditions not met")
+                        else:
+                            self.msg.emit("Entry point detected & order placed:\n"
+                            f'Instrument: {order["order"]["instrument"]}\n'
+                            f'Units: {order["order"]["units"]}\n'
+                            f'Stop Loss: {order["order"]["stopLossOnFill"]}\n'
+                            f'Take Profit: {order["order"]["takeProfitOnFill"]}\n')
+                            # Requires some error handling to confirm order placed and
+                            # check there are no open orders........
+                            # This Fails. 
+                            oanda.place_order(client, order)
+                            # Wait for order to close before continueing.
+                        last_checked = current_time.minute # Update to prevent re-triggering
+                time.sleep(10)
         self.finished.emit()
