@@ -170,6 +170,25 @@ def swing_high(df, index, slb):
     start = max (0, index - slb)
     return df["high"].iloc[start:index+1].max()
 
+def atr_stop_loss(trade_type, row, atr, k=1.5):
+
+    sl_distence = atr * k
+
+    # Check for min stop loss distencee
+    if sl_distence < 0.05:
+        sl_distence = 0.05
+
+    if trade_type:
+        # Buy
+        return row["high"] - sl_distence
+    else:
+        # Sell
+        return row["low"] + sl_distence
+    
+
+
+    
+
 # Function: take_profit()                                                #
 # Description:                                                           #
 # If price reaches the take profit, close the trade and loack in profit  #
@@ -194,7 +213,6 @@ def take_profit(entry_price, stop_loss, trade_type):
 
 def order_units(trade_type, entry_price, stop_loss): 
 
-    #Change this to ATR following to avoid stupidly large bids
 
     if trade_type: # Buy/Long setup
         sl_distence = entry_price - stop_loss
@@ -203,7 +221,7 @@ def order_units(trade_type, entry_price, stop_loss):
 
     units = config.MONEY_RISK / sl_distence
 
-    return units
+    return int(units)
 
 # Function: order_data()                                                #
 # Description:                                                          #
@@ -234,7 +252,7 @@ def strat_5020_Pullback(df, instrument):
 
     # Get latest data
     row = df.iloc[-1]
-    index = len(df) -1 #True index
+    #index = len(df) -1 #True index only required if using sming high or low stop loss
     data = {}
 
     # detect Long or Short setup
@@ -243,7 +261,7 @@ def strat_5020_Pullback(df, instrument):
             # Allow long setup (Buy)
             # Build Trade:
             trade_type = True
-            sl = stop_loss(df, trade_type, index, 5)
+            sl = atr_stop_loss(trade_type, row, row["ATR_14"])
             tp = take_profit(row['high'], sl, trade_type)
             units = order_units(trade_type, row['high'], sl)
             data = order_data(sl, tp, instrument, units, trade_type)
@@ -253,7 +271,7 @@ def strat_5020_Pullback(df, instrument):
             # Allow short setup (Sell)
             # Build Trade:
             trade_type = False
-            sl = stop_loss(df, trade_type, index, 5)
+            sl = atr_stop_loss(trade_type, row, row["ATR_14"])
             tp = take_profit(row['low'], sl, trade_type)
             units = order_units(trade_type, row['low'], sl)
             data = order_data(sl, tp, instrument, units, trade_type)

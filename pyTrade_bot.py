@@ -36,7 +36,6 @@ class pyTradeWorker(QObject):
 
         last_checked = None
         current_market = ""
-        weekend = None
 
         client =  API(access_token=config.OANDA_API_KEY, environment=config.OANDA_ENVIRON)
         
@@ -46,6 +45,7 @@ class pyTradeWorker(QObject):
 
             if current_time.weekday() in (5,6):
                 # Its the weekend
+                # Change to an indicator on the GUI 'Market Closed'
                 self.emit("Its the Weekend - No Trading")
                 time.sleep(10)
             else:
