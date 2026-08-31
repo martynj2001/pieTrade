@@ -11,6 +11,7 @@ import config
 from oandapyV20.exceptions import V20Error
 import oandapyV20.endpoints.instruments as instruments
 import oandapyV20.endpoints.orders as orders
+import oandapyV20.endpoints.positions as positions
 import time
 
 
@@ -67,5 +68,17 @@ def place_order(client, data, retries=5):
                 print(f'Request failed (attempt: {attempt + 1}): {e}')
                 time.sleep(1)
     return None
+
+def get_positions(client):
+
+    r = positions.OpenPositions(accountID=config.OANDA_ACCOUNT_ID)
+    client.request(r)
+
+    return
+
+def get_Account_Details(client):
+
+    return
+
    
     
