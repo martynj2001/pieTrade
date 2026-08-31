@@ -1,0 +1,221 @@
+2026-08-26 20:47:50,510 [INFO] oandapyV20.oandapyV20 : setting up API-client for environment practice
+2026-08-26 21:00:00,530 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 21:15:04,301 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 21:15:04,340 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 21:15:05,341 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 21:15:06,205 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-26 21:30:06,534 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 21:30:06,569 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 21:30:07,570 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 21:45:08,065 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 21:45:08,102 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 21:45:09,103 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:00:00,015 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:00:00,056 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 22:00:01,057 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:15:01,388 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:15:01,428 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 22:15:02,429 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:30:03,776 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:30:03,819 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 22:30:04,820 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:45:05,172 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 22:45:05,215 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 22:45:06,216 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles
+2026-08-26 23:00:01,165 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:00:01,202 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 23:00:02,203 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:15:02,564 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:15:02,599 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 23:15:03,600 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:30:04,969 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:30:05,010 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 23:30:06,010 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:45:06,604 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-26 23:45:06,630 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-26 23:45:07,631 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:00:09,677 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:00:09,715 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 00:00:10,716 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:15:01,071 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:15:01,106 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 00:15:02,107 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:30:05,083 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:30:05,123 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 00:30:06,123 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:45:06,460 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 00:45:06,509 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 00:45:07,510 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:00:08,454 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:00:08,490 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 01:00:09,490 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:15:03,986 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:15:04,028 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 01:15:05,029 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:30:05,424 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:30:05,465 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 01:30:06,465 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:45:01,746 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 01:45:01,776 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 01:45:02,776 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:00:07,933 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:00:07,956 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 02:00:08,956 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:15:09,242 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:15:09,283 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 02:15:10,284 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:30:01,098 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:30:01,123 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 02:30:02,124 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:45:03,035 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 02:45:03,071 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 02:45:04,072 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:00:05,792 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:00:05,834 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 03:00:06,835 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:15:07,738 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:15:07,773 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 03:15:08,774 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:30:09,883 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:30:09,918 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 03:30:10,919 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:45:01,206 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 03:45:01,244 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 03:45:02,245 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:00:04,359 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:00:04,395 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 04:00:05,395 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:15:06,617 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:15:06,650 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 04:15:07,651 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:15:08,737 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-27 04:30:09,399 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:30:09,451 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 04:30:10,452 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:45:02,091 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 04:45:02,124 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 04:45:03,125 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:00:03,645 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:00:03,693 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 05:00:04,694 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:15:09,274 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:15:09,314 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 05:15:10,315 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:30:01,533 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:30:01,586 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 05:30:02,587 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:45:06,525 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 05:45:06,550 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 05:45:07,551 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:00:07,950 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:00:08,029 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 06:00:09,029 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:15:03,376 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:15:03,400 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 06:15:04,401 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:30:07,746 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:30:07,773 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 06:30:08,774 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:30:10,379 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-27 06:45:00,551 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 06:45:00,587 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 06:45:01,588 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:00:02,190 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:00:02,221 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 07:00:03,222 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:15:06,922 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:15:06,960 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 07:15:07,961 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:15:08,224 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-27 07:30:08,369 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:30:08,408 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 07:30:09,409 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:45:03,467 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 07:45:03,495 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 07:45:04,496 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles
+2026-08-27 08:00:05,418 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:00:05,447 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 08:00:06,447 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:00:11,880 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 08:00:12,881 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:00:18,206 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 08:00:19,207 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:00:24,681 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 08:00:25,682 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:15:06,569 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:15:06,615 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 08:15:07,615 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:30:08,241 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:30:08,279 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 08:30:09,279 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:30:10,276 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-27 08:30:15,568 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 08:30:16,569 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-27 08:45:06,725 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:45:06,758 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 08:45:07,759 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles
+2026-08-27 08:45:08,633 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/orders
+2026-08-27 09:00:08,791 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:00:08,822 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 09:00:09,823 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:15:00,136 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:15:00,174 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 09:15:01,174 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:30:02,212 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:30:02,252 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 09:30:03,252 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:45:05,685 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 09:45:05,734 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 09:45:06,734 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:00:00,804 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:00:00,919 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 10:00:01,920 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:15:05,163 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:15:05,191 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 10:15:06,192 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:30:08,679 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:30:08,704 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 10:30:09,705 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:45:00,059 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 10:45:00,093 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 10:45:01,094 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:00:01,999 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:00:02,052 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 11:00:03,053 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:00:08,337 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 11:00:09,338 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:00:14,547 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 11:00:15,548 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:15:06,636 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:15:06,664 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 11:15:07,665 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:30:08,555 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:30:08,587 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 11:30:09,588 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:45:01,019 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 11:45:01,067 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 11:45:02,068 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:00:02,462 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:00:02,496 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 12:00:03,496 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:15:06,303 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:15:06,344 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 12:15:07,345 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:30:07,946 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:30:07,981 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 12:30:08,982 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:30:14,346 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 12:30:15,346 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:45:06,136 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 12:45:06,162 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 12:45:07,163 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 13:00:08,047 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 13:00:08,099 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))]
+2026-08-27 13:00:09,100 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 13:00:14,532 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 13:00:15,533 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 13:00:20,798 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 13:00:21,798 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 13:00:27,146 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]
+2026-08-27 13:00:28,149 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-08-27 13:00:33,496 [ERROR] oandapyV20.oandapyV20 : request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles failed [401,{"errorMessage":"Insufficient authorization to perform request."}]

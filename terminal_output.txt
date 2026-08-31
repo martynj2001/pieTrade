@@ -1,0 +1,124 @@
+/home/martyn/.zshrc:source:7: no such file or directory: ./zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+(base) █▓▒░martyn@MJ-Minty░▒▓██▓▒░ Wed Aug 26 08:07:21pm
+/home/martyn/pieTrade> python pyTrade_main.py
+Traceback (most recent call last):
+  File "/home/martyn/pieTrade/pyTrade_main.py", line 8, in <module>
+    import pyTrade_bot as pyt
+  File "/home/martyn/pieTrade/pyTrade_bot.py", line 8, in <module>
+    import EMA_Trend_following as ema
+  File "/home/martyn/pieTrade/EMA_Trend_following.py", line 48, in <module>
+    import pandas_ta_classic as ta
+ModuleNotFoundError: No module named 'pandas_ta_classic'
+(base) █▓▒░martyn@MJ-Minty░▒▓██▓▒░ Wed Aug 26 08:45:47pm
+/home/martyn/pieTrade> python pyTrade_main.py
+Traceback (most recent call last):
+  File "/home/martyn/pieTrade/pyTrade_main.py", line 8, in <module>
+    import pyTrade_bot as pyt
+  File "/home/martyn/pieTrade/pyTrade_bot.py", line 8, in <module>
+    import EMA_Trend_following as ema
+  File "/home/martyn/pieTrade/EMA_Trend_following.py", line 48, in <module>
+    import pandas_ta_classic as ta
+ModuleNotFoundError: No module named 'pandas_ta_classic'
+(base) █▓▒░martyn@MJ-Minty░▒▓██▓▒░ Wed Aug 26 08:46:56pm
+/home/martyn/pieTrade> pipi pandas_ta_classic
+zsh: command not found: pipi
+(base) █▓▒░martyn@MJ-Minty░▒▓██▓▒░ Wed Aug 26 08:47:21pm
+/home/martyn/pieTrade> pip install  pandas_ta_classic
+Collecting pandas_ta_classic
+  Using cached pandas_ta_classic-0.6.52-py3-none-any.whl.metadata (17 kB)
+Requirement already satisfied: numpy>=2.0.0 in /home/martyn/anaconda3/lib/python3.13/site-packages (from pandas_ta_classic) (2.2.6)
+Requirement already satisfied: pandas>=2.0.0 in /home/martyn/anaconda3/lib/python3.13/site-packages (from pandas_ta_classic) (2.3.3)
+Requirement already satisfied: python-dateutil>=2.8.2 in /home/martyn/anaconda3/lib/python3.13/site-packages (from pandas>=2.0.0->pandas_ta_classic) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in /home/martyn/anaconda3/lib/python3.13/site-packages (from pandas>=2.0.0->pandas_ta_classic) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in /home/martyn/anaconda3/lib/python3.13/site-packages (from pandas>=2.0.0->pandas_ta_classic) (2025.2)
+Requirement already satisfied: six>=1.5 in /home/martyn/anaconda3/lib/python3.13/site-packages (from python-dateutil>=2.8.2->pandas>=2.0.0->pandas_ta_classic) (1.17.0)
+Using cached pandas_ta_classic-0.6.52-py3-none-any.whl (396 kB)
+Installing collected packages: pandas_ta_classic
+Successfully installed pandas_ta_classic-0.6.52
+(base) █▓▒░martyn@MJ-Minty░▒▓██▓▒░ Wed Aug 26 08:47:32pm
+/home/martyn/pieTrade> python pyTrade_main.py        
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+ Probably SELL
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 2): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 3): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 4): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 2): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 3): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 2): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 1): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Request failed (attempt: 2): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 3): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 4): {"errorMessage":"Insufficient authorization to perform request."}
+Request failed (attempt: 5): {"errorMessage":"Insufficient authorization to perform request."}
+Traceback (most recent call last):
+  File "/home/martyn/pieTrade/pyTrade_bot.py", line 68, in run_bot
+    price = oanda.get_Candles(client, open_market["instrument"])
+  File "/home/martyn/pieTrade/oanda_api_handler.py", line 45, in get_Candles
+    for c in candles:
+             ^^^^^^^
+UnboundLocalError: cannot access local variable 'candles' where it is not associated with a value
+(base) █▓▒░martyn@MJ-Minty░▒▓██▓▒░ Mon Aug 31 01:30:30pm
+/home/martyn/pieTrade> 

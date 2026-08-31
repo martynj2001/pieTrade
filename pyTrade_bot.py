@@ -36,6 +36,7 @@ class pyTradeWorker(QObject):
 
         last_checked = None
         current_market = ""
+        trade = False
 
         client =  API(access_token=config.OANDA_API_KEY, environment=config.OANDA_ENVIRON)
         
@@ -43,19 +44,20 @@ class pyTradeWorker(QObject):
 
             current_time = datetime.now(timezone.utc)
 
-            if current_time.weekday() in (5,6):
-                # Its the weekend
-                # Change to an indicator on the GUI 'Market Closed'
-                self.emit("Its the Weekend - No Trading")
-                time.sleep(10)
-            else:
-                # Get Open Market
-                open_market = market.getSession()
+            
+            # Get Open Market
+            open_market = market.get_open_session(current_time)
 
+            if open_market is not None:
                 if open_market["market"] != current_market:
                     self.msg.emit(f"Trading {open_market["instrument"]} in {open_market["market"]} ") 
                     current_market = open_market["market"]
+                    trade = True
+            elif open_market is None and trade:
+                self.msg.emit("Markets Closed")
+                trade = False
 
+            if trade:
                 # Check for new 15 min candle
                 if current_time.minute % 15 == 0 and current_time.second < 10:
                     # Check if the 15 min interval has changed since the last check
@@ -81,7 +83,6 @@ class pyTradeWorker(QObject):
                             f'Take Profit: {order["order"]["takeProfitOnFill"]}\n')
                             # Requires some error handling to confirm order placed and
                             # check there are no open orders........
-                            # This Fails. 
                             oanda.place_order(client, order)
                             # Wait for order to close before continueing.
                         last_checked = current_time.minute # Update to prevent re-triggering
