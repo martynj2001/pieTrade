@@ -5,14 +5,15 @@ from datetime import datetime, time, timezone
 
 # Market opening times dB in UTC, set for continuous 24 hour trading
 
+# TODO : Add market switch based on the most profitable pair rather than simple time (Open/Close)
 # FUTURE: This will be ineffective and should be modified to switch to the most profitable pair rather
 # than simply being time based (ie dont leave a market because of time, stay until it becomes unprofitable)
 
 market_sessions = {
-    "sydney": {"open": 22, "close": 7},     # 22:00 - 00:00 UTC
-    "tokyo": {"open": 0, "close": 8},       # 00:00 - 08:00 UTC
+    "sydney": {"open": 22, "close": 7},     # 22:00 - 07:00 UTC
+    "tokyo": {"open": 0, "close": 9},       # 00:00 - 09:00 UTC
     "london": {"open": 8, "close": 17},     # 08:00 - 17:00 UTC
-    "new_york": {"open": 17, "close": 22}   # 17:00 - 22:00 UTC
+    "new_york": {"open": 13, "close": 22}   # 13:00 - 22:00 UTC
 }
 
 market_instruments = { # session best pair
@@ -39,61 +40,30 @@ def get_open_session(now: datetime):
     hour = now.hour
 
     open_market = {
-            "market": "",
-            "instrument": "",
-
+            "market": None,
+            "instrument": None
         }
 
-    if not is_weekend(now):
-
-        for name, hours in market_sessions.items():
-
-            start = hours["open"]
-            end = hours["close"]
-
-            if start <= end:
-                if start <= hour < end:
-                    open_market["market"] = name
-                    open_market["instrument"] = market_instruments[name]
-                    return open_market
-            else:
-                if hour >= start or hour < end:
-                    open_market["market"] = name
-                    open_market["instrument"] = market_instruments[name]
-                    return open_market
-    return None
-
-'''def getOpenInstr(session):
-    return market_instruments[session]
-
-
-def getSession():
-
-    current_time = datetime.now(timezone.utc)
-    print(current_time)
-    hour = current_time.hour
-    day = current_time.weekday()
-
-    open_market = {
-        "market": "",
-        "instrument": "",
-        "day": day
-    }
+    if is_weekend(now):
+        return open_market
 
     for name, hours in market_sessions.items():
 
         start = hours["open"]
         end = hours["close"]
 
+        # Normal Session (no midnight wrap)
         if start <= end:
-            # Normal day session
-            if start <= hour < end: # Open market
+            if start <= hour < end:
                 open_market["market"] = name
-                open_market["instrument"] = getOpenInstr(name)
+                open_market["instrument"] = market_instruments[name]
+                return open_market
+        #Overnight session (wraps past misdnight)
         else:
-            # Night session
             if hour >= start or hour < end:
                 open_market["market"] = name
-                open_market["instrument"] = getOpenInstr(name)
+                open_market["instrument"] = market_instruments[name]
+                return open_market
+    # Should never happen!        
+    return open_market
 
-    return open_market'''

@@ -31,7 +31,7 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
         self.pb_Stop.setEnabled(True)
     
         # Start pyTrade Worker Thread
-        self.thread = QThread()
+        self.thread = QThread() # type: ignore
         self.worker = pyt.pyTradeWorker()
 
         self.worker.moveToThread(self.thread)
@@ -39,6 +39,8 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
         self.thread.started.connect(self.worker.run_bot)
         self.worker.msg.connect(self.update_output)
         self.worker.finished.connect(self.thread.quit)
+        self.worker.market_info.connect(self.update_market_info)
+        self.worker.account.connect(self.update_account_info)
 
         self.thread.start()
 
@@ -68,8 +70,46 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
     
     def update_output(self, msg=' '):
         current_time = datetime.now(timezone.utc).strftime("%d/%m/%y-%H:%M")
-        msg = f"{current_time}: {msg}" #need to format time to make it readable.
+        msg = f"{current_time}: {msg}" 
         self.pte_logOutput.appendPlainText(msg)
+
+    def update_market_info(self, market_info):
+
+        market = market_info["market"].replace("_", " ").title()
+        instr = market_info["instrument"].replace("_", "/")
+        self.lb_market.setText(market)
+        self.lb_market.setStyleSheet("color: #2ECC71;")
+        self.lb_instr.setText(instr)
+        self.lb_instr.setStyleSheet("color: #2ECC71;")
+
+    def update_account_info(self, account_info):
+
+        if account_info["NAV"] < 0:
+            self.lb_ac_NAV.setStyleSheet("color: rgb(224, 27, 36);")
+        else:
+            self.lb_ac_NAV.setStyleSheet("color: #2ECC71;")
+
+        if account_info["balance"] < 0:
+            self.lb_ac_balance.setStyleSheet("color: rgb(224, 27, 36);")
+        else:
+            self.lb_ac_balance.setStyleSheet("color: #2ECC71;")
+
+        if account_info["pl"] < 0:
+            self.lb_ac_realPL.setStyleSheet("color: rgb(224, 27, 36);")
+        else:
+            self.lb_ac_realPL.setStyleSheet("color: #2ECC71;")
+
+        if account_info["unrealizedPL"] < 0:
+            self.lb_ac_unrealPL.setStyleSheet("color: rgb(224, 27, 36);")
+        else:
+            self.lb_ac_unrealPL.setStyleSheet("color: #2ECC71;")
+
+        self.lb_ac_NAV.setText("£ " + str(account_info["NAV"]))
+        self.lb_ac_openpos.setText(str(account_info["openPositionCount"]))
+        self.lb_ac_opentrades.setText(str(account_info["openTradeCount"]))
+        self.lb_ac_realPL.setText(str(account_info["pl"]))
+        self.lb_ac_unrealPL.setText(str(account_info["unrealizedPL"]))
+        self.lb_ac_balance.setText("£ " + str(account_info["balance"]))
 
 #Boiler plate - runs App
 if __name__ == "__main__":

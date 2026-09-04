@@ -55,11 +55,11 @@ def get_indicators(df, high_ind, low_ind):
     ema_Low = "EMA_" + str(low_ind)
 
     #EMAs
-    df[ema_Low] = ta.ema(df["close"], length=low_ind)
-    df[ema_High] = ta.ema(df["close"], length=high_ind)
+    df[ema_Low] = ta.ema(df["close"], length=low_ind) # pyright: ignore[reportCallIssue]
+    df[ema_High] = ta.ema(df["close"], length=high_ind) # type: ignore
 
     # ATR Stop_Loss
-    df["ATR_14"] = ta.atr(df["high"], df["low"], df["close"], length=14)
+    df["ATR_14"] = ta.atr(df["high"], df["low"], df["close"], length=14) # pyright: ignore[reportCallIssue]
 
     return df
 

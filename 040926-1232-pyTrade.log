@@ -1,0 +1,8 @@
+2026-09-04 13:32:52,379 [INFO] pyTrade : pyTrade Bot started and Log created
+2026-09-04 13:32:52,379 [INFO] oandapyV20.oandapyV20 : setting up API-client for environment practice
+2026-09-04 13:32:52,381 [INFO] pyTrade : Trading EUR_USD in london
+2026-09-04 13:32:52,381 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/summary
+2026-09-04 13:32:53,665 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/summary
+2026-09-04 13:32:55,615 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/summary
+2026-09-04 13:32:56,745 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/summary
+2026-09-04 13:32:57,879 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/summary
