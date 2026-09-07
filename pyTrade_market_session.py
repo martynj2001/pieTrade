@@ -1,4 +1,4 @@
-from datetime import datetime, time, timezone
+from datetime import datetime, time, timezone, timedelta
 
 
 # Checks for Open markets.
@@ -67,3 +67,17 @@ def get_open_session(now: datetime):
     # Should never happen!        
     return open_market
 
+def is_market_closing(now: datetime, market: str, mins_before_closing=10):
+
+    hours = market_sessions[market]
+    close_hour = hours["close"]
+    close_dt = now.replace (hour=close_hour, minute=0, second=0, microsecond=0)
+
+    # Handle midnight crossing sessions (like sydney)
+    if hours["open"] > hours["close"]:
+        close_dt += timedelta(days=1)
+
+    # Claculate remaining market session time
+    time_to_close = close_dt - now
+
+    return time_to_close <= timedelta(minutes=mins_before_closing) and time_to_close > timedelta(0)

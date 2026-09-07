@@ -13,6 +13,7 @@ import oandapyV20.endpoints.instruments as instruments
 import oandapyV20.endpoints.orders as orders
 import oandapyV20.endpoints.positions as positions
 import oandapyV20.endpoints.accounts as accounts
+import oandapyV20.endpoints.trades as trades
 import time
 
 
@@ -66,21 +67,7 @@ def place_order(client, data, retries=5):
     for attempt in range(retries):
         try:
             client.request(r)
-            return #TODO: return response logic needs to go in here
-        except Exception as e:
-            print(f'Request failed (attempt: {attempt + 1}): {e}')
-            time.sleep(1)
-    return None
-   
-# Function: Return current Open Positions
-def open_positions(client, retries=5):
-
-    r = positions.OpenPositions(accountID=config.OANDA_ACCOUNT_ID)
-
-    for attempt in range(retries):
-        try:
-            client.request(r)
-            return r #return response
+            return r.response
         except Exception as e:
             print(f'Request failed (attempt: {attempt + 1}): {e}')
             time.sleep(1)
@@ -110,3 +97,51 @@ def account_summery(client, retries=5):
             print(f'Request failed (attempt: {attempt + 1}): {e}')
             time.sleep(1)
     return None
+
+# Function: Return current Open Positions
+def open_positions(client, retries=5):
+
+    r = positions.OpenPositions(accountID=config.OANDA_ACCOUNT_ID)
+
+    for attempt in range(retries):
+        try:
+            pos = client.request(r)['positions']
+            return pos #return response
+        except Exception as e:
+            print(f'Request failed (attempt: {attempt + 1}): {e}')
+            time.sleep(1)
+    return None
+
+def close_position(client, instr, retries=5):
+
+    data = {
+          "longUnits": "ALL",
+          "shortUnits": "ALL"
+        }
+
+    r = positions.PositionClose(accountID=config.OANDA_ACCOUNT_ID, instrument=instr, data=data)
+    for attempt in range(retries):
+        try:
+            response = client.request(r)
+            return response #return response
+        except Exception as e:
+            print(f'Request failed (attempt: {attempt + 1}): {e}')
+            time.sleep(1)
+    return None
+
+def getTradeTime(client, tradeID, retries=5):
+
+    # Get trade details
+    r = accounts.TradeDetails(accountID=config.OANDA_ACCOUNT_ID, tradeID=tradeID)
+
+    for attempt in range(retries):
+        try:
+            trade = client.request(r)["trade"]["openTime"]
+            return trade
+        except Exception as e:
+            print(f'Request failed (attempt: {attempt + 1}): {e}')
+            time.sleep(1)
+    return None
+            
+    
+

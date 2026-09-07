@@ -46,6 +46,9 @@
 ##########################################################
 
 import pandas_ta_classic as ta
+import pyTrade_market_session as market
+
+from datetime import datetime, timedelta, timezone
 
 import config
 
@@ -185,10 +188,6 @@ def atr_stop_loss(trade_type, row, atr, k=1.5):
         # Sell
         return row["low"] + sl_distence
     
-
-
-    
-
 # Function: take_profit()                                                #
 # Description:                                                           #
 # If price reaches the take profit, close the trade and loack in profit  #
@@ -280,3 +279,81 @@ def strat_5020_Pullback(df, instrument):
     else:
         return None
         
+# Function: position_Validity_Check()                                           #
+# Description:   Auto close open positions when the EMA20/50 trend structure    #
+# breaks:                                                                       #
+#   1.   Trend invalidation (EMA flip)                                          #
+#   2.   Pullback Failure.                                                      #
+#   3.   Time-based invalidation                                                #
+#   4.   Session boundry invalidation                                           #
+#   5.   Volatility collapse (ATR)                                              #
+#                                                                               #
+#TODO: Finish function
+def position_Validity_Check(pos, df, current_market):
+
+    candle = df.iloc[-1]
+    now = candle["time"]
+    entry_dt = datetime.fromisoformat(pos["trade_time"].replace("Z", "+00:00"))
+
+    # Trend invalidation (EMA flip) 
+    if pos["direction"] == "long" and candle["EMA_20"] < candle["EMA_50"]:
+        return {
+            "instrument": pos["instrument"],
+            "reason": "Trend invalidation (EMA Flip) - Long",
+            "validity": False
+        }     
+    if pos["direction"] == "long" and candle["EMA_20"] > candle["EMA_50"]:
+        return {
+            "instrument": pos["instrument"],
+            "reason": "Trend invalidation (EMA Flip) - Short",
+            "validity": False
+        }                      
+                                                        
+    #   Time-based invalidation
+    if (now - entry_dt) > timedelta(hours=4):
+        return {
+                    "instrument": pos["instrument"],
+                    "reason": "Time-base invalidation",
+                    "validity": False
+                }                                             
+
+    #   Session boundry invalidation
+    if market.is_market_closing(datetime.now(timezone.utc), current_market):
+        return {
+            "instrument": pos["instrument"],
+            "reason": "Session boundry invalidation (Market Closing)",
+            "validity": False
+        }
+                                            
+    #   TODO: Volatility collapse (ATR)
+    
+    return {
+        "instrument": pos["instrument"],
+        "reason": "Position still Valid",
+        "validity": True
+    }
+
+def positions_data(position):
+
+    # Get the correct data
+        # Long or Short position, units & entry_price
+        if int(position["long"]["units"]) != 0:
+            units = int(position["long"]["units"])
+            tradeID = position["long"]["tradeIDs"][0]
+            direction = "long"
+            entry_price = float(position["long"]["averagePrice"])
+        else:
+            units = int(position["short"]["units"])
+            tradeID = position["short"]["tradeIDs"][0]
+            direction = "short"
+            entry_price = float(position["short"]["averagePrice"])
+    
+        return {
+            "instrument" :position["instrument"],
+            "direction": direction,
+            "units": units,
+            "entry_price": entry_price,
+            "tradeID": tradeID,
+        }
+        
+
