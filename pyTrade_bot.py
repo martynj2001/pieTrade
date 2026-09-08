@@ -97,7 +97,7 @@ class pyTradeWorker(QObject):
                             for position in positions:
                                 pos = ema.positions_data(position)
                                 #TODO: Validate Oanda API call is not None
-                                pos["trade_time"] = oanda.getTradeTime(pos["tradeID"])
+                                pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
                                 validity = ema.position_Validity_Check(pos, price, open_market)
                                 if not validity["validity"]:
                                     posClose_res = oanda.close_position(client, pos["instrument"])
