@@ -75,9 +75,11 @@ def is_market_closing(now: datetime, market: str, mins_before_closing=10):
 
     # Handle midnight crossing sessions (like sydney)
     if hours["open"] > hours["close"]:
-        close_dt += timedelta(days=1)
+        if now.hour >= hours["open"]:
+            close_dt += timedelta(days=1)
 
     # Claculate remaining market session time
     time_to_close = close_dt - now
 
-    return time_to_close <= timedelta(minutes=mins_before_closing) and time_to_close > timedelta(0)
+    return timedelta(0) < time_to_close <= timedelta(minutes=mins_before_closing) 
+

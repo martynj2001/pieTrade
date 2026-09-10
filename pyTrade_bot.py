@@ -10,6 +10,19 @@ import pyTrade_market_session as market
 import logging
 import config
 
+class OandaInfoFilter(logging.Filter):
+    def filter(self, record):
+        # Suppress only specific noisy INFO messages
+        blocked = [
+            "summary"
+        ]
+
+        # Only filter INFO logs, keep WARNING/ERROR untouched
+        if record.levelno == logging.INFO:
+            return not any(msg in record.getMessage() for msg in blocked)
+
+        return True
+
 class pyTradeWorker(QObject):
 
     msg = Signal(str)
@@ -35,6 +48,12 @@ class pyTradeWorker(QObject):
             format="%(asctime)s [%(levelname)s] %(name)s : %(message)s",
         )
         logger = logging.getLogger("pyTrade")
+        # Apply logging filter
+        # Attach filter to OANDA logger
+        oanda_logger = logging.getLogger("oandapyV20.oandapyV20")
+        oanda_logger.addFilter(OandaInfoFilter())
+
+        val_logger = logging.getLogger("Validation")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
@@ -69,6 +88,8 @@ class pyTradeWorker(QObject):
 
             # Get Account Summery & update GUI
             summery = oanda.account_summery(client)
+            if summery is None:
+                oanda_logger.error("API call: Failed to get Account Summary (oanda.account_sumary())")
             self.account.emit(summery)
             open_pos = summery['openPositionCount']
 
@@ -87,29 +108,39 @@ class pyTradeWorker(QObject):
                             self.msg.emit("New Candles recieved and indicators set")
                         else:
                             self.msg.emit("Failed to get Candles")
-                            logger.error("Failed to get Candles")
+                            oanda_logger.error("API Call: Failed to get Candles")
 
                         if open_pos > 0: # There are open positions, so get the open positions data
 
                             self.msg.emit(f"You have {open_pos} open positions - checking position validity")
                             positions = oanda.open_positions(client)
+                            oanda_logger.info(positions)
 
+                            position_closed = False
                             for position in positions:
                                 pos = ema.positions_data(position)
                                 #TODO: Validate Oanda API call is not None
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
-                                validity = ema.position_Validity_Check(pos, price, open_market)
+                                validity = ema.position_Validity_Check(pos, price, open_market["market"])
+
+                                val_logger.info(f'Instrument: {validity["instrument"]}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
+
                                 if not validity["validity"]:
-                                    posClose_res = oanda.close_position(client, pos["instrument"])
+                                    posClose_res = None
+                                    if oanda.server_position_exists(client, position["instrument"]):
+                                        posClose_res = oanda.close_position(client, position["instrument"])
+                                        val_logger.info(f'closePosition called for: {position["instrument"]}')
+                                    else:
+                                        val_logger.info('closePosition failed - position no longer exists') 
+
                                     if posClose_res is None:
                                         self.msg.emit(f'Failed to Close Position - {validity["instrument"]}')
-                                        logger.error(f'Failed to Close Position - {pos["instrument"]}')
+                                        oanda_logger.error(f'API Call: Failed to Close Position - {pos["instrument"]}')
                                     else:
                                         self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                         logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                         position_closed = True
-                                else:
-                                    position_closed = False
+                                    break
 
                         if not position_closed:  # No positions closed, check this candle for new entry signals
 
@@ -131,8 +162,10 @@ class pyTradeWorker(QObject):
                                         f"Units: {order["order"]["units"]}\n")
                                 else:
                                     self.msg.emit("Entry point detected - Order failed to place!")
-                                    logger.error("Entry point detected - Order failed to place!")
+                                    oanda_logger.error("API Call: Entry point detected - Order failed to place!")
                             
                         last_checked = current_time.minute # Update to prevent re-triggering
                 time.sleep(10)
         self.finished.emit()
+
+

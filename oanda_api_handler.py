@@ -19,7 +19,7 @@ import time
 
 #define variables
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
-#instrument = config.INSTRUMENT  # will eventually be set by GUI & then AI
+
 
 
 # Get latest Candle Data
@@ -129,10 +129,30 @@ def close_position(client, instr, retries=5):
             time.sleep(1)
     return None
 
+def server_position_exists(client, instrument, retries=5):
+
+    r = positions.OpenPositions(config.OANDA_ACCOUNT_ID)
+    for attempt in range(retries):
+        try:
+            response = client.request(r)
+        except Exception as e:
+            print(f'Request failed (attempt: {attempt + 1}): {e}')
+            time.sleep(1)
+
+    for pos in response.get("positions", []):
+        if pos["instrument"] == instrument:
+            # Position exists AND has non-zero units
+            long_units = int(pos["long"]["units"])
+            short_units = int(pos["short"]["units"])
+            if long_units != 0 or short_units != 0:
+                return True
+
+    return False
+
 def getTradeTime(client, tradeID, retries=5):
 
     # Get trade details
-    r = accounts.TradeDetails(accountID=config.OANDA_ACCOUNT_ID, tradeID=tradeID)
+    r = trades.TradeDetails(accountID=config.OANDA_ACCOUNT_ID, tradeID=tradeID)
 
     for attempt in range(retries):
         try:
