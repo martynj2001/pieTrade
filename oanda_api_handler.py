@@ -21,8 +21,6 @@ import logging
 #define variables
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
 
-
-
 # Get latest Candle Data
 def get_Candles(client, inst, retries=5):
 
@@ -89,7 +87,7 @@ def account_summery(client, retries=5):
                 "NAV": round(float(summary["NAV"]), 2),
                 "marginAvailable": float(summary["marginAvailable"]),
                 "marginUsed": float(summary["marginUsed"]),
-                "unrealizedPL": float(summary["unrealizedPL"]),
+                "unrealizedPL": round(float(summary["unrealizedPL"]), 2),
                 "openTradeCount": int(summary["openTradeCount"]),
                 "openPositionCount": int(summary["openPositionCount"]),
                 "pl": float(summary["pl"])

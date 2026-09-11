@@ -29,9 +29,7 @@ class pyTradeWorker(QObject):
     finished = Signal()
     market_info = Signal(dict)
     account = Signal(dict)
-    # TODO: Add log screen to GUI - view Log.
-    # log = Signal(str)
-
+   
     def __init__(self):
         super().__init__()
         self.running = True
@@ -48,11 +46,12 @@ class pyTradeWorker(QObject):
             format="%(asctime)s [%(levelname)s] %(name)s : %(message)s",
         )
         logger = logging.getLogger("pyTrade")
+        val_logger = logging.getLogger("Validation")
+        oanda_logger = logging.getLogger("oandapyV20.oandapyV20")
         # Apply logging filter
         # Attach filter to OANDA logger
-        oanda_logger = logging.getLogger("oandapyV20.oandapyV20")
         oanda_logger.addFilter(OandaInfoFilter())
-        val_logger = logging.getLogger("Validation")
+        
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
@@ -114,6 +113,7 @@ class pyTradeWorker(QObject):
                             positions = oanda.open_positions(client)
                             position_closed = False
                             for position in positions:
+                                #TODO: Push the generation of position data dict in to Oanda API handler
                                 pos = ema.positions_data(position)
                                 #TODO: Validate Oanda API call /trade is not None
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])

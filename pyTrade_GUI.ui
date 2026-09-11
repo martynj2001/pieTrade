@@ -14,10 +14,10 @@
    <string>pyTrade</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>images/windows/Square44x44Logo.altform-unplated_targetsize-24.png</normaloff>images/windows/Square44x44Logo.altform-unplated_targetsize-24.png</iconset>
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/images/icon_32.png</normaloff>:/images/images/icon_32.png</iconset>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -465,6 +465,7 @@ color: white;
  </widget>
  <resources>
   <include location="resources.qrc"/>
+  <include location="../.designer/backup/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -1,0 +1,18 @@
+
+Development Pathway for pyTrade Bot
+
+TODO: 1. Develop second Strategy - Breakout Strategy
+
+TODO: 2. Add Open Positions onto GUI - Cards type list
+
+TODO: 3. Use FAST API & IONIC to develop a remote app that can monitor the Outputs from the Main app.
+
+This will require a fixed IP address or dynamic DNS subscription (noIP.com) and settign up the Startlink router to work with it.
+
+TODO: 4. Add Logging output to GUI - use tabs on main page.
+
+TODO: Automate strategy switching.
+
+TODO: Develop AI Agent to speed up and broaden automation.
+
+TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
