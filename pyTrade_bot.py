@@ -44,7 +44,7 @@ class pyTradeWorker(QObject):
         #Configure logging
         logging.basicConfig(
             filename=f"{datetime.now(timezone.utc).strftime('%d%m%y-%H%M')}-pyTrade.log",
-            level=logging.INFO,
+            level=logging.DEBUG if config.DEBUG_LOGGING else logging.INFO,
             format="%(asctime)s [%(levelname)s] %(name)s : %(message)s",
         )
         logger = logging.getLogger("pyTrade")
@@ -52,7 +52,6 @@ class pyTradeWorker(QObject):
         # Attach filter to OANDA logger
         oanda_logger = logging.getLogger("oandapyV20.oandapyV20")
         oanda_logger.addFilter(OandaInfoFilter())
-
         val_logger = logging.getLogger("Validation")
 
         self.msg.emit("pyTrade Bot started and Log created.")
@@ -111,36 +110,30 @@ class pyTradeWorker(QObject):
                             oanda_logger.error("API Call: Failed to get Candles")
 
                         if open_pos > 0: # There are open positions, so get the open positions data
-
                             self.msg.emit(f"You have {open_pos} open positions - checking position validity")
                             positions = oanda.open_positions(client)
-                            oanda_logger.info(positions)
-
                             position_closed = False
                             for position in positions:
                                 pos = ema.positions_data(position)
-                                #TODO: Validate Oanda API call is not None
+                                #TODO: Validate Oanda API call /trade is not None
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
                                 validity = ema.position_Validity_Check(pos, price, open_market["market"])
 
-                                val_logger.info(f'Instrument: {validity["instrument"]}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
+                                val_logger.info(f'Position: Instrument: {validity["instrument"]}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
 
                                 if not validity["validity"]:
                                     posClose_res = None
                                     if oanda.server_position_exists(client, position["instrument"]):
+                                        val_logger.debug(f'closePosition called for: {position["instrument"]}')
                                         posClose_res = oanda.close_position(client, position["instrument"])
-                                        val_logger.info(f'closePosition called for: {position["instrument"]}')
-                                    else:
-                                        val_logger.info('closePosition failed - position no longer exists') 
-
                                     if posClose_res is None:
                                         self.msg.emit(f'Failed to Close Position - {validity["instrument"]}')
-                                        oanda_logger.error(f'API Call: Failed to Close Position - {pos["instrument"]}')
+                                        oanda_logger.error(f'API Call: Failed to Close Position - {pos["instrument"]} - {validity["reason"]}')
                                     else:
                                         self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                         logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                         position_closed = True
-                                    break
+                                break
 
                         if not position_closed:  # No positions closed, check this candle for new entry signals
 

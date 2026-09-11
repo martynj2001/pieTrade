@@ -290,7 +290,7 @@ def strat_5020_Pullback(df, instrument):
 #   4.   Session boundry invalidation                                           #
 #   5.   Volatility collapse (ATR)                                              #
 #                                                                               #
-#TODO: Finish function
+
 def position_Validity_Check(pos, df, current_market):
 
     logger = logging.getLogger("Validation")
@@ -311,17 +311,9 @@ def position_Validity_Check(pos, df, current_market):
     ema20 = candle["EMA_20"]
     ema50 = candle["EMA_50"]
 
-    logger.info(
-        f"[VALIDITY CHECK START] Instrument={pos['instrument']} \n"
-        f"Direction={pos['direction']} Units={pos['units']}\n"
-        f"[CANDLE] time={now} | EMA20={ema20:.5f} | EMA50={ema50:.5f}\n"
-        f"[TRADE] trade_time={entry_dt} | age={trade_age} \n"
-        f"(hours={trade_age.total_seconds()/3600:.2f})\n"
-        )
-
     # Long position invalidation: trend flipped bearish
     if pos["direction"] == "long" and ema20 < ema50:
-        logger.info(
+        logger.debug(
             "[INVALIDATION] EMA Flip (Long invalid) — EMA20 < EMA50"
                 )
         return {
@@ -332,7 +324,7 @@ def position_Validity_Check(pos, df, current_market):
 
     # Short position invalidation: trend flipped bullish
     if pos["direction"] == "short" and ema20 > ema50:
-        logger.info(
+        logger.debug(
             "[INVALIDATION] EMA Flip (Short invalid) — EMA20 > EMA50"
         )
         return {
@@ -346,7 +338,7 @@ def position_Validity_Check(pos, df, current_market):
     # ------------------------------------------------------------
     
     if trade_age > timedelta(hours=4):
-        logger.info(
+        logger.debug(
             f"[INVALIDATION] Time-based — trade_age={trade_age} > 4 hours"
         )
         return {
@@ -360,7 +352,7 @@ def position_Validity_Check(pos, df, current_market):
     # ------------------------------------------------------------
 
     if market.is_market_closing(utc_now, current_market):
-        logger.info(
+        logger.debug(
             "[INVALIDATION] Session boundary — market closing soon"
         )
         return {
@@ -372,7 +364,7 @@ def position_Validity_Check(pos, df, current_market):
     # ------------------------------------------------------------
     # 4. STILL VALID
     # ------------------------------------------------------------
-    logger.info("[VALID] position still valid")
+    logger.debug("[VALID] position still valid")
     return {
         "instrument": pos["instrument"],
         "reason": "Position still valid",
@@ -400,97 +392,4 @@ def positions_data(position):
             "units": units,
             "entry_price": entry_price,
             "tradeID": tradeID,
-        }
-        
-
-
-
-
-
-def position_Validity_Check(pos, df, current_market):
-    """
-    Validates whether an open position should remain open or be closed.
-    Adds detailed debug logging for every decision point.
-    """
-
-    logger = logging.getLogger("pyTrade.validity")
-
-    candle = df.iloc[-1]
-    now = candle["time"]  # timestamp of the current candle
-
-    # Convert trade open time to datetime
-    entry_dt = datetime.fromisoformat(pos["trade_time"].replace("Z", "+00:00"))
-    trade_age = now - entry_dt
-
-    ema20 = candle["EMA_20"]
-    ema50 = candle["EMA_50"]
-
-    
-    
-
-
-    # ------------------------------------------------------------
-    # 1. EMA TREND INVALIDATION
-    # ------------------------------------------------------------
-
-    if pos["direction"] == "long" and ema20 < ema50:
-        print(
-            "[INVALIDATION] EMA Flip (Long invalid) — EMA20 < EMA50"
-        )
-        return {
-            "instrument": pos["instrument"],
-            "reason": "Trend invalidation (EMA Flip) - Long",
-            "validity": False
-        }
-
-    if pos["direction"] == "short" and ema20 > ema50:
-        
-        return {
-            "instrument": pos["instrument"],
-            "reason": "Trend invalidation (EMA Flip) - Short",
-            "validity": False
-        }
-
-    # ------------------------------------------------------------
-    # 2. TIME-BASED INVALIDATION
-    # ------------------------------------------------------------
-
-    if trade_age > timedelta(hours=4):
-        
-        return {
-            "instrument": pos["instrument"],
-            "reason": "Time-based invalidation (Trade > 4 hours)",
-            "validity": False
-        }
-
-    # ------------------------------------------------------------
-    # 3. SESSION BOUNDARY INVALIDATION
-    # ------------------------------------------------------------
-
-    utc_now = datetime.now(timezone.utc)
-    closing_soon = market.is_market_closing(utc_now, current_market)
-
-    logger.debug(
-        f"[SESSION] now={utc_now} | market={current_market} | closing_soon={closing_soon}"
-    )
-
-    if closing_soon:
-        logger.debug(
-            "[INVALIDATION] Session boundary — market closing soon"
-        )
-        return {
-            "instrument": pos["instrument"],
-            "reason": "Session boundary invalidation (Market closing soon)",
-            "validity": False
-        }
-
-    # ------------------------------------------------------------
-    # 4. STILL VALID
-    # ------------------------------------------------------------
-
-    logger.debug("[VALID] Position still valid")
-    return {
-        "instrument": pos["instrument"],
-        "reason": "Position still valid",
-        "validity": True
-    }
+        }       
