@@ -69,13 +69,12 @@ class pyTradeWorker(QObject):
             current_time = datetime.now(timezone.utc)
 
             # Get Open Market
-            open_market = []
             open_market = market.get_open_session(current_time)
 
             if open_market["market"] is not None:
                 if open_market["market"] != current_market:
-                    self.msg.emit(f"Trading {open_market["instrument"]} in {open_market["market"]}") 
-                    logger.info(f"Trading {open_market["instrument"]} in {open_market["market"]}")
+                    self.msg.emit(f"Trading {open_market['instrument']} in {open_market['market']}") 
+                    logger.info(f"Trading {open_market['instrument']} in {open_market['market']}")
                     self.market_info.emit(open_market)
                     current_market = open_market["market"]
                     trade = True
@@ -85,11 +84,14 @@ class pyTradeWorker(QObject):
                 trade = False
 
             # Get Account Summery & update GUI
-            summery = oanda.account_summery(client)
-            if summery is None:
+            summary = oanda.account_summery(client)
+            if summary is None:
+                self.msg.emit("Failed to get account summary")
                 oanda_logger.error("API call: Failed to get Account Summary (oanda.account_sumary())")
-            self.account.emit(summery)
-            open_pos = summery['openPositionCount']
+                time.sleep(10)
+                continue
+            self.account.emit(summary)
+            open_pos = summary["openPositionCount"]
 
             if trade:
                 # Check for new 15 min candle
@@ -107,16 +109,34 @@ class pyTradeWorker(QObject):
                         else:
                             self.msg.emit("Failed to get Candles")
                             oanda_logger.error("API Call: Failed to get Candles")
+                            last_checked = current_time.minute
+                            time.sleep(10)
+                            continue
 
                         if open_pos > 0: # There are open positions, so get the open positions data
                             self.msg.emit(f"You have {open_pos} open positions - checking position validity")
                             positions = oanda.open_positions(client)
                             position_closed = False
+                            if positions is None:
+                                self.msg.emit("Failed to fetch open positions")
+                                oanda_logger.error("API Call: Failed to get open positions")
+                                last_checked = current_time.minute
+                                time.sleep(10)
+                                continue
                             for position in positions:
                                 #TODO: Push the generation of position data dict in to Oanda API handler
                                 pos = ema.positions_data(position)
                                 #TODO: Validate Oanda API call /trade is not None
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
+                                if pos["trade_time"] is None:
+                                    self.msg.emit(
+                                        f"Skipping validation: missing trade time for {pos['instrument']}"
+                                    )
+                                    oanda_logger.error(
+                                        "API Call: Failed to get trade time for tradeID %s",
+                                        pos["tradeID"],
+                                    )
+                                    continue
                                 validity = ema.position_Validity_Check(pos, price, open_market["market"])
 
                                 val_logger.info(f'Position: Instrument: {validity["instrument"]}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
@@ -151,14 +171,13 @@ class pyTradeWorker(QObject):
                                     f'Take Profit: {order["order"]["takeProfitOnFill"]}\n'
                                     f'Order No.: {order_res["orderCreateTransaction"]["id"]}')
                                     logger.info("Entry point detected & order placed:\n"
-                                        f"Instrument: {order["order"]["instrument"]}\n"
-                                        f"Units: {order["order"]["units"]}\n")
+                                        f"Instrument: {order['order']['instrument']}\n"
+                                        f"Units: {order['order']['units']}\n")
                                 else:
                                     self.msg.emit("Entry point detected - Order failed to place!")
                                     oanda_logger.error("API Call: Entry point detected - Order failed to place!")
                             
                         last_checked = current_time.minute # Update to prevent re-triggering
-                time.sleep(10)
+            time.sleep(10)
         self.finished.emit()
-
 
