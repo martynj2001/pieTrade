@@ -18,7 +18,7 @@ class OandaInfoFilter(logging.Filter):
         ]
 
         # Only filter INFO logs, keep WARNING/ERROR untouched
-        if record.levelno == logging.INFO:
+        if record.levelno == logging.INFO or record.levelno == logging.DEBUG:
             return not any(msg in record.getMessage() for msg in blocked)
 
         return True
@@ -39,19 +39,27 @@ class pyTradeWorker(QObject):
 
     def run_bot(self):
 
-        #Configure logging
+        # Configure logging ############################################################
+
         logging.basicConfig(
             filename=f"{datetime.now(timezone.utc).strftime('%d%m%y-%H%M')}-pyTrade.log",
             level=logging.DEBUG if config.DEBUG_LOGGING else logging.INFO,
             format="%(asctime)s [%(levelname)s] %(name)s : %(message)s",
         )
+        logging.getLogger("urllib3").setLevel(logging.INFO)
+        logging.getLogger("oandapyV20.oandapyV20").setLevel(logging.INFO)
+
         logger = logging.getLogger("pyTrade")
         val_logger = logging.getLogger("Validation")
         oanda_logger = logging.getLogger("oandapyV20.oandapyV20")
+
         # Apply logging filter
-        # Attach filter to OANDA logger
+        logger.addFilter(OandaInfoFilter())
+        val_logger.addFilter(OandaInfoFilter())
         oanda_logger.addFilter(OandaInfoFilter())
-        
+
+        ##################################################################################
+       
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
@@ -150,9 +158,9 @@ class pyTradeWorker(QObject):
                                     f'Stop Loss: {order["order"]["stopLossOnFill"]}\n'
                                     f'Take Profit: {order["order"]["takeProfitOnFill"]}\n'
                                     f'Order No.: {order_res["orderCreateTransaction"]["id"]}')
-                                    logger.info("Entry point detected & order placed:\n"
-                                        f"Instrument: {order["order"]["instrument"]}\n"
-                                        f"Units: {order["order"]["units"]}\n")
+                                    logger.info("Entry point detected & order placed:"
+                                        f"Instrument: {order["order"]["instrument"]}"
+                                        f"Units: {order["order"]["units"]}")
                                 else:
                                     self.msg.emit("Entry point detected - Order failed to place!")
                                     oanda_logger.error("API Call: Entry point detected - Order failed to place!")

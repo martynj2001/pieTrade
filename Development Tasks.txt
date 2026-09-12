@@ -16,3 +16,5 @@ TODO: Automate strategy switching.
 TODO: Develop AI Agent to speed up and broaden automation.
 
 TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
+
+TODO: Display time left in current Market/Time until Market closes/Time unstil swap market - display on GUI.
