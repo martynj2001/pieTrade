@@ -83,17 +83,17 @@ class pyTradeWorker(QObject):
                 logger.warning("Markets Closed: No active market session at %s UTC", str(current_time))
                 trade = False
 
-            # Get Account Summery & update GUI
-            summary = oanda.account_summery(client)
-            if summary is None:
-                self.msg.emit("Failed to get account summary")
-                oanda_logger.error("API call: Failed to get Account Summary (oanda.account_sumary())")
-                time.sleep(10)
-                continue
-            self.account.emit(summary)
-            open_pos = summary["openPositionCount"]
-
             if trade:
+                # Get Account Summary & update GUI
+                summary = oanda.account_summery(client)
+                if summary is None:
+                    self.msg.emit("Failed to get account summary")
+                    oanda_logger.error("API call: Failed to get Account Summary (oanda.account_sumary())")
+                    time.sleep(10)
+                    continue
+                self.account.emit(summary)
+                open_pos = summary["openPositionCount"]
+
                 # Check for new 15 min candle
                 if current_time.minute % 15 == 0 and current_time.second < 10:
                     # Check if the 15 min interval has changed since the last check
