@@ -36,6 +36,10 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
 
         self.worker.moveToThread(self.thread)
 
+        self.cb_strategy.currentTextChanged.connect(self.worker.on_set_strategy)
+
+        self.cb_strategy.setEnabled(False)
+
         self.thread.started.connect(self.worker.run_bot)
         self.worker.msg.connect(self.update_output)
         self.worker.finished.connect(self.thread.quit)

@@ -17,7 +17,7 @@ TODO: Develop AI Agent to speed up and broaden automation.
 
 TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
 
-
+TODO: Close all trades & positions when the Bot is stopped (this is will enable easier strategie swapping)
 
 TODO: Object-Oriented Migration Suggestions
 To allow swapping or combining strategies (e.g. BreakoutEngine vs. EMATrendEngine):

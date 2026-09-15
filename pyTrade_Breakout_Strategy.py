@@ -46,6 +46,8 @@ class BreakoutEngine:
         self.rr_ratio = rr_ratio
         self.min_sl_dist = min_sl_dist
 
+        self.strategy_name = "Breakout"
+
         # Logger configured to integrate with pyTrade's logging hierarchy
         self.logger = logging.getLogger("pyTrade.BreakoutEngine")
         self.logger.info(

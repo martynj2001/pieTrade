@@ -1,0 +1,105 @@
+Read , lines 1 to 150
+Completed with input: {
+  "path": "/home/martyn/pieTrade/pyTrade_validation.py",
+  "view_range": [
+    1,
+    150
+  ]
+}
+
+Read , lines 151 to 300
+Completed with input: {
+  "path": "/home/martyn/pieTrade/pyTrade_validation.py",
+  "view_range": [
+    151,
+    300
+  ]
+}
+
+Read , line 301 to the end
+Completed with input: {
+  "path": "/home/martyn/pieTrade/pyTrade_validation.py",
+  "view_range": [
+    301,
+    -1
+  ]
+}
+
+Read , lines 60 to 110
+Completed with input: {
+  "path": "/home/martyn/pieTrade/pyTrade_Breakout_Strategy.py",
+  "view_range": [
+    60,
+    110
+  ]
+}
+
+Edit 
+
+Checked workspace, 1 problem found in 
+
+Edit 
+
+Checked workspace, no problems found
+
+The `Validation` class in `pyTrade_validation.py` has been updated to support breakout-strategy position validation alongside the existing EMA trend-following rules, 4-hour time limits, and session-boundary checks.
+
+---
+
+### 1. New Breakout Validation Methods Added
+
+| Check Method | Logic / Trigger | Invalidation Condition |
+| :--- | :--- | :--- |
+| `check_trend_continuation` | Trend Continuation vs. 50 EMA | • **Long**: Invalidate if `close < EMA_50`<br>• **Short**: Invalidate if `close > EMA_50` |
+| `check_donchian_reentry` | Donchian Channel Boundary | • **Long**: Invalidate if `close < DC_Upper`<br>• **Short**: Invalidate if `close > DC_Lower` |
+| `check_volatility_contraction` | Volatility Contraction Filter | • Invalidate if `ATR_14 < ATR_SMA_14` after entry (expansion lost) |
+| `check_breakout_candle_integrity` | Immediate Post-Entry Candle | • Invalidate if the candle immediately following entry forms an engulfing reversal against the trade direction |
+| `check_stop_proximity` | Stop-Loss Danger Buffer | • Invalidate early if price moves within $0.3 \times \text{ATR}$ of the ATR Stop Loss |
+| `check_failed_retest` | Breakout Level Retest Failure | • **Long**: Invalidate if retest closes below breakout level<br>• **Short**: Invalidate if retest closes above breakout level |
+| `check_momentum_loss` | ATR Momentum Decay | • Invalidate if current ATR drops $> 20\%$ below entry ATR |
+
+Universal checks preserved:
+- `check_time_invalidation`: Maximum open trade duration (4 hours).
+- `check_session_invalidation`: Session boundary / market closing check.
+
+---
+
+### 2. Strategy Validation Routing Mechanism
+
+To allow the bot to automatically validate each position against its specific strategy (e.g. `breakout` vs. `trend_following`), the class provides `resolve_strategy_type` using the following fallback hierarchy:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Strategy Resolution Order                       │
+│                                                                        │
+│  1. Explicit parameter: validate_position(..., strategy_type="breakout")│
+│                         ▼ (if not provided)                            │
+│  2. Position metadata:  pos["strategy"] == "breakout"                  │
+│                         ▼ (if not tagged)                              │
+│  3. Validator default:  Validation(strategy_type="breakout")           │
+│                         ▼ (if "auto")                                  │
+│  4. Indicator inference from DataFrame:                                │
+│       • If 'DC_Upper' / 'DC_Lower' in df.columns ──> 'breakout'        │
+│       • If 'EMA_20' in df.columns                ──> 'trend_following' │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### How to use this in the Bot / Worker Thread:
+
+1. **Option A (Automatic via DataFrame indicators or Position tagging - Recommended):**
+   ```python
+   # The bot calls the validator directly; it auto-routes based on the DataFrame's columns:
+   validity = validator.validate_position(pos, price_df, current_market)
+   ```
+
+2. **Option B (Tagging the position dictionary when tracking trades):**
+   ```python
+   pos["strategy"] = "breakout"
+   validity = validator.validate_position(pos, price_df, current_market)
+   ```
+
+3. **Option C (Dedicated Validator instances per Strategy):**
+   ```python
+   breakout_validator = Validation(strategy_type="breakout")
+   trend_validator = Validation(strategy_type="trend_following")
+   ```
