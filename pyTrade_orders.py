@@ -54,6 +54,7 @@ class OrderManager:
         :param money_risk: Optional override for money risk
         :return: Number of units as a positive integer (direction applied during order formatting)
         """
+        #TODO: Change to a compound units & risk usints calculationg ot build wealth (ie bigger the current balance bigger the units)
         risk_amount = money_risk if money_risk is not None else self.money_risk
         sl_distance = abs(entry_price - stop_loss)
 

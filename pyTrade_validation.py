@@ -679,7 +679,7 @@ class Validation:
         # ---------------------------------------------------------------------
         # 2. Strategy-Specific Checks: Breakout vs Trend Following
         # ---------------------------------------------------------------------
-        if active_strategy in ("breakout", "all") and self.enable_breakout_checks:
+        if active_strategy in ("Breakout", "all") and self.enable_breakout_checks:
             # 2a. Trend-continuation check (Price vs EMA50)
             is_valid, reason = self.check_trend_continuation(pos, candle)
             if not is_valid:
@@ -715,7 +715,7 @@ class Validation:
             if not is_valid:
                 return {"instrument": instrument, "reason": reason, "validity": False}
 
-        if active_strategy in ("trend_following", "ema_trend", "all") and self.enable_trend_check:
+        if active_strategy in ("trend_following", "ema_trend", "EMA Pullback", "all") and self.enable_trend_check:
             # EMA Trend Invalidation (EMA20 vs EMA50 flip)
             is_valid, reason = self.check_trend_invalidation(pos, candle)
             if not is_valid:

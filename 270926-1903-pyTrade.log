@@ -1,0 +1,9 @@
+2026-09-27 20:03:13,507 [INFO] pyTrade : pyTrade Bot started and Log created
+2026-09-27 20:03:13,507 [INFO] pyTrade : Running Strategy: Breakout
+2026-09-27 20:03:13,508 [INFO] oandapyV20.oandapyV20 : setting up API-client for environment practice
+2026-09-27 20:03:28,719 [INFO] pyTrade.TrendFollowingEngine : TrendFollowingEngine initialized: EMA_High=50, EMA_Low=20, ATR=14, ATR_Mult=1.50, RR=2.00
+2026-09-27 20:03:28,720 [INFO] pyTrade.Validation : Validation initialized: strategy_type=auto, max_trade_hours=4.0, EMA_Low=20, EMA_High=50, ATR=14
+2026-09-27 20:03:28,725 [INFO] pyTrade.BreakoutEngine : BreakoutEngine initialized: Donchian=20, EMA=50, ATR=14, ATR_Mult=2.00, RR=2.00
+2026-09-27 20:03:28,727 [INFO] pyTrade : pyTrade Bot started and Log created
+2026-09-27 20:03:28,727 [INFO] pyTrade : Running Strategy: Breakout
+2026-09-27 20:03:28,728 [INFO] oandapyV20.oandapyV20 : setting up API-client for environment practice

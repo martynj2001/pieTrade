@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUIlgEEEq.ui'
+## Form generated from reading UI file 'pyTrade_GUIqDkezH.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -128,6 +128,24 @@ class Ui_pyTrade(object):
         self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.verticalLayout_3.addItem(self.horizontalSpacer_3)
+
+        self.lb_Markets = QLabel(self.layoutWidget)
+        self.lb_Markets.setObjectName(u"lb_Markets")
+        font2 = QFont()
+        font2.setPointSize(18)
+        self.lb_Markets.setFont(font2)
+        self.lb_Markets.setStyleSheet(u"color: rgb(224, 27, 36);")
+        self.lb_Markets.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.verticalLayout_3.addWidget(self.lb_Markets)
+
+        self.lb_time = QLabel(self.layoutWidget)
+        self.lb_time.setObjectName(u"lb_time")
+        self.lb_time.setFont(font2)
+        self.lb_time.setStyleSheet(u"color: rgb(224, 27, 36);")
+        self.lb_time.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.verticalLayout_3.addWidget(self.lb_time)
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
@@ -304,6 +322,8 @@ class Ui_pyTrade(object):
         self.lb_market.setText(QCoreApplication.translate("pyTrade", u"-", None))
         self.lb_title_2.setText(QCoreApplication.translate("pyTrade", u"Current Instrument: ", None))
         self.lb_instr.setText(QCoreApplication.translate("pyTrade", u"-", None))
+        self.lb_Markets.setText(QCoreApplication.translate("pyTrade", u"Markets Closed", None))
+        self.lb_time.setText(QCoreApplication.translate("pyTrade", u"00:00", None))
         self.lb_AB_3.setText(QCoreApplication.translate("pyTrade", u"Open Positions:", None))
         self.lb_ac_openpos.setText(QCoreApplication.translate("pyTrade", u"-", None))
         self.lb_AB_4.setText(QCoreApplication.translate("pyTrade", u"Open Trades:", None))

@@ -31,6 +31,7 @@ class pyTradeWorker(QObject):
     msg = Signal(str)
     finished = Signal()
     market_info = Signal(dict)
+    market_open = Signal(bool)
     account = Signal(dict)
    
     def __init__(self, strategy=None, validator=None, order_manager=None):
@@ -49,10 +50,6 @@ class pyTradeWorker(QObject):
             self.strategy = TrendFollowingEngine()
         else: # Breakout
             self.strategy = BreakoutEngine()
-
-        logger = logging.getLogger("pyTrade")
-        logger.info("Strategy updated to %s", strat)
-        self.msg.emit(f"Strategy updated to {strat}")
 
 
     def run_bot(self):
@@ -82,6 +79,7 @@ class pyTradeWorker(QObject):
         logger.info("pyTrade Bot started and Log created")
 
         self.msg.emit(f"Running Strategy: {self.strategy.strategy_name}")
+        logger.info("Running Strategy: %s", self.strategy.strategy_name)
 
         last_checked = None
         current_market = ""
@@ -97,17 +95,25 @@ class pyTradeWorker(QObject):
 
             # Get Open Market
             open_market = market.get_open_session(current_time)
-
+            #TODO: Bug - What is Open market returning when markets are closed.
             if open_market["market"] is not None:
                 if open_market["market"] != current_market:
                     self.msg.emit(f"Trading {open_market['instrument']} in {open_market['market']}") 
                     logger.info(f"Trading {open_market['instrument']} in {open_market['market']}")
                     self.market_info.emit(open_market)
                     current_market = open_market["market"]
+                    self.market_open.emit(True)
                     trade = True
             elif open_market["market"] is None and trade:
                 self.msg.emit("Markets Closed")
                 logger.warning("Markets Closed: No active market session at %s UTC", str(current_time))
+                self.market_info.emit({"market": None, "instrument": None})
+                self.market_open.emit(False)
+                trade = False
+            elif open_market["market"] is None and not trade:
+                #TODO: Add some sort of timer so you know bot is still alive.
+                self.market_info.emit({"market": None, "instrument": None})
+                self.market_open.emit(False)
                 trade = False
 
             if trade:
@@ -143,6 +149,7 @@ class pyTradeWorker(QObject):
                         if open_pos > 0: # There are open positions, so get the open positions data
                             self.msg.emit(f"You have {open_pos} open positions - checking position validity")
                             positions = oanda.open_positions(client)
+                            oanda_logger.debug(f"Open positions: {positions}")
                             position_closed = False
                             if positions is None:
                                 self.msg.emit("Failed to fetch open positions")
@@ -151,6 +158,7 @@ class pyTradeWorker(QObject):
                                 time.sleep(10)
                                 continue
                             for position in positions:
+                                position["strategy"] = self.strategy.strategy_name
                                 pos = self.validator.extract_position_data(position)
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
                                 if pos["trade_time"] is None:
@@ -162,22 +170,26 @@ class pyTradeWorker(QObject):
                                         pos["tradeID"],
                                     )
                                     continue
-                                validity = self.validator.validate_position(pos, price, open_market["market"])
-
+                                validity = self.validator.validate_position(pos, price, open_market["market"], self.strategy.strategy_name)
                                 val_logger.info(f'Position: Instrument: {validity["instrument"]}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
-                                # TODO: Tidy up this a bit
-                                if not validity["validity"]:
+
+                                # TODO: Tidy up validation and position closing logic
+                                if not validity["validity"]: #Position is no longer valid
                                     posClose_res = None
                                     if oanda.server_position_exists(client, position["instrument"]):
                                         val_logger.debug(f'closePosition called for: {position["instrument"]}')
+                                        
                                         posClose_res = oanda.close_position(client, position["instrument"])
-                                    if posClose_res is None:
-                                        self.msg.emit(f'Failed to Close Position - {validity["instrument"]}')
-                                        oanda_logger.error(f'API Call: Failed to Close Position - {pos["instrument"]} - {validity["reason"]}')
-                                    else:
-                                        self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
-                                        logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
-                                        position_closed = True
+                                        
+                                        if posClose_res is None:
+                                            self.msg.emit(f'DEBUG::Failed to Close Position - {validity["instrument"]}')
+                                            oanda_logger.debug(f'API Call DEBUG: Didnt send, debugging - {pos["instrument"]} - {validity["reason"]}')
+                                            #self.msg.emit(f'Failed to Close Position - {validity["instrument"]}')
+                                            #oanda_logger.error(f'API Call: Failed to Close Position - {pos["instrument"]} - {validity["reason"]}')
+                                        else:
+                                            self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
+                                            logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
+                                            position_closed = True
                                 break
 
                         if not position_closed:  # No positions closed, check this candle for new entry signals
@@ -187,6 +199,7 @@ class pyTradeWorker(QObject):
                             if signal not in ("BUY", "SELL") or entry is None or stop is None or tp is None:
                                 self.msg.emit("Strategy conditions not met")
                             else:
+                                #TODO: Capture/Store Orders in Strategy object to be used in validation.
                                 order = self.order_manager.create_order_params(
                                     instrument=open_market["instrument"],
                                     signal=signal,

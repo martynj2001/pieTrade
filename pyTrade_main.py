@@ -21,6 +21,9 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
         self.pb_Start.clicked.connect(self.btn_Start_Clicked) #change to start btn clicked
         self.pb_Stop.clicked.connect(self.btn_Stop_Clicked) #change to stop btn clicked
 
+        self.lb_Markets.setVisible(False)
+        self.lb_time.setVisible(False)
+        
         self.show()
 
     def btn_Start_Clicked(self):
@@ -37,13 +40,14 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
         self.worker.moveToThread(self.thread)
 
         self.cb_strategy.currentTextChanged.connect(self.worker.on_set_strategy)
-
         self.cb_strategy.setEnabled(False)
+        self.worker.on_set_strategy(self.cb_strategy.currentText())
 
         self.thread.started.connect(self.worker.run_bot)
         self.worker.msg.connect(self.update_output)
         self.worker.finished.connect(self.thread.quit)
         self.worker.market_info.connect(self.update_market_info)
+        self.worker.market_open.connect(self.update_market_open)
         self.worker.account.connect(self.update_account_info)
 
         self.thread.start()
@@ -55,18 +59,29 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
         self.update_output("Stopping.....")
 
         if self.started:
+            #Update the GUI
             self.pb_Start.setStyleSheet(" ")
             self.pb_Start.setEnabled(True)
             self.pb_Stop.setStyleSheet("background-color: rgb(224, 27, 36);")
             self.pb_Stop.setEnabled(False)
+            self.cb_strategy.setEnabled(False)
+            self.lb_Markets.setVisible(False)
+            self.lb_time.setVisible(False)
+            self.lb_time.setVisible(False)
+            self.lb_Title_1.setVisible(True)
+            self.lb_title_2.setVisible(True)
+            self.lb_market.setVisible(True)
+            self.lb_instr.setVisible(True)
+
             msg = "pyTrade Bot stopped."
             self.update_output(msg=msg)
             self.started = False
 
-            # Quite pyTrade_bot worker thread
+            # Quit pyTrade_bot worker thread
             self.worker.stop_bot()
             self.thread.quit()
             self.thread.wait()
+
         else:
             msg = "pyTrade Bot not started. Click Start to start trading."
             self.update_output(msg=msg)
@@ -79,12 +94,35 @@ class App_pyTrade(qtw.QWidget, Ui_pyTrade):
 
     def update_market_info(self, market_info):
 
+        if market_info["market"] is None:
+            self.lb_market.setText("N/A")
+            self.lb_instr.setText("N/A")
+            return
+
         market = market_info["market"].replace("_", " ").title()
         instr = market_info["instrument"].replace("_", "/")
         self.lb_market.setText(market)
-        self.lb_market.setStyleSheet("color: #2ECC71;")
         self.lb_instr.setText(instr)
-        self.lb_instr.setStyleSheet("color: #2ECC71;")
+
+    def update_market_open(self, is_open):
+        if is_open:
+            self.lb_market.setStyleSheet("color: #2ECC71;")
+            self.lb_instr.setStyleSheet("color: #2ECC71;")
+            self.lb_Markets.setVisible(False)
+            self.lb_time.setVisible(False)
+            self.lb_Title_1.setVisible(True)
+            self.lb_title_2.setVisible(True)
+            self.lb_market.setVisible(True)
+            self.lb_instr.setVisible(True)
+        else:
+            self.lb_market.setStyleSheet("color: rgb(224, 27, 36);")
+            self.lb_instr.setStyleSheet("color: rgb(224, 27, 36);")
+            self.lb_Markets.setVisible(True)
+            self.lb_time.setVisible(True)
+            self.lb_Title_1.setVisible(False)
+            self.lb_title_2.setVisible(False)
+            self.lb_market.setVisible(False)
+            self.lb_instr.setVisible(False)
 
     def update_account_info(self, account_info):
 
