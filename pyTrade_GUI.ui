@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>778</width>
-    <height>642</height>
+    <width>881</width>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,8 @@
     <rect>
      <x>30</x>
      <y>10</y>
-     <width>709</width>
-     <height>571</height>
+     <width>811</width>
+     <height>711</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -489,16 +489,9 @@ color: white;
        </spacer>
       </item>
       <item>
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QTabWidget" name="tb_positions">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tb_Candles">
          <attribute name="title">
@@ -518,6 +511,11 @@ color: white;
           </property>
          </widget>
         </widget>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Positions</string>
+         </attribute>
+        </widget>
         <widget class="QWidget" name="tb_Output">
          <attribute name="title">
           <string>Output</string>
@@ -527,12 +525,19 @@ color: white;
            <rect>
             <x>10</x>
             <y>10</y>
-            <width>681</width>
-            <height>221</height>
+            <width>781</width>
+            <height>261</height>
            </rect>
           </property>
          </widget>
         </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
        </widget>
       </item>
      </layout>

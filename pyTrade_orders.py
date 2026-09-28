@@ -18,6 +18,7 @@ class OrderManager:
     def __init__(
         self,
         money_risk: float = config.MONEY_RISK,
+        risk_percent: float = config.RISK_PERCENT,
         min_sl_dist: float = 0.05,
         price_precision: int = 3,
         default_order_type: str = "MARKET",
@@ -25,12 +26,17 @@ class OrderManager:
         """
         Initialize the OrderManager.
 
-        :param money_risk: Capital at risk per trade in account currency
+        :param money_risk: Fallback capital at risk per trade in account currency,
+            used only when no account balance is available to compute a
+            percentage-based risk amount.
+        :param risk_percent: Fraction of account balance to risk per trade
+            (e.g. 0.02 = 2%). Used whenever an account balance is supplied.
         :param min_sl_dist: Minimum stop loss distance in price units to prevent oversized units
         :param price_precision: Decimal precision for price fields (default: 3)
         :param default_order_type: OANDA order type (default: 'MARKET')
         """
         self.money_risk = money_risk
+        self.risk_percent = risk_percent
         self.min_sl_dist = min_sl_dist
         self.price_precision = price_precision
         self.default_order_type = default_order_type
@@ -41,21 +47,38 @@ class OrderManager:
         signal: Union[str, bool],
         entry_price: float,
         stop_loss: float,
+        account_balance: Optional[float] = None,
+        risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
     ) -> int:
         """
         Calculate the number of units to trade using risk-based position sizing.
 
-        Units = money_risk / stop_loss_distance
+        When an account balance is supplied, risk is calculated as a percentage
+        of that balance (risk_amount = account_balance * risk_percent), so
+        position size scales up/down with the account instead of using a fixed
+        money amount. If no balance is supplied, falls back to the fixed
+        money_risk amount for backward compatibility.
+
+        Units = risk_amount / stop_loss_distance
 
         :param signal: 'BUY', 'SELL', 'LONG', 'SHORT', or boolean (True=BUY, False=SELL)
         :param entry_price: Planned entry price
         :param stop_loss: Stop loss price level
-        :param money_risk: Optional override for money risk
+        :param account_balance: Current account balance in account currency. When
+            provided, risk is computed as a percentage of this balance.
+        :param risk_percent: Optional override for the risk percentage (fraction,
+            e.g. 0.02 for 2%). Only used when account_balance is supplied.
+        :param money_risk: Optional override for the fixed money risk amount,
+            used only when account_balance is not supplied.
         :return: Number of units as a positive integer (direction applied during order formatting)
         """
-        #TODO: Change to a compound units & risk usints calculationg ot build wealth (ie bigger the current balance bigger the units)
-        risk_amount = money_risk if money_risk is not None else self.money_risk
+        if account_balance is not None:
+            pct = risk_percent if risk_percent is not None else self.risk_percent
+            risk_amount = account_balance * pct
+        else:
+            risk_amount = money_risk if money_risk is not None else self.money_risk
+
         sl_distance = abs(entry_price - stop_loss)
 
         if sl_distance < self.min_sl_dist:
@@ -70,11 +93,13 @@ class OrderManager:
         units = max(1, units)
 
         self.logger.debug(
-            "calculate_units: Signal=%s, Entry=%.5f, SL=%.5f, SL_Dist=%.5f, Risk=%.2f -> Units=%d",
+            "calculate_units: Signal=%s, Entry=%.5f, SL=%.5f, SL_Dist=%.5f, "
+            "Balance=%s, Risk=%.2f -> Units=%d",
             str(signal),
             entry_price,
             stop_loss,
             sl_distance,
+            f"{account_balance:.2f}" if account_balance is not None else "N/A",
             risk_amount,
             units,
         )
@@ -136,6 +161,8 @@ class OrderManager:
         entry_price: float,
         stop_loss: float,
         take_profit: float,
+        account_balance: Optional[float] = None,
+        risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
         order_type: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -147,7 +174,11 @@ class OrderManager:
         :param entry_price: Entry price
         :param stop_loss: Stop loss price
         :param take_profit: Take profit price
-        :param money_risk: Risk capital override
+        :param account_balance: Current account balance; when supplied, position
+            size is risk_percent of this balance instead of a fixed money amount
+        :param risk_percent: Risk percentage override (fraction, e.g. 0.02 for 2%)
+        :param money_risk: Fixed risk capital override, used only when
+            account_balance is not supplied
         :param order_type: Order type override
         :return: OANDA order payload dictionary
         """
@@ -155,6 +186,8 @@ class OrderManager:
             signal=signal,
             entry_price=entry_price,
             stop_loss=stop_loss,
+            account_balance=account_balance,
+            risk_percent=risk_percent,
             money_risk=money_risk,
         )
 
@@ -177,7 +210,9 @@ def order_units(
     trade_type: Union[str, bool],
     entry_price: float,
     stop_loss: float,
-    money_risk: float = config.MONEY_RISK,
+    account_balance: Optional[float] = None,
+    risk_percent: Optional[float] = None,
+    money_risk: Optional[float] = None,
 ) -> int:
     """
     Calculate order units based on risk capital and stop loss distance.
@@ -185,13 +220,19 @@ def order_units(
     :param trade_type: True/False or 'BUY'/'SELL'
     :param entry_price: Entry price level
     :param stop_loss: Stop loss price level
-    :param money_risk: Total money risk in account currency
+    :param account_balance: Current account balance; when supplied, position
+        size is risk_percent of this balance instead of a fixed money amount
+    :param risk_percent: Risk percentage override (fraction, e.g. 0.02 for 2%)
+    :param money_risk: Fixed money risk override, used only when
+        account_balance is not supplied
     :return: Position units
     """
     return _default_order_manager.calculate_units(
         signal=trade_type,
         entry_price=entry_price,
         stop_loss=stop_loss,
+        account_balance=account_balance,
+        risk_percent=risk_percent,
         money_risk=money_risk,
     )
 
@@ -231,7 +272,9 @@ def create_order_from_signal(
     entry: float,
     stop: float,
     tp: float,
-    money_risk: float = config.MONEY_RISK,
+    account_balance: Optional[float] = None,
+    risk_percent: Optional[float] = None,
+    money_risk: Optional[float] = None,
     price_precision: int = 3,
 ) -> Optional[Dict[str, Any]]:
     """
@@ -243,7 +286,11 @@ def create_order_from_signal(
     :param entry: Entry price
     :param stop: Stop loss price
     :param tp: Take profit price
-    :param money_risk: Risk capital
+    :param account_balance: Current account balance; when supplied, position
+        size is risk_percent of this balance instead of a fixed money amount
+    :param risk_percent: Risk percentage override (fraction, e.g. 0.02 for 2%)
+    :param money_risk: Fixed risk capital override, used only when
+        account_balance is not supplied
     :param price_precision: Price decimal precision
     :return: OANDA order payload dictionary, or None if signal is 'NONE'
     """
@@ -256,5 +303,7 @@ def create_order_from_signal(
         entry_price=entry,
         stop_loss=stop,
         take_profit=tp,
+        account_balance=account_balance,
+        risk_percent=risk_percent,
         money_risk=money_risk,
     )

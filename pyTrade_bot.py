@@ -84,7 +84,6 @@ class pyTradeWorker(QObject):
         last_checked = None
         current_market = ""
         trade = False
-        position_closed = False
 
         # Open API connection
         client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
@@ -92,10 +91,9 @@ class pyTradeWorker(QObject):
         while self.running: 
 
             current_time = datetime.now(timezone.utc)
-
+            position_closed = False
             # Get Open Market
             open_market = market.get_open_session(current_time)
-            #TODO: Bug - What is Open market returning when markets are closed.
             if open_market["market"] is not None:
                 if open_market["market"] != current_market:
                     self.msg.emit(f"Trading {open_market['instrument']} in {open_market['market']}") 
@@ -114,8 +112,10 @@ class pyTradeWorker(QObject):
                 #TODO: Add some sort of timer so you know bot is still alive.
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
+                self.msg.emit("Markets Closed")
                 trade = False
-
+                time.sleep(1000) # Sleep for 1000 seconds before checking again
+                #TODO: Add mechanisum to check time until the next market open session (if it is less than 1000 seconds then dont sleep for the full 1000 seconds)
             if trade:
                 # Get Account Summary & update GUI
                 summary = oanda.account_summery(client)
@@ -206,6 +206,7 @@ class pyTradeWorker(QObject):
                                     entry_price=entry,
                                     stop_loss=stop,
                                     take_profit=tp,
+                                    account_balance=summary["balance"],
                                 )
                                 order_res = oanda.place_order(client, order)
 
