@@ -23,15 +23,13 @@ logger = logging.getLogger("oanda_api_handler")
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
 
 # Get latest Candle Data
-def get_Candles(client, inst, retries=5):
+def get_Candles(client, inst, retries=5, granularity=None):
 
     params = {
-        "granularity": timeframe,
+        "granularity": granularity or timeframe,
         "price": "A", 
         "count": 200
     }
-
-    candles = []
 
     r = instruments.InstrumentsCandles(instrument=inst, params=params)
     for attempt in range(retries):
@@ -40,7 +38,7 @@ def get_Candles(client, inst, retries=5):
             break
         except Exception as e:
             logger.error(f'Request failed (attempt: {attempt + 1}): {e}')
-            if attempt == retries:
+            if attempt == retries - 1:
                 return None
             time.sleep(1)
 
@@ -325,6 +323,25 @@ def getTradeTime(client, tradeID, retries=5):
             logger.error(f'Request failed (attempt: {attempt + 1}): {e}')
             time.sleep(1)
     return None
+
+
+def getTradeDetails(client, tradeID, retries=5):
+    """Return OANDA's full trade details, including realized close data."""
+    r = trades.TradeDetails(
+        accountID=config.OANDA_ACCOUNT_ID,
+        tradeID=tradeID,
+    )
+    for attempt in range(retries):
+        try:
+            return client.request(r).get("trade")
+        except Exception as e:
+            logger.error(
+                "Request failed while fetching trade %s (attempt: %s): %s",
+                tradeID,
+                attempt + 1,
+                e,
+            )
+            time.sleep(1)
+    return None
             
     
-
