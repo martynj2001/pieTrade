@@ -88,6 +88,12 @@ def _persist_filled_trades(
         try:
             trades_db.insert_trade(trade_data)
             logger.info("Saved opened OANDA trade %s to local database", trade_id)
+            # TODO: write the entry signal's indicator values (atr14, ema20, ema50,
+            # adx, trend_strength, rejection_candle, pullback_detected, close/high/low,
+            # signal_timestamp) via trades_db.insert_signal_data({"trade_id": str(trade_id), ...}).
+            # trade_signals is currently never written, so the API's /api/analytics/atr-ranges
+            # (which reads trade_signals.atr14) returns no data. The strategy's signal row
+            # (pyTrade_TrendFollowing_Strategy.py, ATR_14 column) must be passed down to here.
         except (OSError, sqlite3.Error, TypeError, ValueError, KeyError):
             logger.exception("Could not save opened trade %s", trade_id)
 
