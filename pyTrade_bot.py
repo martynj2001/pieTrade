@@ -12,7 +12,7 @@ from pyTrade_validation import Validation
 from pyTrade_orders import OrderManager
 import pyTrade_market_session as market
 import pyTrade_trades_db as trades_db
-from trade_guards import TradeGuards
+from pyTrade_trade_guards import TradeGuards
 
 import logging
 import config
