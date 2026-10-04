@@ -17,6 +17,4 @@ TODO: Build a Candles graph into the GUI - start to make the GUI look like a tra
 
 TODO: Close all trades & positions when the Bot is stopped (this is will enable easier strategie swapping)
 
-TODO: Output Database to GUI.
 
-TODO: Impliment some form of Trades analysis on Database data - this may be a seperate IONIC/ANGULAR App.
