@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2wxqUUX.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2wEqemv.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -25,13 +25,18 @@ class Ui_pyTrade_v2(object):
     def setupUi(self, pyTrade_v2):
         if not pyTrade_v2.objectName():
             pyTrade_v2.setObjectName(u"pyTrade_v2")
-        pyTrade_v2.resize(1072, 730)
+        pyTrade_v2.resize(1072, 820)
         self.centralwidget = QWidget(pyTrade_v2)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_7 = QVBoxLayout(self.centralwidget)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.frame_12 = QFrame(self.centralwidget)
         self.frame_12.setObjectName(u"frame_12")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.frame_12.sizePolicy().hasHeightForWidth())
+        self.frame_12.setSizePolicy(sizePolicy)
         self.frame_12.setMinimumSize(QSize(0, 30))
         self.frame_12.setMaximumSize(QSize(16777215, 50))
         self.frame_12.setFrameShape(QFrame.Shape.NoFrame)
@@ -41,22 +46,22 @@ class Ui_pyTrade_v2(object):
         self.horizontalLayout_5.setContentsMargins(-1, 0, 0, 0)
         self.frame_14 = QFrame(self.frame_12)
         self.frame_14.setObjectName(u"frame_14")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.frame_14.sizePolicy().hasHeightForWidth())
-        self.frame_14.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.frame_14.sizePolicy().hasHeightForWidth())
+        self.frame_14.setSizePolicy(sizePolicy1)
         self.frame_14.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_14.setFrameShadow(QFrame.Shadow.Plain)
         self.horizontalLayout_6 = QHBoxLayout(self.frame_14)
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.label_10 = QLabel(self.frame_14)
         self.label_10.setObjectName(u"label_10")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.label_10.sizePolicy().hasHeightForWidth())
-        self.label_10.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.label_10.sizePolicy().hasHeightForWidth())
+        self.label_10.setSizePolicy(sizePolicy2)
         self.label_10.setPixmap(QPixmap(u":/images/images/logo_gui.png"))
         self.label_10.setScaledContents(False)
 
@@ -67,11 +72,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_15 = QFrame(self.frame_12)
         self.frame_15.setObjectName(u"frame_15")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.frame_15.sizePolicy().hasHeightForWidth())
-        self.frame_15.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.frame_15.sizePolicy().hasHeightForWidth())
+        self.frame_15.setSizePolicy(sizePolicy3)
         self.frame_15.setMinimumSize(QSize(165, 0))
         self.frame_15.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_15.setFrameShadow(QFrame.Shadow.Plain)
@@ -93,8 +98,8 @@ class Ui_pyTrade_v2(object):
 
         self.frame_16 = QFrame(self.frame_12)
         self.frame_16.setObjectName(u"frame_16")
-        sizePolicy.setHeightForWidth(self.frame_16.sizePolicy().hasHeightForWidth())
-        self.frame_16.setSizePolicy(sizePolicy)
+        sizePolicy1.setHeightForWidth(self.frame_16.sizePolicy().hasHeightForWidth())
+        self.frame_16.setSizePolicy(sizePolicy1)
         font1 = QFont()
         font1.setPointSize(14)
         self.frame_16.setFont(font1)
@@ -204,11 +209,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_4 = QFrame(self.frame)
         self.frame_4.setObjectName(u"frame_4")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.frame_4.sizePolicy().hasHeightForWidth())
-        self.frame_4.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.frame_4.sizePolicy().hasHeightForWidth())
+        self.frame_4.setSizePolicy(sizePolicy4)
         self.frame_4.setFrameShape(QFrame.Shape.Box)
         self.frame_4.setFrameShadow(QFrame.Shadow.Sunken)
         self.horizontalLayout_3 = QHBoxLayout(self.frame_4)
@@ -246,8 +251,8 @@ class Ui_pyTrade_v2(object):
 
         self.frame_8 = QFrame(self.frame_4)
         self.frame_8.setObjectName(u"frame_8")
-        sizePolicy2.setHeightForWidth(self.frame_8.sizePolicy().hasHeightForWidth())
-        self.frame_8.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.frame_8.sizePolicy().hasHeightForWidth())
+        self.frame_8.setSizePolicy(sizePolicy3)
         self.frame_8.setMinimumSize(QSize(65, 0))
         self.frame_8.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_8.setFrameShadow(QFrame.Shadow.Raised)
@@ -310,8 +315,8 @@ class Ui_pyTrade_v2(object):
 
         self.frame_10 = QFrame(self.frame_4)
         self.frame_10.setObjectName(u"frame_10")
-        sizePolicy2.setHeightForWidth(self.frame_10.sizePolicy().hasHeightForWidth())
-        self.frame_10.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.frame_10.sizePolicy().hasHeightForWidth())
+        self.frame_10.setSizePolicy(sizePolicy3)
         self.frame_10.setMinimumSize(QSize(65, 0))
         self.frame_10.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_10.setFrameShadow(QFrame.Shadow.Raised)
@@ -370,8 +375,8 @@ class Ui_pyTrade_v2(object):
 
         self.frame_6 = QFrame(self.frame)
         self.frame_6.setObjectName(u"frame_6")
-        sizePolicy3.setHeightForWidth(self.frame_6.sizePolicy().hasHeightForWidth())
-        self.frame_6.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.frame_6.sizePolicy().hasHeightForWidth())
+        self.frame_6.setSizePolicy(sizePolicy4)
         self.frame_6.setFrameShape(QFrame.Shape.Box)
         self.frame_6.setFrameShadow(QFrame.Shadow.Sunken)
         self.verticalLayout_6 = QVBoxLayout(self.frame_6)
@@ -460,11 +465,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_19 = QFrame(self.frame_11)
         self.frame_19.setObjectName(u"frame_19")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.frame_19.sizePolicy().hasHeightForWidth())
-        self.frame_19.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.frame_19.sizePolicy().hasHeightForWidth())
+        self.frame_19.setSizePolicy(sizePolicy5)
         self.frame_19.setFrameShape(QFrame.Shape.Box)
         self.frame_19.setFrameShadow(QFrame.Shadow.Sunken)
         self.verticalLayout_9 = QVBoxLayout(self.frame_19)
@@ -485,6 +490,7 @@ class Ui_pyTrade_v2(object):
         self.label_15.setObjectName(u"label_15")
         font4 = QFont()
         font4.setPointSize(12)
+        font4.setBold(True)
         self.label_15.setFont(font4)
         self.label_15.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -495,8 +501,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_24 = QFrame(self.pg_openpositions)
         self.frame_24.setObjectName(u"frame_24")
-        sizePolicy3.setHeightForWidth(self.frame_24.sizePolicy().hasHeightForWidth())
-        self.frame_24.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.frame_24.sizePolicy().hasHeightForWidth())
+        self.frame_24.setSizePolicy(sizePolicy4)
+        self.frame_24.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
+"background-repeat: no-repeat;\n"
+"background-position: center;")
         self.frame_24.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_24.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_15 = QHBoxLayout(self.frame_24)
@@ -508,7 +517,7 @@ class Ui_pyTrade_v2(object):
         self.positions_cards.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 100, 30))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 524, 542))
         self.positions_cards.setWidget(self.scrollAreaWidgetContents)
 
         self.horizontalLayout_15.addWidget(self.positions_cards)
@@ -539,8 +548,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_26 = QFrame(self.pg_candles)
         self.frame_26.setObjectName(u"frame_26")
-        sizePolicy3.setHeightForWidth(self.frame_26.sizePolicy().hasHeightForWidth())
-        self.frame_26.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.frame_26.sizePolicy().hasHeightForWidth())
+        self.frame_26.setSizePolicy(sizePolicy4)
+        self.frame_26.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
+"background-repeat: no-repeat;\n"
+"background-position: center;")
         self.frame_26.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_26.setFrameShadow(QFrame.Shadow.Raised)
 
@@ -553,44 +565,43 @@ class Ui_pyTrade_v2(object):
         self.verticalLayout_15.setObjectName(u"verticalLayout_15")
         self.frame_27 = QFrame(self.pg_output)
         self.frame_27.setObjectName(u"frame_27")
+        font5 = QFont()
+        font5.setBold(True)
+        self.frame_27.setFont(font5)
         self.frame_27.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_27.setFrameShadow(QFrame.Shadow.Raised)
-        self.verticalLayout_14 = QVBoxLayout(self.frame_27)
-        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
+        self.horizontalLayout_16 = QHBoxLayout(self.frame_27)
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
         self.label_17 = QLabel(self.frame_27)
         self.label_17.setObjectName(u"label_17")
         self.label_17.setFont(font4)
         self.label_17.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.verticalLayout_14.addWidget(self.label_17, 0, Qt.AlignmentFlag.AlignTop)
+        self.horizontalLayout_16.addWidget(self.label_17)
 
 
-        self.verticalLayout_15.addWidget(self.frame_27)
+        self.verticalLayout_15.addWidget(self.frame_27, 0, Qt.AlignmentFlag.AlignTop)
 
         self.frame_28 = QFrame(self.pg_output)
         self.frame_28.setObjectName(u"frame_28")
-        sizePolicy3.setHeightForWidth(self.frame_28.sizePolicy().hasHeightForWidth())
-        self.frame_28.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.frame_28.sizePolicy().hasHeightForWidth())
+        self.frame_28.setSizePolicy(sizePolicy4)
+        self.frame_28.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
+"background-repeat: no-repeat;\n"
+"background-position: center;")
         self.frame_28.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_28.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_17 = QHBoxLayout(self.frame_28)
+        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
         self.pte_logOutput = QPlainTextEdit(self.frame_28)
         self.pte_logOutput.setObjectName(u"pte_logOutput")
-        self.pte_logOutput.setGeometry(QRect(10, 10, 581, 351))
-        sizePolicy4.setHeightForWidth(self.pte_logOutput.sizePolicy().hasHeightForWidth())
-        self.pte_logOutput.setSizePolicy(sizePolicy4)
+        sizePolicy5.setHeightForWidth(self.pte_logOutput.sizePolicy().hasHeightForWidth())
+        self.pte_logOutput.setSizePolicy(sizePolicy5)
         self.pte_logOutput.setStyleSheet(u"background: transparent;\n"
 "border: line 1px;")
-        self.img_trans = QLabel(self.frame_28)
-        self.img_trans.setObjectName(u"img_trans")
-        self.img_trans.setGeometry(QRect(10, 10, 581, 351))
-        sizePolicy4.setHeightForWidth(self.img_trans.sizePolicy().hasHeightForWidth())
-        self.img_trans.setSizePolicy(sizePolicy4)
-        self.img_trans.setStyleSheet(u"background: #3D3D3D;")
-        self.img_trans.setPixmap(QPixmap(u":/images/images/Icon_trans.png"))
-        self.img_trans.setScaledContents(False)
-        self.img_trans.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.img_trans.raise_()
-        self.pte_logOutput.raise_()
+
+        self.horizontalLayout_17.addWidget(self.pte_logOutput)
+
 
         self.verticalLayout_15.addWidget(self.frame_28)
 
@@ -617,11 +628,13 @@ class Ui_pyTrade_v2(object):
 
         self.frame_30 = QFrame(self.pg_settings)
         self.frame_30.setObjectName(u"frame_30")
-        sizePolicy3.setHeightForWidth(self.frame_30.sizePolicy().hasHeightForWidth())
-        self.frame_30.setSizePolicy(sizePolicy3)
-        self.frame_30.setStyleSheet(u"background: transparent;")
-        self.frame_30.setFrameShape(QFrame.Shape.StyledPanel)
-        self.frame_30.setFrameShadow(QFrame.Shadow.Raised)
+        sizePolicy4.setHeightForWidth(self.frame_30.sizePolicy().hasHeightForWidth())
+        self.frame_30.setSizePolicy(sizePolicy4)
+        self.frame_30.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
+"background-repeat: no-repeat;\n"
+"background-position: center;")
+        self.frame_30.setFrameShape(QFrame.Shape.Box)
+        self.frame_30.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.verticalLayout_17.addWidget(self.frame_30)
 
@@ -634,11 +647,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_20 = QFrame(self.frame_11)
         self.frame_20.setObjectName(u"frame_20")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
-        self.frame_20.setSizePolicy(sizePolicy5)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
+        self.frame_20.setSizePolicy(sizePolicy6)
         self.frame_20.setMaximumSize(QSize(16777215, 30))
         self.frame_20.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_20.setFrameShadow(QFrame.Shadow.Raised)
@@ -654,9 +667,9 @@ class Ui_pyTrade_v2(object):
         self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.label_13 = QLabel(self.frame_21)
         self.label_13.setObjectName(u"label_13")
-        font5 = QFont()
-        font5.setPointSize(8)
-        self.label_13.setFont(font5)
+        font6 = QFont()
+        font6.setPointSize(8)
+        self.label_13.setFont(font6)
 
         self.horizontalLayout_11.addWidget(self.label_13)
 
@@ -692,7 +705,7 @@ class Ui_pyTrade_v2(object):
 
         self.retranslateUi(pyTrade_v2)
 
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(pyTrade_v2)
@@ -740,7 +753,6 @@ class Ui_pyTrade_v2(object):
         self.label_15.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))
         self.label_16.setText(QCoreApplication.translate("pyTrade_v2", u"Candles", None))
         self.label_17.setText(QCoreApplication.translate("pyTrade_v2", u"Output/Log", None))
-        self.img_trans.setText("")
         self.label_18.setText(QCoreApplication.translate("pyTrade_v2", u"Bot Settings", None))
         self.label_13.setText(QCoreApplication.translate("pyTrade_v2", u"pyTrade v0.2 Created by SimpleDesigns 2026", None))
     # retranslateUi

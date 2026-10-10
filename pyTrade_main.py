@@ -1,7 +1,7 @@
 import sys
 from PySide6 import QtWidgets as qtw
 from PySide6.QtCore import QThread, Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QColor, QIcon, QPalette
 import resources_rc # Contains GUI resources (images etc.)
 from datetime import datetime, timezone
 
@@ -9,6 +9,28 @@ from ui_pyTrade_GUI_v2 import Ui_pyTrade_v2
 import pyTrade_bot as pyt
 from position_cards import PositionCardsPanel
 from spinner_overlay import SpinnerOverlay
+
+
+def apply_dark_theme(app):
+    # Force a dark look regardless of the desktop/launcher environment
+    app.setStyle("Fusion")
+    if hasattr(app.styleHints(), "setColorScheme"):
+        app.styleHints().setColorScheme(Qt.ColorScheme.Dark)
+    pal = QPalette()
+    for role, colour in (
+        (QPalette.ColorRole.Window, "#2b2b2b"), (QPalette.ColorRole.WindowText, "#e6e6e6"),
+        (QPalette.ColorRole.Base, "#1e1e1e"), (QPalette.ColorRole.AlternateBase, "#2b2b2b"),
+        (QPalette.ColorRole.Text, "#e6e6e6"), (QPalette.ColorRole.Button, "#353535"),
+        (QPalette.ColorRole.ButtonText, "#e6e6e6"), (QPalette.ColorRole.ToolTipBase, "#353535"),
+        (QPalette.ColorRole.ToolTipText, "#e6e6e6"), (QPalette.ColorRole.Highlight, "#F19E39"),
+        (QPalette.ColorRole.HighlightedText, "#000000"),
+        # Frame (Box/Sunken) borders are drawn from these roles
+        (QPalette.ColorRole.Light, "#4a4a4a"), (QPalette.ColorRole.Midlight, "#3f3f3f"),
+        (QPalette.ColorRole.Mid, "#2f2f2f"), (QPalette.ColorRole.Dark, "#1a1a1a"),
+        (QPalette.ColorRole.Shadow, "#000000"), (QPalette.ColorRole.PlaceholderText, "#888888"),
+    ):
+        pal.setColor(role, QColor(colour))
+    app.setPalette(pal)
 
 
 class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
@@ -230,6 +252,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 if __name__ == "__main__":
 
     app = qtw.QApplication(sys.argv)
+    apply_dark_theme(app)
     app.setApplicationName("pyTrade")
     app.setDesktopFileName("pyTrade")  # matches ~/Desktop/pyTrade.desktop so the taskbar groups/icons correctly
     app_icon = QIcon()

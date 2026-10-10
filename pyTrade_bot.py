@@ -2,7 +2,6 @@ from PySide6.QtCore import QObject, Signal
 from datetime import datetime, timezone
 import sqlite3
 import time
-from typing import Any, Dict, Iterable
 from oandapyV20 import API
 
 import oanda_api_handler as oanda
@@ -14,238 +13,11 @@ import pyTrade_market_session as market
 import pyTrade_trades_db as trades_db
 from pyTrade_trade_guards import TradeGuards
 from pyTrade_position_data import build_position_cards
+from pyTrade_trade_persistence import persist_filled_trades, persist_closed_trades, sync_closed_trades
+from pyTrade_signal_data import build_signal_data
 
 import logging
 import config
-
-
-def _persist_filled_trades(
-    order_response: Dict[str, Any],
-    order: Dict[str, Any],
-    strategy_name: str,
-    session: str,
-    account_balance: float,
-    risk_percent: float,
-    logger: logging.Logger,
-) -> None:
-    """Store trades OANDA confirms were opened by a filled order."""
-    fill = order_response.get("orderFillTransaction")
-    if not isinstance(fill, dict):
-        logger.warning(
-            "Order response had no fill transaction; no trade was saved"
-        )
-        return
-
-    opened_trades = []
-    if isinstance(fill.get("tradeOpened"), dict):
-        opened_trades.append(fill["tradeOpened"])
-    opened_trades.extend(
-        trade
-        for trade in fill.get("tradesOpened", [])
-        if isinstance(trade, dict)
-    )
-    if not opened_trades:
-        logger.warning(
-            "Order fill for %s did not open a new trade; no trade was saved",
-            fill.get("instrument", order.get("order", {}).get("instrument")),
-        )
-        return
-
-    requested_units = abs(int(order["order"]["units"]))
-    for opened_trade in opened_trades:
-        trade_id = opened_trade.get("tradeID")
-        if trade_id is None:
-            logger.error("OANDA opened trade response is missing tradeID: %s", opened_trade)
-            continue
-        units = int(float(opened_trade["units"]))
-        allocated_risk = (
-            account_balance
-            * risk_percent
-            * abs(units)
-            / requested_units
-            if requested_units
-            else 0.0
-        )
-        trade_data = {
-            "trade_id": str(trade_id),
-            "instrument": fill.get(
-                "instrument", order["order"]["instrument"]
-            ),
-            "direction": "BUY" if units > 0 else "SELL",
-            "strategy": strategy_name,
-            "entry_time": fill.get("time"),
-            "entry_price": float(fill["price"]),
-            "stop_loss": float(
-                order["order"]["stopLossOnFill"]["price"]
-            ),
-            "take_profit": float(
-                order["order"]["takeProfitOnFill"]["price"]
-            ),
-            "units": abs(units),
-            "risk_amount": allocated_risk,
-            "status": "OPEN",
-            "session": session,
-        }
-        try:
-            trades_db.insert_trade(trade_data)
-            logger.info("Saved opened OANDA trade %s to local database", trade_id)
-            # TODO: write the entry signal's indicator values (atr14, ema20, ema50,
-            # adx, trend_strength, rejection_candle, pullback_detected, close/high/low,
-            # signal_timestamp) via trades_db.insert_signal_data({"trade_id": str(trade_id), ...}).
-            # trade_signals is currently never written, so the API's /api/analytics/atr-ranges
-            # (which reads trade_signals.atr14) returns no data. The strategy's signal row
-            # (pyTrade_TrendFollowing_Strategy.py, ATR_14 column) must be passed down to here.
-        except (OSError, sqlite3.Error, TypeError, ValueError, KeyError):
-            logger.exception("Could not save opened trade %s", trade_id)
-
-
-def _calculate_pnl_pips(
-    trade: Dict[str, Any],
-    exit_price: float,
-) -> float:
-    """Calculate signed pips from a stored trade and its exit price."""
-    entry_price = float(trade["entry_price"])
-    pip_size = 0.01 if trade["instrument"].endswith("_JPY") else 0.0001
-    price_change = (
-        exit_price - entry_price
-        if trade["direction"].upper() == "BUY"
-        else entry_price - exit_price
-    )
-    return round(price_change / pip_size, 2)
-
-
-def _persist_closed_trades(
-    close_response: Dict[str, Any],
-    close_reason: str,
-    logger: logging.Logger,
-) -> None:
-    """Persist realized outcomes for trades closed by an OANDA position fill."""
-    fill_transactions = [
-        close_response.get("longOrderFillTransaction"),
-        close_response.get("shortOrderFillTransaction"),
-    ]
-    closed_trade_count = 0
-    for fill in fill_transactions:
-        if not isinstance(fill, dict):
-            continue
-
-        closed_trades = fill.get("tradesClosed", [])
-        if isinstance(closed_trades, dict):
-            closed_trades = [closed_trades]
-        elif not isinstance(closed_trades, (list, tuple)):
-            closed_trades = []
-        if isinstance(fill.get("tradeClosed"), dict):
-            closed_trades = [*closed_trades, fill["tradeClosed"]]
-        for closed_trade in closed_trades:
-            trade_id = closed_trade.get("tradeID")
-            if trade_id is None:
-                logger.error(
-                    "OANDA close transaction is missing tradeID: %s",
-                    closed_trade,
-                )
-                continue
-
-            trade_id = str(trade_id)
-            try:
-                stored_trade = trades_db.get_trade_by_id(trade_id)
-                if stored_trade is None:
-                    logger.warning(
-                        "Closed OANDA trade %s is not in the local database",
-                        trade_id,
-                    )
-                    continue
-
-                exit_price = float(fill["price"])
-                pnl_pips = _calculate_pnl_pips(stored_trade, exit_price)
-                realized_pl = float(closed_trade["realizedPL"])
-                updated = trades_db.update_trade_close(
-                    trade_id=trade_id,
-                    exit_time=fill["time"],
-                    exit_price=exit_price,
-                    pnl_currency=realized_pl,
-                    pnl_pips=pnl_pips,
-                    close_reason=close_reason,
-                )
-                if updated:
-                    closed_trade_count += 1
-                    trades_db.insert_trade_event(
-                        trade_id,
-                        "CLOSED",
-                        close_reason,
-                        event_time=fill["time"],
-                    )
-                    logger.info(
-                        "Saved realized close outcome for trade %s: P&L=%s",
-                        trade_id,
-                        realized_pl,
-                    )
-            except (OSError, sqlite3.Error, TypeError, ValueError, KeyError):
-                logger.exception("Could not save close outcome for trade %s", trade_id)
-
-    if not closed_trade_count:
-        logger.warning(
-            "Position close returned no recognized closed trades to save"
-        )
-
-
-def _sync_closed_trades(
-    client,
-    open_positions: Iterable[Dict[str, Any]],
-    logger: logging.Logger,
-) -> None:
-    """Reconcile DB-open trades against OANDA to capture SL/TP/manual closes."""
-    active_trade_ids = set()
-    for position in open_positions:
-        for side in ("long", "short"):
-            active_trade_ids.update(
-                str(trade_id)
-                for trade_id in position.get(side, {}).get("tradeIDs", [])
-            )
-
-    try:
-        local_open_trades = trades_db.get_open_trades()
-    except (OSError, sqlite3.Error):
-        logger.exception("Could not read open trades for close reconciliation")
-        return
-
-    for local_trade in local_open_trades:
-        trade_id = str(local_trade["trade_id"])
-        if trade_id in active_trade_ids:
-            continue
-
-        trade_details = oanda.getTradeDetails(client, trade_id)
-        if not trade_details or trade_details.get("state") != "CLOSED":
-            continue
-
-        try:
-            exit_price = float(trade_details["averageClosePrice"])
-            pnl_currency = float(trade_details["realizedPL"])
-            exit_time = trade_details["closeTime"]
-            updated = trades_db.update_trade_close(
-                trade_id=trade_id,
-                exit_time=exit_time,
-                exit_price=exit_price,
-                pnl_currency=pnl_currency,
-                pnl_pips=_calculate_pnl_pips(local_trade, exit_price),
-                close_reason="OANDA trade closed outside the bot",
-            )
-            if updated:
-                trades_db.insert_trade_event(
-                    trade_id,
-                    "CLOSED",
-                    "OANDA trade closed outside the bot",
-                    event_time=exit_time,
-                )
-                logger.info(
-                    "Reconciled closed OANDA trade %s: P&L=%s",
-                    trade_id,
-                    pnl_currency,
-                )
-        except (OSError, sqlite3.Error, TypeError, ValueError, KeyError):
-            logger.exception(
-                "Could not reconcile close details for trade %s",
-                trade_id,
-            )
 
 
 class OandaInfoFilter(logging.Filter):
@@ -279,12 +51,23 @@ class pyTradeWorker(QObject):
     ):
         super().__init__()
         self.running = True
-        self.strategy = strategy if strategy is not None else TrendFollowingEngine()
+        self.strategy_primary = strategy if strategy is not None else TrendFollowingEngine()
+        self.strategy_secondary = (
+            BreakoutEngine() if isinstance(self.strategy_primary, TrendFollowingEngine)
+            else TrendFollowingEngine()
+        )
         self.validator = validator if validator is not None else Validation()
         self.order_manager = order_manager if order_manager is not None else OrderManager()
         self.trade_guards = (
             trade_guards if trade_guards is not None else TradeGuards()
         )
+
+    def _strategy_engine(self, name):
+        """Return the strategy engine matching a stored strategy name, or None."""
+        for engine in (self.strategy_primary, self.strategy_secondary):
+            if engine.strategy_name == name:
+                return engine
+        return None
 
     def _publish_positions(self, client, positions):
         """Send the current open positions (with trade details) to the GUI."""
@@ -305,9 +88,153 @@ class pyTradeWorker(QObject):
     def on_set_strategy(self, strat):
 
         if strat == "EMA Pullback":
-            self.strategy = TrendFollowingEngine()
+            self.strategy_primary = TrendFollowingEngine()
+            self.strategy_secondary = BreakoutEngine()
         else: # Breakout
-            self.strategy = BreakoutEngine()
+            self.strategy_primary = BreakoutEngine()
+            self.strategy_secondary = TrendFollowingEngine()
+
+
+    def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
+        """Look for an entry signal on one strategy and place the order if the guards pass.
+
+        Returns True if the strategy produced a trade signal (whether or not it was
+        accepted by the guards), False if its conditions were not met.
+        """
+        signal, entry, stop, tp = strategy.get_signal(price)
+
+        if signal not in ("BUY", "SELL") or entry is None or stop is None or tp is None:
+            return False
+
+        h1_price = oanda.get_Candles(
+            client,
+            open_market["instrument"],
+            granularity="H1",
+        )
+        if h1_price is None:
+            self.msg.emit(
+                "Failed to get H1 candles; entry rejected"
+            )
+            oanda_logger.error(
+                "Could not retrieve H1 candles for %s; "
+                "rejecting signal",
+                open_market["instrument"],
+            )
+        else:
+            strategy_name = strategy.strategy_name
+            if strategy_name == "Breakout":
+                level_column = (
+                    "DC_Upper"
+                    if signal == "BUY"
+                    else "DC_Lower"
+                )
+                if (
+                    level_column not in price.columns
+                    or price.empty
+                    or price[level_column].iloc[-1]
+                    is None
+                ):
+                    guard_passed = False
+                    logger.error(
+                        "Cannot validate breakout: missing "
+                        "%s breakout level",
+                        level_column,
+                    )
+                else:
+                    guard_passed = (
+                        self.trade_guards.validate_breakout(
+                            price,
+                            h1_price,
+                            float(
+                                price[level_column].iloc[-1]
+                            ),
+                            signal,
+                        )
+                    )
+            elif strategy_name in {
+                "EMA_TrendFollowing",
+                "TrendFollowing",
+            }:
+                guard_passed = (
+                    self.trade_guards.validate_trend_following(
+                        price,
+                        h1_price,
+                        signal,
+                    )
+                )
+            else:
+                guard_passed = False
+                logger.error(
+                    "No trade guards configured for "
+                    "strategy %s",
+                    strategy_name,
+                )
+
+            if not guard_passed:
+                self.msg.emit(
+                    "Trade signal rejected by qualification guards"
+                )
+                logger.info(
+                    "Trade signal rejected by qualification guards"
+                )
+            else:
+                order = self.order_manager.create_order_params(
+                    instrument=open_market["instrument"],
+                    signal=signal,
+                    entry_price=entry,
+                    stop_loss=stop,
+                    take_profit=tp,
+                    account_balance=summary["balance"],
+                )
+                order_res = oanda.place_order(client, order)
+
+                if order_res is not None:
+                    try:
+                        signal_data = build_signal_data(strategy, signal, price, self.trade_guards, logger)
+                    except Exception:
+                        logger.exception("Could not build signal data")
+                        signal_data = None
+                    persist_filled_trades(
+                        order_response=order_res,
+                        order=order,
+                        strategy_name=strategy_name,
+                        session=open_market["market"],
+                        account_balance=float(
+                            summary["balance"]
+                        ),
+                        risk_percent=float(
+                            getattr(
+                                self.order_manager,
+                                "risk_percent",
+                                config.RISK_PERCENT,
+                            )
+                        ),
+                        logger=logger,
+                        signal_data=signal_data,
+                    )
+                    self.msg.emit(
+                        "Entry point detected & order placed: "
+                        f'Instrument: {order["order"]["instrument"]} '
+                        f'Units: {order["order"]["units"]} '
+                        f'Stop Loss: {order["order"]["stopLossOnFill"]} '
+                        f'Take Profit: {order["order"]["takeProfitOnFill"]} '
+                        f'Order No.: {order_res["orderCreateTransaction"]["id"]}'
+                    )
+                    logger.info(
+                        "Entry point detected & order placed:\n"
+                        "Instrument: %s\nUnits: %s",
+                        order["order"]["instrument"],
+                        order["order"]["units"],
+                    )
+                else:
+                    self.msg.emit(
+                        "Entry point detected - Order failed to place!"
+                    )
+                    oanda_logger.error(
+                        "API Call: Entry point detected - "
+                        "Order failed to place!"
+                    )
+        return True
 
 
     def run_bot(self):
@@ -334,16 +261,18 @@ class pyTradeWorker(QObject):
         # ----------------------------------------------------------------------------------
 
         try:
-                database_path = trades_db.create_database()
-                logger.info("Trade database ready at %s", database_path)
+            database_path = trades_db.create_database()
+            logger.info("Trade database ready at %s", database_path)
         except (OSError, sqlite3.Error):
                 logger.exception("Could not initialize the local trade database")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
 
-        self.msg.emit(f"Running Strategy: {self.strategy.strategy_name}")
-        logger.info("Running Strategy: %s", self.strategy.strategy_name)
+        self.msg.emit(f"Primary Strategy: {self.strategy_primary.strategy_name}")
+        logger.info("Primary Strategy: %s", self.strategy_primary.strategy_name)
+        self.msg.emit(f"Secondary Strategy: {self.strategy_secondary.strategy_name}")
+        logger.info("Secondary Strategy: %s", self.strategy_secondary.strategy_name)
 
         last_checked = None
         current_market = ""
@@ -399,7 +328,8 @@ class pyTradeWorker(QObject):
                         price = oanda.get_Candles(client, open_market["instrument"])
 
                         if price is not None:
-                            price = self.strategy.add_indicators(price)
+                            raw_price = price.copy()
+                            price = self.strategy_primary.add_indicators(price)
                             self.msg.emit("New Candles recieved and indicators set")
                         else:
                             self.msg.emit("Failed to get Candles")
@@ -416,7 +346,7 @@ class pyTradeWorker(QObject):
                             self._sleep(10)
                             continue
 
-                        _sync_closed_trades(client, positions, logger)
+                        sync_closed_trades(client, positions, logger)
                         if positions:
                             self.msg.emit(
                                 f"You have {len(positions)} open positions "
@@ -424,9 +354,37 @@ class pyTradeWorker(QObject):
                             )
                             oanda_logger.debug(f"Open positions: {positions}")
                             position_closed = False
+                            indicator_cache = {self.strategy_primary.strategy_name: price}
                             for position in positions:
-                                position["strategy"] = self.strategy.strategy_name
                                 pos = self.validator.extract_position_data(position)
+
+                                # Validate with the strategy the trade was opened under (stored in the DB)
+                                pos_strategy = self.strategy_primary
+                                try:
+                                    stored = trades_db.get_trade_by_id(str(pos["tradeID"])) if pos["tradeID"] else None
+                                except (OSError, sqlite3.Error):
+                                    logger.exception("Could not read strategy for trade %s", pos["tradeID"])
+                                    stored = None
+                                if stored and stored.get("strategy"):
+                                    engine = self._strategy_engine(stored["strategy"])
+                                    if engine is not None:
+                                        pos_strategy = engine
+                                    else:
+                                        logger.warning(
+                                            "Trade %s has unknown strategy %s; using primary strategy rules",
+                                            pos["tradeID"], stored["strategy"],
+                                        )
+                                else:
+                                    logger.warning(
+                                        "No stored strategy for trade %s; using primary strategy rules",
+                                        pos["tradeID"],
+                                    )
+                                pos["strategy"] = pos_strategy.strategy_name
+
+                                if pos_strategy.strategy_name not in indicator_cache:
+                                    indicator_cache[pos_strategy.strategy_name] = pos_strategy.add_indicators(raw_price.copy())
+                                pos_price = indicator_cache[pos_strategy.strategy_name]
+
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
                                 if pos["trade_time"] is None:
                                     self.msg.emit(
@@ -437,8 +395,8 @@ class pyTradeWorker(QObject):
                                         pos["tradeID"],
                                     )
                                     continue
-                                validity = self.validator.validate_position(pos, price, open_market["market"], self.strategy.strategy_name)
-                                val_logger.info(f'Position: Instrument: {validity["instrument"]}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
+                                validity = self.validator.validate_position(pos, pos_price, open_market["market"], pos_strategy.strategy_name)
+                                val_logger.info(f'Position: Instrument: {validity["instrument"]}, Strategy: {pos_strategy.strategy_name}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
 
                                 if not validity["validity"]: #Position is no longer valid
                                     posClose_res = None
@@ -453,7 +411,7 @@ class pyTradeWorker(QObject):
                                             #self.msg.emit(f'Failed to Close Position - {validity["instrument"]}')
                                             #oanda_logger.error(f'API Call: Failed to Close Position - {pos["instrument"]} - {validity["reason"]}')
                                         else:
-                                            _persist_closed_trades(
+                                            persist_closed_trades(
                                                 posClose_res,
                                                 validity["reason"],
                                                 logger,
@@ -470,133 +428,26 @@ class pyTradeWorker(QObject):
 
                         if not position_closed:  # No positions closed, check this candle for new entry signals
 
-                            signal, entry, stop, tp = self.strategy.get_signal(price)
-                
-                            if signal not in ("BUY", "SELL") or entry is None or stop is None or tp is None:
-                                self.msg.emit("Strategy conditions not met")
-                            else:
-                                h1_price = oanda.get_Candles(
-                                    client,
-                                    open_market["instrument"],
-                                    granularity="H1",
-                                )
-                                if h1_price is None:
-                                    self.msg.emit(
-                                        "Failed to get H1 candles; entry rejected"
-                                    )
-                                    oanda_logger.error(
-                                        "Could not retrieve H1 candles for %s; "
-                                        "rejecting signal",
-                                        open_market["instrument"],
-                                    )
+                            for index, strategy in enumerate((self.strategy_primary, self.strategy_secondary)):
+                                if index == 0:
+                                    strat_price = price
                                 else:
-                                    strategy_name = self.strategy.strategy_name
-                                    if strategy_name == "Breakout":
-                                        level_column = (
-                                            "DC_Upper"
-                                            if signal == "BUY"
-                                            else "DC_Lower"
-                                        )
-                                        if (
-                                            level_column not in price.columns
-                                            or price.empty
-                                            or price[level_column].iloc[-1]
-                                            is None
-                                        ):
-                                            guard_passed = False
-                                            logger.error(
-                                                "Cannot validate breakout: missing "
-                                                "%s breakout level",
-                                                level_column,
-                                            )
-                                        else:
-                                            guard_passed = (
-                                                self.trade_guards.validate_breakout(
-                                                    price,
-                                                    h1_price,
-                                                    float(
-                                                        price[level_column].iloc[-1]
-                                                    ),
-                                                    signal,
-                                                )
-                                            )
-                                    elif strategy_name in {
-                                        "EMA_TrendFollowing",
-                                        "TrendFollowing",
-                                    }:
-                                        guard_passed = (
-                                            self.trade_guards.validate_trend_following(
-                                                price,
-                                                h1_price,
-                                                signal,
-                                            )
-                                        )
-                                    else:
-                                        guard_passed = False
-                                        logger.error(
-                                            "No trade guards configured for "
-                                            "strategy %s",
-                                            strategy_name,
-                                        )
-
-                                    if not guard_passed:
-                                        self.msg.emit(
-                                            "Trade signal rejected by qualification guards"
-                                        )
-                                        logger.info(
-                                            "Trade signal rejected by qualification guards"
-                                        )
-                                    else:
-                                        order = self.order_manager.create_order_params(
-                                            instrument=open_market["instrument"],
-                                            signal=signal,
-                                            entry_price=entry,
-                                            stop_loss=stop,
-                                            take_profit=tp,
-                                            account_balance=summary["balance"],
-                                        )
-                                        order_res = oanda.place_order(client, order)
-
-                                        if order_res is not None:
-                                            _persist_filled_trades(
-                                                order_response=order_res,
-                                                order=order,
-                                                strategy_name=strategy_name,
-                                                session=open_market["market"],
-                                                account_balance=float(
-                                                    summary["balance"]
-                                                ),
-                                                risk_percent=float(
-                                                    getattr(
-                                                        self.order_manager,
-                                                        "risk_percent",
-                                                        config.RISK_PERCENT,
-                                                    )
-                                                ),
-                                                logger=logger,
-                                            )
-                                            self.msg.emit(
-                                                "Entry point detected & order placed: "
-                                                f'Instrument: {order["order"]["instrument"]} '
-                                                f'Units: {order["order"]["units"]} '
-                                                f'Stop Loss: {order["order"]["stopLossOnFill"]} '
-                                                f'Take Profit: {order["order"]["takeProfitOnFill"]} '
-                                                f'Order No.: {order_res["orderCreateTransaction"]["id"]}'
-                                            )
-                                            logger.info(
-                                                "Entry point detected & order placed:\n"
-                                                "Instrument: %s\nUnits: %s",
-                                                order["order"]["instrument"],
-                                                order["order"]["units"],
-                                            )
-                                        else:
-                                            self.msg.emit(
-                                                "Entry point detected - Order failed to place!"
-                                            )
-                                            oanda_logger.error(
-                                                "API Call: Entry point detected - "
-                                                "Order failed to place!"
-                                            )
+                                    # Secondary strategy needs its own indicator set on the raw candles
+                                    strat_price = strategy.add_indicators(raw_price.copy())
+                                    if strat_price is None or strat_price.empty:
+                                        self.msg.emit(f"{strategy.strategy_name}: could not calculate indicators")
+                                        break
+                                if self._try_entry(strategy, strat_price, client, open_market, summary, logger, oanda_logger):
+                                    break
+                                if index == 0:
+                                    msg = (
+                                        f"No trade signal from primary strategy ({strategy.strategy_name}) "
+                                        f"- moving to secondary strategy ({self.strategy_secondary.strategy_name})"
+                                    )
+                                    self.msg.emit(msg)
+                                    logger.info(msg)
+                                else:
+                                    self.msg.emit("Strategy conditions not met (primary and secondary)")
                             
                         last_checked = current_time.minute # Update to prevent re-triggering
             self._sleep(10)

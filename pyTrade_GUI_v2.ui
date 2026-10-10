@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1072</width>
-    <height>730</height>
+    <height>820</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,12 @@
    <layout class="QVBoxLayout" name="verticalLayout_7">
     <item>
      <widget class="QFrame" name="frame_12">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -758,7 +764,7 @@
              <item>
               <widget class="QStackedWidget" name="stackedWidget">
                <property name="currentIndex">
-                <number>3</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="pg_openpositions">
                 <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -776,6 +782,7 @@
                       <property name="font">
                        <font>
                         <pointsize>12</pointsize>
+                        <bold>true</bold>
                        </font>
                       </property>
                       <property name="text">
@@ -796,6 +803,11 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
@@ -829,8 +841,8 @@
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>100</width>
-                         <height>30</height>
+                         <width>524</width>
+                         <height>542</height>
                         </rect>
                        </property>
                       </widget>
@@ -857,6 +869,7 @@
                       <property name="font">
                        <font>
                         <pointsize>12</pointsize>
+                        <bold>true</bold>
                        </font>
                       </property>
                       <property name="text">
@@ -878,6 +891,11 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
@@ -890,20 +908,26 @@
                </widget>
                <widget class="QWidget" name="pg_output">
                 <layout class="QVBoxLayout" name="verticalLayout_15">
-                 <item>
+                 <item alignment="Qt::AlignmentFlag::AlignTop">
                   <widget class="QFrame" name="frame_27">
+                   <property name="font">
+                    <font>
+                     <bold>true</bold>
+                    </font>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
                     <enum>QFrame::Shadow::Raised</enum>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_14">
-                    <item alignment="Qt::AlignmentFlag::AlignTop">
+                   <layout class="QHBoxLayout" name="horizontalLayout_16">
+                    <item>
                      <widget class="QLabel" name="label_17">
                       <property name="font">
                        <font>
                         <pointsize>12</pointsize>
+                        <bold>true</bold>
                        </font>
                       </property>
                       <property name="text">
@@ -925,65 +949,33 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
                     <enum>QFrame::Shadow::Raised</enum>
                    </property>
-                   <widget class="QPlainTextEdit" name="pte_logOutput">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>10</y>
-                      <width>581</width>
-                      <height>351</height>
-                     </rect>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background: transparent;
+                   <layout class="QHBoxLayout" name="horizontalLayout_17">
+                    <item>
+                     <widget class="QPlainTextEdit" name="pte_logOutput">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: transparent;
 border: line 1px;</string>
-                    </property>
-                   </widget>
-                   <widget class="QLabel" name="img_trans">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>10</y>
-                      <width>581</width>
-                      <height>351</height>
-                     </rect>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background: #3D3D3D;</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="pixmap">
-                     <pixmap resource="resources.qrc">:/images/images/Icon_trans.png</pixmap>
-                    </property>
-                    <property name="scaledContents">
-                     <bool>false</bool>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                   <zorder>img_trans</zorder>
-                   <zorder>pte_logOutput</zorder>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                 </layout>
@@ -1004,6 +996,7 @@ border: line 1px;</string>
                       <property name="font">
                        <font>
                         <pointsize>12</pointsize>
+                        <bold>true</bold>
                        </font>
                       </property>
                       <property name="text">
@@ -1026,13 +1019,15 @@ border: line 1px;</string>
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">background: transparent;</string>
+                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
                    </property>
                    <property name="frameShape">
-                    <enum>QFrame::Shape::StyledPanel</enum>
+                    <enum>QFrame::Shape::Box</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Shadow::Raised</enum>
+                    <enum>QFrame::Shadow::Sunken</enum>
                    </property>
                   </widget>
                  </item>

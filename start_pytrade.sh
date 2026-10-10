@@ -6,6 +6,9 @@ cd "$ROOT" || exit 1
 # Use the conda python/uvicorn if they are not already on PATH
 export PATH="$HOME/anaconda3/bin:$PATH"
 
+# Hide the harmless Qt "Could not register app ID" portal warning
+export QT_LOGGING_RULES="qt.qpa.services=false"
+
 LOG_DIR="$ROOT/log_txt_services"
 mkdir -p "$LOG_DIR"
 PIDS=()
