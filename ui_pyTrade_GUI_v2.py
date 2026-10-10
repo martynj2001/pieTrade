@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2wEqemv.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2ygKBWl.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -179,6 +179,113 @@ class Ui_pyTrade_v2(object):
         self.frame.setFrameShadow(QFrame.Shadow.Sunken)
         self.verticalLayout = QVBoxLayout(self.frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.frame_5 = QFrame(self.frame)
+        self.frame_5.setObjectName(u"frame_5")
+        self.frame_5.setFrameShape(QFrame.Shape.Box)
+        self.frame_5.setFrameShadow(QFrame.Shadow.Sunken)
+        self.horizontalLayout_2 = QHBoxLayout(self.frame_5)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label_20 = QLabel(self.frame_5)
+        self.label_20.setObjectName(u"label_20")
+        self.label_20.setMinimumSize(QSize(30, 30))
+        self.label_20.setMaximumSize(QSize(30, 30))
+        self.label_20.setPixmap(QPixmap(u":/icons/icons/menu_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg"))
+        self.label_20.setScaledContents(True)
+
+        self.horizontalLayout_2.addWidget(self.label_20)
+
+        self.label_9 = QLabel(self.frame_5)
+        self.label_9.setObjectName(u"label_9")
+        font2 = QFont()
+        font2.setPointSize(16)
+        self.label_9.setFont(font2)
+        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_2.addWidget(self.label_9)
+
+
+        self.verticalLayout.addWidget(self.frame_5)
+
+        self.frame_6 = QFrame(self.frame)
+        self.frame_6.setObjectName(u"frame_6")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.frame_6.sizePolicy().hasHeightForWidth())
+        self.frame_6.setSizePolicy(sizePolicy4)
+        self.frame_6.setFrameShape(QFrame.Shape.Box)
+        self.frame_6.setFrameShadow(QFrame.Shadow.Sunken)
+        self.verticalLayout_6 = QVBoxLayout(self.frame_6)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.frame_31 = QFrame(self.frame_6)
+        self.frame_31.setObjectName(u"frame_31")
+        sizePolicy4.setHeightForWidth(self.frame_31.sizePolicy().hasHeightForWidth())
+        self.frame_31.setSizePolicy(sizePolicy4)
+        self.frame_31.setMaximumSize(QSize(16777215, 16777215))
+        self.frame_31.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_31.setFrameShadow(QFrame.Shadow.Raised)
+        self.verticalLayout_14 = QVBoxLayout(self.frame_31)
+        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
+        self.pb_output = QPushButton(self.frame_31)
+        self.pb_output.setObjectName(u"pb_output")
+        sizePolicy4.setHeightForWidth(self.pb_output.sizePolicy().hasHeightForWidth())
+        self.pb_output.setSizePolicy(sizePolicy4)
+
+        self.verticalLayout_14.addWidget(self.pb_output)
+
+        self.pb_settings = QPushButton(self.frame_31)
+        self.pb_settings.setObjectName(u"pb_settings")
+        sizePolicy4.setHeightForWidth(self.pb_settings.sizePolicy().hasHeightForWidth())
+        self.pb_settings.setSizePolicy(sizePolicy4)
+
+        self.verticalLayout_14.addWidget(self.pb_settings)
+
+        self.pb_candles = QPushButton(self.frame_31)
+        self.pb_candles.setObjectName(u"pb_candles")
+        sizePolicy4.setHeightForWidth(self.pb_candles.sizePolicy().hasHeightForWidth())
+        self.pb_candles.setSizePolicy(sizePolicy4)
+
+        self.verticalLayout_14.addWidget(self.pb_candles)
+
+        self.pb_openpositions = QPushButton(self.frame_31)
+        self.pb_openpositions.setObjectName(u"pb_openpositions")
+        sizePolicy4.setHeightForWidth(self.pb_openpositions.sizePolicy().hasHeightForWidth())
+        self.pb_openpositions.setSizePolicy(sizePolicy4)
+
+        self.verticalLayout_14.addWidget(self.pb_openpositions)
+
+
+        self.verticalLayout_6.addWidget(self.frame_31)
+
+        self.frame_13 = QFrame(self.frame_6)
+        self.frame_13.setObjectName(u"frame_13")
+        sizePolicy2.setHeightForWidth(self.frame_13.sizePolicy().hasHeightForWidth())
+        self.frame_13.setSizePolicy(sizePolicy2)
+        self.frame_13.setMinimumSize(QSize(0, 100))
+        self.frame_13.setMaximumSize(QSize(16777215, 0))
+        self.frame_13.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_13.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.frame_13)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.label_11 = QLabel(self.frame_13)
+        self.label_11.setObjectName(u"label_11")
+        self.label_11.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_4.addWidget(self.label_11)
+
+        self.comboBox = QComboBox(self.frame_13)
+        self.comboBox.addItem("")
+        self.comboBox.addItem("")
+        self.comboBox.setObjectName(u"comboBox")
+
+        self.horizontalLayout_4.addWidget(self.comboBox)
+
+
+        self.verticalLayout_6.addWidget(self.frame_13, 0, Qt.AlignmentFlag.AlignTop)
+
+
+        self.verticalLayout.addWidget(self.frame_6)
+
         self.frame_3 = QFrame(self.frame)
         self.frame_3.setObjectName(u"frame_3")
         self.frame_3.setFrameShape(QFrame.Shape.Box)
@@ -197,8 +304,6 @@ class Ui_pyTrade_v2(object):
 
         self.label = QLabel(self.frame_3)
         self.label.setObjectName(u"label")
-        font2 = QFont()
-        font2.setPointSize(16)
         self.label.setFont(font2)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -209,9 +314,6 @@ class Ui_pyTrade_v2(object):
 
         self.frame_4 = QFrame(self.frame)
         self.frame_4.setObjectName(u"frame_4")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.frame_4.sizePolicy().hasHeightForWidth())
         self.frame_4.setSizePolicy(sizePolicy4)
         self.frame_4.setFrameShape(QFrame.Shape.Box)
@@ -347,84 +449,6 @@ class Ui_pyTrade_v2(object):
 
 
         self.verticalLayout.addWidget(self.frame_4)
-
-        self.frame_5 = QFrame(self.frame)
-        self.frame_5.setObjectName(u"frame_5")
-        self.frame_5.setFrameShape(QFrame.Shape.Box)
-        self.frame_5.setFrameShadow(QFrame.Shadow.Sunken)
-        self.horizontalLayout_2 = QHBoxLayout(self.frame_5)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.label_20 = QLabel(self.frame_5)
-        self.label_20.setObjectName(u"label_20")
-        self.label_20.setMinimumSize(QSize(30, 30))
-        self.label_20.setMaximumSize(QSize(30, 30))
-        self.label_20.setPixmap(QPixmap(u":/icons/icons/menu_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg"))
-        self.label_20.setScaledContents(True)
-
-        self.horizontalLayout_2.addWidget(self.label_20)
-
-        self.label_9 = QLabel(self.frame_5)
-        self.label_9.setObjectName(u"label_9")
-        self.label_9.setFont(font2)
-        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.horizontalLayout_2.addWidget(self.label_9, 0, Qt.AlignmentFlag.AlignTop)
-
-
-        self.verticalLayout.addWidget(self.frame_5, 0, Qt.AlignmentFlag.AlignTop)
-
-        self.frame_6 = QFrame(self.frame)
-        self.frame_6.setObjectName(u"frame_6")
-        sizePolicy4.setHeightForWidth(self.frame_6.sizePolicy().hasHeightForWidth())
-        self.frame_6.setSizePolicy(sizePolicy4)
-        self.frame_6.setFrameShape(QFrame.Shape.Box)
-        self.frame_6.setFrameShadow(QFrame.Shadow.Sunken)
-        self.verticalLayout_6 = QVBoxLayout(self.frame_6)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.frame_13 = QFrame(self.frame_6)
-        self.frame_13.setObjectName(u"frame_13")
-        self.frame_13.setFrameShape(QFrame.Shape.NoFrame)
-        self.frame_13.setFrameShadow(QFrame.Shadow.Raised)
-        self.horizontalLayout_4 = QHBoxLayout(self.frame_13)
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.label_11 = QLabel(self.frame_13)
-        self.label_11.setObjectName(u"label_11")
-        self.label_11.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.horizontalLayout_4.addWidget(self.label_11)
-
-        self.comboBox = QComboBox(self.frame_13)
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.setObjectName(u"comboBox")
-
-        self.horizontalLayout_4.addWidget(self.comboBox)
-
-
-        self.verticalLayout_6.addWidget(self.frame_13)
-
-        self.pb_candles = QPushButton(self.frame_6)
-        self.pb_candles.setObjectName(u"pb_candles")
-
-        self.verticalLayout_6.addWidget(self.pb_candles)
-
-        self.pb_output = QPushButton(self.frame_6)
-        self.pb_output.setObjectName(u"pb_output")
-
-        self.verticalLayout_6.addWidget(self.pb_output)
-
-        self.pb_settings = QPushButton(self.frame_6)
-        self.pb_settings.setObjectName(u"pb_settings")
-
-        self.verticalLayout_6.addWidget(self.pb_settings)
-
-        self.pb_openpositions = QPushButton(self.frame_6)
-        self.pb_openpositions.setObjectName(u"pb_openpositions")
-
-        self.verticalLayout_6.addWidget(self.pb_openpositions)
-
-
-        self.verticalLayout.addWidget(self.frame_6)
 
 
         self.horizontalLayout.addWidget(self.frame)
@@ -720,6 +744,16 @@ class Ui_pyTrade_v2(object):
         self.pb_minimise.setText("")
         self.pb_fullscreen.setText("")
         self.pb_close.setText("")
+        self.label_20.setText("")
+        self.label_9.setText(QCoreApplication.translate("pyTrade_v2", u"Menu", None))
+        self.pb_output.setText(QCoreApplication.translate("pyTrade_v2", u"Output/Log", None))
+        self.pb_settings.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))
+        self.pb_candles.setText(QCoreApplication.translate("pyTrade_v2", u"Candles Chart", None))
+        self.pb_openpositions.setText(QCoreApplication.translate("pyTrade_v2", u"Settings", None))
+        self.label_11.setText(QCoreApplication.translate("pyTrade_v2", u"Primary Strategy", None))
+        self.comboBox.setItemText(0, QCoreApplication.translate("pyTrade_v2", u"EMA Pullback", None))
+        self.comboBox.setItemText(1, QCoreApplication.translate("pyTrade_v2", u"Breakout", None))
+
         self.label_19.setText("")
         self.label.setText(QCoreApplication.translate("pyTrade_v2", u"Account Summary", None))
         self.label_2.setText(QCoreApplication.translate("pyTrade_v2", u"Open Market:", None))
@@ -738,16 +772,6 @@ class Ui_pyTrade_v2(object):
         self.lb_ac_NAV.setText(QCoreApplication.translate("pyTrade_v2", u"..", None))
         self.lb_ac_unrealPL.setText(QCoreApplication.translate("pyTrade_v2", u"..", None))
         self.lb_ac_realPL.setText(QCoreApplication.translate("pyTrade_v2", u"..", None))
-        self.label_20.setText("")
-        self.label_9.setText(QCoreApplication.translate("pyTrade_v2", u"Menu", None))
-        self.label_11.setText(QCoreApplication.translate("pyTrade_v2", u"Strategy", None))
-        self.comboBox.setItemText(0, QCoreApplication.translate("pyTrade_v2", u"EMA Pullback", None))
-        self.comboBox.setItemText(1, QCoreApplication.translate("pyTrade_v2", u"Breakout", None))
-
-        self.pb_candles.setText(QCoreApplication.translate("pyTrade_v2", u"Candles Chart", None))
-        self.pb_output.setText(QCoreApplication.translate("pyTrade_v2", u"Output/Log", None))
-        self.pb_settings.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))
-        self.pb_openpositions.setText(QCoreApplication.translate("pyTrade_v2", u"Settings", None))
         self.label_21.setText("")
         self.label_14.setText(QCoreApplication.translate("pyTrade_v2", u"Dashboard", None))
         self.label_15.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))

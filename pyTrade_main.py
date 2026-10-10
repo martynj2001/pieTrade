@@ -126,7 +126,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
             self.update_output("Stopping.....")
             self.pb_Stop.setStyleSheet("background-color: rgb(224, 27, 36);")
             self.pb_Stop.setEnabled(False)
-            self.comboBox.setEnabled(False)
+            self.comboBox.setEnabled(True)
             self.lb_Markets.setVisible(False)
             self.lb_market.setVisible(True)
             self.lb_instr.setVisible(True)
