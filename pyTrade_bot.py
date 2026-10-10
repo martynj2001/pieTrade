@@ -13,6 +13,7 @@ from pyTrade_orders import OrderManager
 import pyTrade_market_session as market
 import pyTrade_trades_db as trades_db
 from pyTrade_trade_guards import TradeGuards
+from pyTrade_position_data import build_position_cards
 
 import logging
 import config
@@ -267,6 +268,7 @@ class pyTradeWorker(QObject):
     market_info = Signal(dict)
     market_open = Signal(bool)
     account = Signal(dict)
+    positions = Signal(list)
    
     def __init__(
         self,
@@ -283,6 +285,19 @@ class pyTradeWorker(QObject):
         self.trade_guards = (
             trade_guards if trade_guards is not None else TradeGuards()
         )
+
+    def _publish_positions(self, client, positions):
+        """Send the current open positions (with trade details) to the GUI."""
+        open_trades = oanda.open_trades(client)
+        if open_trades is None:
+            logging.getLogger("pyTrade_bot").error("API Call: Failed to get open trades for position cards")
+        self.positions.emit(build_position_cards(positions, open_trades))
+
+    def _sleep(self, seconds):
+        # Sleep in short slices so stop_bot() takes effect promptly
+        end = time.monotonic() + seconds
+        while self.running and time.monotonic() < end:
+            time.sleep(min(0.2, max(0, end - time.monotonic())))
 
     def stop_bot(self):
         self.running = False
@@ -363,7 +378,7 @@ class pyTradeWorker(QObject):
                 self.market_open.emit(False)
                 self.msg.emit("Markets Closed")
                 trade = False
-                time.sleep(1000) # Sleep for 1000 seconds before checking again
+                self._sleep(1000) # Sleep for 1000 seconds before checking again
                 #TODO: Add mechanisum to check time until the next market open session (if it is less than 1000 seconds then dont sleep for the full 1000 seconds)
             if trade:
                 # Get Account Summary & update GUI
@@ -371,7 +386,7 @@ class pyTradeWorker(QObject):
                 if summary is None:
                     self.msg.emit("Failed to get account summary")
                     oanda_logger.error("API call: Failed to get Account Summary (oanda.account_sumary())")
-                    time.sleep(10)
+                    self._sleep(10)
                     continue
                 self.account.emit(summary)
                 # Check for new 15 min candle
@@ -390,7 +405,7 @@ class pyTradeWorker(QObject):
                             self.msg.emit("Failed to get Candles")
                             oanda_logger.error("API Call: Failed to get Candles")
                             last_checked = current_time.minute
-                            time.sleep(10)
+                            self._sleep(10)
                             continue
                         
                         positions = oanda.open_positions(client)
@@ -398,7 +413,7 @@ class pyTradeWorker(QObject):
                             self.msg.emit("Failed to fetch open positions")
                             oanda_logger.error("API Call: Failed to get open positions")
                             last_checked = current_time.minute
-                            time.sleep(10)
+                            self._sleep(10)
                             continue
 
                         _sync_closed_trades(client, positions, logger)
@@ -447,6 +462,11 @@ class pyTradeWorker(QObject):
                                             logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             position_closed = True
                                 break
+
+                        if position_closed:
+                            positions = oanda.open_positions(client)
+                        if positions is not None:
+                            self._publish_positions(client, positions)
 
                         if not position_closed:  # No positions closed, check this candle for new entry signals
 
@@ -579,5 +599,5 @@ class pyTradeWorker(QObject):
                                             )
                             
                         last_checked = current_time.minute # Update to prevent re-triggering
-            time.sleep(10)
+            self._sleep(10)
         self.finished.emit()

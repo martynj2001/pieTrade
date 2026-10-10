@@ -110,6 +110,18 @@ def open_positions(client, retries=5):
             time.sleep(1)
     return None
 
+def open_trades(client, retries=5):
+    """Return all open trades (units, unrealised P/L, TP/SL orders), or None on failure."""
+    r = trades.OpenTrades(accountID=config.OANDA_ACCOUNT_ID)
+
+    for attempt in range(retries):
+        try:
+            return client.request(r)['trades']
+        except Exception as e:
+            logger.error(f'Request failed fetching open trades (attempt: {attempt + 1}): {e}')
+            time.sleep(1)
+    return None
+
 def close_position(client, instr, retries=5):
 
     close_position_log = logging.getLogger("close_position")

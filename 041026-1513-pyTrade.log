@@ -1,5 +1,0 @@
-2026-10-04 16:13:26,562 [INFO] pyTrade.TradesDB : Trade database ready: /home/martyn/pieTrade/Trades_db/pytrade.db
-2026-10-04 16:13:26,563 [INFO] pyTrade : Trade database ready at /home/martyn/pieTrade/Trades_db/pytrade.db
-2026-10-04 16:13:26,564 [INFO] pyTrade : pyTrade Bot started and Log created
-2026-10-04 16:13:26,565 [INFO] pyTrade : Running Strategy: EMA_TrendFollowing
-2026-10-04 16:13:26,565 [INFO] oandapyV20.oandapyV20 : setting up API-client for environment practice

@@ -26,7 +26,7 @@ class TrendFollowingEngine:
         ema_low_len: int = 20,
         atr_len: int = 14,
         atr_multiplier: float = 1.5,
-        rr_ratio: float = 2.0,
+        rr_ratio: float = 1.0, # was 2.0, lower to 1.0
         min_sl_dist: float = 0.05,
         trend_filter_k: float = 0.5,
         pullback_tolerance_k: float = 0.25,
@@ -39,7 +39,7 @@ class TrendFollowingEngine:
         :param ema_low_len: Lookback period for pullback EMA (default: 20)
         :param atr_len: Lookback period for ATR (default: 14)
         :param atr_multiplier: Multiplier for ATR-based stop loss (default: 1.5)
-        :param rr_ratio: Risk-to-reward ratio for take profit (default: 2.0)
+        :param rr_ratio: Risk-to-reward ratio for take profit (default: 1.0)
         :param min_sl_dist: Minimum stop loss distance in price units (default: 0.05)
         :param trend_filter_k: Multiplier for minimum price-to-EMA50 distance in ATRs (default: 0.5)
         :param pullback_tolerance_k: Multiplier for EMA20 proximity in ATRs (default: 0.25)
