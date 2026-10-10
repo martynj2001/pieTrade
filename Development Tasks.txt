@@ -1,7 +1,6 @@
 
 Development Pathway for pyTrade Bot
 
-TODO: 2. Add Open Positions onto GUI - Cards type list
 
 TODO: 3. Use FAST API & IONIC to develop a remote app that can monitor the Outputs from the Main app.
 
@@ -15,6 +14,5 @@ TODO: Develop AI Agent to speed up and broaden automation.
 
 TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
 
-TODO: Close all trades & positions when the Bot is stopped (this is will enable easier strategie swapping)
 
 
