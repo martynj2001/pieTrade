@@ -1,20 +1,30 @@
 
 Development Pathway for pyTrade Bot
 
-TODO: 1. Develop second Strategy - Breakout Strategy
 
-TODO: 2. Add Open Positions onto GUI - Cards type list
-
-TODO: 3. Use FAST API & IONIC to develop a remote app that can monitor the Outputs from the Main app.
+TODO: Use FAST API & IONIC to develop a remote app that can monitor the Outputs from the Main app.
 
 This will require a fixed IP address or dynamic DNS subscription (noIP.com) and settign up the Startlink router to work with it.
 
-TODO: 4. Add Logging output to GUI - use tabs on main page.
+TODO: Add Logging output to GUI - use tabs on main page.
 
-TODO: Automate strategy switching.
+TODO: Automate strategy switching. Current Strategy switching is automatic - IF the primairy Startegy (set by the GUI) does not find a
+entry signal then the secondary strategy is used.
 
 TODO: Develop AI Agent to speed up and broaden automation.
 
 TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
 
 TODO: Display time left in current Market/Time until Market closes/Time unstil swap market - display on GUI.
+
+-------------------------------------------------------------------------
+
+NOTES:
+
+Values stored in Db to aid Analysis:
+
+ema20, ema50, atr14, close/high/low and signal_timestamp come straight from the signal candle.
+adx is the M15 ADX(14) from the existing trade guards.
+
+trend_strength is defined as: |close − EMA50| / ATR. That is the same measure the trend filter uses.
+rejection_candle and pullback_detected are only filled for EMA Pullback trades.

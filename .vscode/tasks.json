@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run pyTrade",
+            "type": "shell",
+            "command": "python pyTrade_main.py",
+            "inAgents": true
+        }
+    ]
+}
