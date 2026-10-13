@@ -71,3 +71,7 @@ INFO:     127.0.0.1:39596 - "GET /api/trades?session=new_york&sort=entry_time&or
 INFO:     127.0.0.1:39596 - "GET /api/trades?session=sydney&sort=entry_time&order=desc&limit=25&offset=0 HTTP/1.1" 200 OK
 INFO:     127.0.0.1:39596 - "GET /api/trades?session=tokyo&sort=entry_time&order=desc&limit=25&offset=0 HTTP/1.1" 200 OK
 INFO:     127.0.0.1:39596 - "GET /api/trades?sort=entry_time&order=desc&limit=25&offset=0 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1368207]
