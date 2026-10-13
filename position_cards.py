@@ -4,7 +4,7 @@ Kept separate from ui_pyTrade_GUI_v2.py so Qt Designer regeneration never overwr
 """
 from typing import Any, Dict, List
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QObject, Qt, Slot
 from PySide6.QtWidgets import (QFrame, QLabel, QPushButton, QScrollArea,
                                QStackedLayout, QVBoxLayout, QWidget)
 
@@ -95,10 +95,14 @@ class PositionCard(QFrame):
         return row
 
 
-class PositionCardsPanel:
-    """Populates a Designer-made QScrollArea with one PositionCard per open position."""
+class PositionCardsPanel(QObject):
+    """Populates a Designer-made QScrollArea with one PositionCard per open position.
+
+    A QObject so signals from the worker thread are queued onto the GUI thread.
+    """
 
     def __init__(self, scroll_area: QScrollArea):
+        super().__init__(scroll_area)
         self._cards: Dict[str, PositionCard] = {}
 
         container = QWidget()
@@ -118,6 +122,7 @@ class PositionCardsPanel:
         scroll_area.setWidget(container)
         self._stack.setCurrentWidget(self._empty)
 
+    @Slot(list)
     def update_positions(self, positions: List[Dict[str, Any]]):
         """Refresh cards in place so expanded state survives each update."""
         seen = set()
