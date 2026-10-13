@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2ygKBWl.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2guiHYo.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -37,7 +37,7 @@ class Ui_pyTrade_v2(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame_12.sizePolicy().hasHeightForWidth())
         self.frame_12.setSizePolicy(sizePolicy)
-        self.frame_12.setMinimumSize(QSize(0, 30))
+        self.frame_12.setMinimumSize(QSize(0, 65))
         self.frame_12.setMaximumSize(QSize(16777215, 50))
         self.frame_12.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_12.setFrameShadow(QFrame.Shadow.Sunken)
@@ -55,20 +55,21 @@ class Ui_pyTrade_v2(object):
         self.frame_14.setFrameShadow(QFrame.Shadow.Plain)
         self.horizontalLayout_6 = QHBoxLayout(self.frame_14)
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.label_10 = QLabel(self.frame_14)
         self.label_10.setObjectName(u"label_10")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.label_10.sizePolicy().hasHeightForWidth())
         self.label_10.setSizePolicy(sizePolicy2)
-        self.label_10.setPixmap(QPixmap(u":/images/images/logo_gui.png"))
+        self.label_10.setPixmap(QPixmap(u":/images/images/logo_XL_trans.png"))
         self.label_10.setScaledContents(False)
 
         self.horizontalLayout_6.addWidget(self.label_10)
 
 
-        self.horizontalLayout_5.addWidget(self.frame_14)
+        self.horizontalLayout_5.addWidget(self.frame_14, 0, Qt.AlignmentFlag.AlignVCenter)
 
         self.frame_15 = QFrame(self.frame_12)
         self.frame_15.setObjectName(u"frame_15")
@@ -259,8 +260,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_13 = QFrame(self.frame_6)
         self.frame_13.setObjectName(u"frame_13")
-        sizePolicy2.setHeightForWidth(self.frame_13.sizePolicy().hasHeightForWidth())
-        self.frame_13.setSizePolicy(sizePolicy2)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.frame_13.sizePolicy().hasHeightForWidth())
+        self.frame_13.setSizePolicy(sizePolicy5)
         self.frame_13.setMinimumSize(QSize(0, 100))
         self.frame_13.setMaximumSize(QSize(16777215, 0))
         self.frame_13.setFrameShape(QFrame.Shape.NoFrame)
@@ -489,11 +493,9 @@ class Ui_pyTrade_v2(object):
 
         self.frame_19 = QFrame(self.frame_11)
         self.frame_19.setObjectName(u"frame_19")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.frame_19.sizePolicy().hasHeightForWidth())
-        self.frame_19.setSizePolicy(sizePolicy5)
+        sizePolicy2.setHeightForWidth(self.frame_19.sizePolicy().hasHeightForWidth())
+        self.frame_19.setSizePolicy(sizePolicy2)
+        self.frame_19.setStyleSheet(u"")
         self.frame_19.setFrameShape(QFrame.Shape.Box)
         self.frame_19.setFrameShadow(QFrame.Shadow.Sunken)
         self.verticalLayout_9 = QVBoxLayout(self.frame_19)
@@ -541,7 +543,7 @@ class Ui_pyTrade_v2(object):
         self.positions_cards.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 524, 542))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 524, 527))
         self.positions_cards.setWidget(self.scrollAreaWidgetContents)
 
         self.horizontalLayout_15.addWidget(self.positions_cards)
@@ -619,8 +621,8 @@ class Ui_pyTrade_v2(object):
         self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
         self.pte_logOutput = QPlainTextEdit(self.frame_28)
         self.pte_logOutput.setObjectName(u"pte_logOutput")
-        sizePolicy5.setHeightForWidth(self.pte_logOutput.sizePolicy().hasHeightForWidth())
-        self.pte_logOutput.setSizePolicy(sizePolicy5)
+        sizePolicy2.setHeightForWidth(self.pte_logOutput.sizePolicy().hasHeightForWidth())
+        self.pte_logOutput.setSizePolicy(sizePolicy2)
         self.pte_logOutput.setStyleSheet(u"background: transparent;\n"
 "border: line 1px;")
 
@@ -729,7 +731,7 @@ class Ui_pyTrade_v2(object):
 
         self.retranslateUi(pyTrade_v2)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(pyTrade_v2)

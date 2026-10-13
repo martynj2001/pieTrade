@@ -1,8 +1,9 @@
 <RCC>
   <qresource prefix="/images">
-    <file>images/icon_32.png</file>
     <file>images/Icon_trans.png</file>
+    <file>images/icon_32.png</file>
     <file>images/icon_64.png</file>
+    <file>images/logo_XL_trans.png</file>
     <file>images/icon_256.png</file>
     <file>images/Icon_mstr.png</file>
     <file>images/Icon_mstr.xcf</file>
