@@ -1,8 +1,34 @@
 <RCC>
   <qresource prefix="/images">
     <file>images/icon_32.png</file>
+    <file>images/Icon_trans.png</file>
     <file>images/icon_64.png</file>
     <file>images/icon_256.png</file>
+    <file>images/Icon_mstr.png</file>
+    <file>images/Icon_mstr.xcf</file>
     <file>images/logo_gui.png</file>
+    <file>images/logo_slim.xcf</file>
+    <file>images/logo_slim.png</file>
+    <file>images/logo_XL.jpeg</file>
+  </qresource>
+  <qresource prefix="icons">
+    <file>icons/dashboard_2_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/stop_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/stop_circle_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/play_arrow_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/play_circle_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/close_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/close_fullscreen.svg</file>
+    <file>icons/fullscreen.svg</file>
+    <file>icons/minimize_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/cancel_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/chess_pawn_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/chess_knight_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/currency_exchange_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/pending_actions_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/list_alt_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/history_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/finance_mode_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
+    <file>icons/menu_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg</file>
   </qresource>
 </RCC>

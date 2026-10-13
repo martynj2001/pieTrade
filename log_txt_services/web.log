@@ -1,0 +1,22 @@
+❯ Building...
+✔ Building...
+Initial chunk files | Names                  |  Raw size
+polyfills.js        | polyfills              |  90.20 kB | 
+main.js             | main                   |   3.62 kB | 
+chunk-VUJOFXKG.js   | -                      | 938 bytes | 
+styles.css          | styles                 | 156 bytes | 
+
+                    | Initial total          |  94.92 kB
+
+Lazy chunk files    | Names                  |  Raw size
+chunk-CB2SRJI3.js   | dashboard-component    |  15.26 kB | 
+chunk-P6NG3QME.js   | trade-list-component   |  10.56 kB | 
+chunk-ATINUNJS.js   | -                      |   6.70 kB | 
+chunk-KVARNFHC.js   | trade-detail-component |   6.66 kB | 
+chunk-34AKDFPK.js   | -                      |   2.17 kB | 
+
+Application bundle generation complete. [5.475 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4200/

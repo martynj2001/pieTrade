@@ -1,0 +1,17 @@
+INFO:     Started server process [1341251]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:38168 - "GET /api/meta HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38208 - "GET /api/analytics/by-instrument HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38176 - "GET /api/analytics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38172 - "GET /api/analytics/holding-time HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38206 - "GET /api/analytics/drawdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38168 - "GET /api/analytics/by-session HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38192 - "GET /api/analytics/exit-reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38208 - "GET /api/analytics/by-direction HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38176 - "GET /api/analytics/atr-ranges HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1341251]
