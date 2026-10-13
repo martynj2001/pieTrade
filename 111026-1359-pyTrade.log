@@ -1857,3 +1857,7 @@ Units: 120
 2026-10-13 17:30:16,874 [ERROR] oanda_api_handler : Request failed fetching open trades (attempt: 1): {"errorMessage":"Insufficient authorization to perform request."}
 2026-10-13 17:30:17,874 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/openTrades
 2026-10-13 17:30:18,697 [INFO] pyTrade : No trade signal from primary strategy (EMA_TrendFollowing) - moving to secondary strategy (Breakout)
+2026-10-13 17:45:03,170 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles
+2026-10-13 17:45:03,330 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/openPositions
+2026-10-13 17:45:03,952 [INFO] oandapyV20.oandapyV20 : performing request https://api-fxpractice.oanda.com/v3/accounts/101-004-39818354-001/openTrades
+2026-10-13 17:45:04,113 [INFO] pyTrade : No trade signal from primary strategy (EMA_TrendFollowing) - moving to secondary strategy (Breakout)
