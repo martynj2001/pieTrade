@@ -15,6 +15,8 @@ TODO: Develop AI Agent to speed up and broaden automation.
 
 TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
 
+TODO: Display time left in current Market/Time until Market closes/Time unstil swap market - display on GUI.
+
 -------------------------------------------------------------------------
 
 NOTES:
@@ -26,4 +28,3 @@ adx is the M15 ADX(14) from the existing trade guards.
 
 trend_strength is defined as: |close − EMA50| / ATR. That is the same measure the trend filter uses.
 rejection_candle and pullback_detected are only filled for EMA Pullback trades.
-

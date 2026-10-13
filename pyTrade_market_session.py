@@ -67,8 +67,8 @@ def get_open_session(now: datetime):
     # Should never happen!        
     return open_market
 
-def is_market_closing(now: datetime, market: str, mins_before_closing=10):
-
+def is_market_closing(now: datetime, market: str, mins_before_closing=15):
+# TODO: This may need to be 15mins to make sure trade are closed the last cycle be closing.
     hours = market_sessions[market]
     close_hour = hours["close"]
     close_dt = now.replace (hour=close_hour, minute=0, second=0, microsecond=0)
