@@ -47,7 +47,6 @@ class BreakoutEngine:
         self.min_sl_dist = min_sl_dist
 
         self.strategy_name = "Breakout"
-
         # Logger configured to integrate with pyTrade's logging hierarchy
         self.logger = logging.getLogger("pyTrade.BreakoutEngine")
         self.logger.info(
@@ -60,14 +59,12 @@ class BreakoutEngine:
         )
 
     def add_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
-
         """
         Calculate and append Donchian Channels, EMA, ATR, and ATR_SMA to the DataFrame.
 
         :param df: DataFrame containing OHLC candle data ('open', 'high', 'low', 'close')
         :return: DataFrame enriched with technical indicator columns
         """
-
         if df is None or df.empty:
             self.logger.error("add_indicators: Received empty or None DataFrame")
             return df
