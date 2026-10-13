@@ -1,2 +1,2 @@
 # Do not commit config as it contains OANDA keys
-/config.py
+/config.py*.log
