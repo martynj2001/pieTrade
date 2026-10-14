@@ -101,7 +101,10 @@ class pyTradeWorker(QObject):
         Returns True if the strategy produced a trade signal (whether or not it was
         accepted by the guards), False if its conditions were not met.
         """
-        signal, entry, stop, tp = strategy.get_signal(price)
+        signal, entry, stop, tp = strategy.get_signal(
+            price,
+            instrument=open_market["instrument"],
+        )
 
         if signal not in ("BUY", "SELL") or entry is None or stop is None or tp is None:
             return False

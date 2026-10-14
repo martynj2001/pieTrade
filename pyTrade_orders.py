@@ -8,6 +8,7 @@ for OANDA v20 orders used across all strategy engines (Trend Following, Breakout
 import logging
 from typing import Any, Dict, Optional, Union
 import config
+import pyTrade_instruments
 
 
 class OrderManager:
@@ -50,6 +51,7 @@ class OrderManager:
         account_balance: Optional[float] = None,
         risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
+        instrument: Optional[str] = None,
     ) -> int:
         """
         Calculate the number of units to trade using risk-based position sizing.
@@ -71,6 +73,7 @@ class OrderManager:
             e.g. 0.02 for 2%). Only used when account_balance is supplied.
         :param money_risk: Optional override for the fixed money risk amount,
             used only when account_balance is not supplied.
+        :param instrument: Optional instrument symbol for pair-specific minimum stop distance.
         :return: Number of units as a positive integer (direction applied during order formatting)
         """
         if account_balance is not None:
@@ -81,13 +84,19 @@ class OrderManager:
 
         sl_distance = abs(entry_price - stop_loss)
 
-        if sl_distance < self.min_sl_dist:
+        minimum_sl_dist = (
+            pyTrade_instruments.min_sl_dist(instrument)
+            if instrument is not None
+            else self.min_sl_dist
+        )
+
+        if sl_distance < minimum_sl_dist:
             self.logger.warning(
                 "Stop loss distance (%.5f) below minimum (%.5f); clamping to minimum",
                 sl_distance,
-                self.min_sl_dist,
+                minimum_sl_dist,
             )
-            sl_distance = self.min_sl_dist
+            sl_distance = minimum_sl_dist
 
         units = int(risk_amount / sl_distance)
         units = max(1, units)
@@ -189,6 +198,7 @@ class OrderManager:
             account_balance=account_balance,
             risk_percent=risk_percent,
             money_risk=money_risk,
+            instrument=instrument,
         )
 
         return self.build_order_data(
