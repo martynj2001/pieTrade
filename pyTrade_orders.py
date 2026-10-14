@@ -21,7 +21,7 @@ class OrderManager:
         money_risk: float = config.MONEY_RISK,
         risk_percent: float = config.RISK_PERCENT,
         min_sl_dist: float = 0.05,
-        price_precision: int = 3,
+        price_precision: Optional[int] = None,
         default_order_type: str = "MARKET",
     ) -> None:
         """
@@ -33,7 +33,7 @@ class OrderManager:
         :param risk_percent: Fraction of account balance to risk per trade
             (e.g. 0.02 = 2%). Used whenever an account balance is supplied.
         :param min_sl_dist: Minimum stop loss distance in price units to prevent oversized units
-        :param price_precision: Decimal precision for price fields (default: 3)
+        :param price_precision: Optional decimal precision for price fields
         :param default_order_type: OANDA order type (default: 'MARKET')
         """
         self.money_risk = money_risk
@@ -138,7 +138,15 @@ class OrderManager:
         :param price_precision: Decimal places for prices
         :return: OANDA order payload dictionary
         """
-        prec = price_precision if price_precision is not None else self.price_precision
+        prec = (
+            price_precision
+            if price_precision is not None
+            else (
+                self.price_precision
+                if self.price_precision is not None
+                else pyTrade_instruments.price_precision(instrument)
+            )
+        )
         ord_type = order_type if order_type is not None else self.default_order_type
 
         # Determine signed units
@@ -258,7 +266,7 @@ def order_data(
     instrument: str,
     units: int,
     trade_type: Optional[Union[str, bool]] = None,
-    price_precision: int = 3,
+    price_precision: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Build OANDA v20 order parameters payload.
