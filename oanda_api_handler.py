@@ -14,6 +14,7 @@ import oandapyV20.endpoints.orders as orders
 import oandapyV20.endpoints.positions as positions
 import oandapyV20.endpoints.accounts as accounts
 import oandapyV20.endpoints.trades as trades
+import oandapyV20.endpoints.pricing as pricing
 import time
 import logging
 
@@ -57,6 +58,47 @@ def get_Candles(client, inst, retries=5, granularity=None):
     df = pd.DataFrame(data)
     df["time"] = pd.to_datetime(df["time"])
     return df
+
+
+def get_quote_to_gbp(client, instrument, retries=5):
+    """Return the GBP value of one unit of an instrument's quote currency."""
+    try:
+        quote = instrument.split("_", 1)[1]
+    except (AttributeError, IndexError):
+        logger.error("Invalid instrument for GBP conversion: %s", instrument)
+        return None
+
+    if quote == "GBP":
+        return 1.0
+
+    conversion_instrument = f"GBP_{quote}"
+    request = pricing.PricingInfo(
+        accountID=config.OANDA_ACCOUNT_ID,
+        params={"instruments": conversion_instrument},
+    )
+
+    for attempt in range(retries):
+        try:
+            response = client.request(request)
+            price = response["prices"][0]
+            bid = float(price["bids"][0]["price"])
+            ask = float(price["asks"][0]["price"])
+            mid = (bid + ask) / 2
+            if mid <= 0:
+                raise ValueError(f"Invalid midpoint for {conversion_instrument}: {mid}")
+            return 1 / mid
+        except Exception as exc:
+            logger.error(
+                "GBP conversion request failed for %s (attempt: %d): %s",
+                conversion_instrument,
+                attempt + 1,
+                exc,
+            )
+            if attempt < retries - 1:
+                time.sleep(1)
+
+    return None
+
 
 # Function: Place Order
 def place_order(client, data, retries=5):

@@ -52,6 +52,7 @@ class OrderManager:
         risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
         instrument: Optional[str] = None,
+        quote_to_gbp: float = 1.0,
     ) -> int:
         """
         Calculate the number of units to trade using risk-based position sizing.
@@ -74,6 +75,7 @@ class OrderManager:
         :param money_risk: Optional override for the fixed money risk amount,
             used only when account_balance is not supplied.
         :param instrument: Optional instrument symbol for pair-specific minimum stop distance.
+        :param quote_to_gbp: Conversion rate from one quote-currency unit to GBP.
         :return: Number of units as a positive integer (direction applied during order formatting)
         """
         if account_balance is not None:
@@ -98,7 +100,7 @@ class OrderManager:
             )
             sl_distance = minimum_sl_dist
 
-        units = int(risk_amount / sl_distance)
+        units = int(risk_amount / (sl_distance * quote_to_gbp))
         units = max(1, units)
 
         self.logger.debug(
@@ -174,6 +176,7 @@ class OrderManager:
         risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
         order_type: Optional[str] = None,
+        quote_to_gbp: float = 1.0,
     ) -> Dict[str, Any]:
         """
         Helper method to calculate units and generate the complete OANDA order payload.
@@ -189,6 +192,7 @@ class OrderManager:
         :param money_risk: Fixed risk capital override, used only when
             account_balance is not supplied
         :param order_type: Order type override
+        :param quote_to_gbp: Conversion rate from one quote-currency unit to GBP.
         :return: OANDA order payload dictionary
         """
         units = self.calculate_units(
@@ -199,6 +203,7 @@ class OrderManager:
             risk_percent=risk_percent,
             money_risk=money_risk,
             instrument=instrument,
+            quote_to_gbp=quote_to_gbp,
         )
 
         return self.build_order_data(
