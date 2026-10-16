@@ -278,15 +278,19 @@ class pyTradeWorker(QObject):
         oanda_logger.addFilter(OandaInfoFilter())
         
         # ----------------------------------------------------------------------------------
+        # Change the version after every major modification, change or update 
+        self.msg.emit("pyTrade version 1.0 last modified 16 Oct 2026")
+        logger.info("pyTrade version 1.0 last modified 16 Oct 2026")
+
+        self.msg.emit("pyTrade Bot started and Log created.")
+        logger.info("pyTrade Bot started and Log created")
 
         try:
             database_path = trades_db.create_database()
             logger.info("Trade database ready at %s", database_path)
+            self.msg.emit(f"Trade database ready at {database_path}")
         except (OSError, sqlite3.Error):
                 logger.exception("Could not initialize the local trade database")
-
-        self.msg.emit("pyTrade Bot started and Log created.")
-        logger.info("pyTrade Bot started and Log created")
 
         self.msg.emit(f"Primary Strategy: {self.strategy_primary.strategy_name}")
         logger.info("Primary Strategy: %s", self.strategy_primary.strategy_name)
