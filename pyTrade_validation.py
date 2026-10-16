@@ -38,6 +38,8 @@ class Validation:
         enable_time_check: bool = True,
         enable_session_check: bool = True,
         enable_breakout_checks: bool = True,
+        enable_failed_retest: bool = False,
+        enable_momentum_loss: bool = False,
     ) -> None:
         """
         Initialize the Validation engine.
@@ -54,6 +56,8 @@ class Validation:
         :param enable_time_check: Enable trade age duration check (4 hours)
         :param enable_session_check: Enable session boundary / closing check
         :param enable_breakout_checks: Enable breakout-specific validation rules
+        :param enable_failed_retest: Enable failed retest validation
+        :param enable_momentum_loss: Enable momentum loss validation
         """
         self.strategy_type = strategy_type.lower()
         self.max_trade_hours = max_trade_hours
@@ -68,6 +72,9 @@ class Validation:
         self.enable_time_check = enable_time_check
         self.enable_session_check = enable_session_check
         self.enable_breakout_checks = enable_breakout_checks
+        # TODO: Add GUI settings to toggle these validation flags.
+        self.enable_failed_retest = enable_failed_retest
+        self.enable_momentum_loss = enable_momentum_loss
 
         self.logger = logging.getLogger("pyTrade.Validation")
         self.logger.info(
@@ -709,15 +716,17 @@ class Validation:
             if not is_valid:
                 return {"instrument": instrument, "reason": reason, "validity": False}
 
-            # 2f. Failed retest check (Closes beyond breakout level)
-            is_valid, reason = self.check_failed_retest(pos, candle, df)
-            if not is_valid:
-                return {"instrument": instrument, "reason": reason, "validity": False}
+            if self.enable_failed_retest:
+                # 2f. Failed retest check (Closes beyond breakout level)
+                is_valid, reason = self.check_failed_retest(pos, candle, df)
+                if not is_valid:
+                    return {"instrument": instrument, "reason": reason, "validity": False}
 
-            # 2g. Momentum loss check (ATR drop > 20% from entry)
-            is_valid, reason = self.check_momentum_loss(pos, candle, df)
-            if not is_valid:
-                return {"instrument": instrument, "reason": reason, "validity": False}
+            if self.enable_momentum_loss:
+                # 2g. Momentum loss check (ATR drop > 20% from entry)
+                is_valid, reason = self.check_momentum_loss(pos, candle, df)
+                if not is_valid:
+                    return {"instrument": instrument, "reason": reason, "validity": False}
 
         if run_trend and self.enable_trend_check:
             # EMA Trend Invalidation (EMA20 vs EMA50 flip)
@@ -780,4 +789,3 @@ def positions_data(position: Dict[str, Any]) -> Dict[str, Any]:
     :return: Normalized position dictionary
     """
     return _default_validator.extract_position_data(position)
-

@@ -101,7 +101,10 @@ class pyTradeWorker(QObject):
         Returns True if the strategy produced a trade signal (whether or not it was
         accepted by the guards), False if its conditions were not met.
         """
-        signal, entry, stop, tp = strategy.get_signal(price)
+        signal, entry, stop, tp = strategy.get_signal(
+            price,
+            instrument=open_market["instrument"],
+        )
 
         if signal not in ("BUY", "SELL") or entry is None or stop is None or tp is None:
             return False
@@ -178,6 +181,21 @@ class pyTradeWorker(QObject):
                     "Trade signal rejected by qualification guards"
                 )
             else:
+                quote_to_gbp = oanda.get_quote_to_gbp(
+                    client,
+                    open_market["instrument"],
+                )
+                if quote_to_gbp is None:
+                    self.msg.emit(
+                        "Failed to get GBP conversion rate; entry rejected"
+                    )
+                    oanda_logger.error(
+                        "Could not retrieve GBP conversion rate for %s; "
+                        "rejecting signal",
+                        open_market["instrument"],
+                    )
+                    return True
+
                 order = self.order_manager.create_order_params(
                     instrument=open_market["instrument"],
                     signal=signal,
@@ -185,6 +203,7 @@ class pyTradeWorker(QObject):
                     stop_loss=stop,
                     take_profit=tp,
                     account_balance=summary["balance"],
+                    quote_to_gbp=quote_to_gbp,
                 )
                 order_res = oanda.place_order(client, order)
 

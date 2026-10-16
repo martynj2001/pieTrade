@@ -8,6 +8,7 @@ for OANDA v20 orders used across all strategy engines (Trend Following, Breakout
 import logging
 from typing import Any, Dict, Optional, Union
 import config
+import pyTrade_instruments
 
 
 class OrderManager:
@@ -20,7 +21,7 @@ class OrderManager:
         money_risk: float = config.MONEY_RISK,
         risk_percent: float = config.RISK_PERCENT,
         min_sl_dist: float = 0.05,
-        price_precision: int = 3,
+        price_precision: Optional[int] = None,
         default_order_type: str = "MARKET",
     ) -> None:
         """
@@ -32,7 +33,7 @@ class OrderManager:
         :param risk_percent: Fraction of account balance to risk per trade
             (e.g. 0.02 = 2%). Used whenever an account balance is supplied.
         :param min_sl_dist: Minimum stop loss distance in price units to prevent oversized units
-        :param price_precision: Decimal precision for price fields (default: 3)
+        :param price_precision: Optional decimal precision for price fields
         :param default_order_type: OANDA order type (default: 'MARKET')
         """
         self.money_risk = money_risk
@@ -50,6 +51,8 @@ class OrderManager:
         account_balance: Optional[float] = None,
         risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
+        instrument: Optional[str] = None,
+        quote_to_gbp: float = 1.0,
     ) -> int:
         """
         Calculate the number of units to trade using risk-based position sizing.
@@ -71,6 +74,8 @@ class OrderManager:
             e.g. 0.02 for 2%). Only used when account_balance is supplied.
         :param money_risk: Optional override for the fixed money risk amount,
             used only when account_balance is not supplied.
+        :param instrument: Optional instrument symbol for pair-specific minimum stop distance.
+        :param quote_to_gbp: Conversion rate from one quote-currency unit to GBP.
         :return: Number of units as a positive integer (direction applied during order formatting)
         """
         if account_balance is not None:
@@ -81,15 +86,21 @@ class OrderManager:
 
         sl_distance = abs(entry_price - stop_loss)
 
-        if sl_distance < self.min_sl_dist:
+        minimum_sl_dist = (
+            pyTrade_instruments.min_sl_dist(instrument)
+            if instrument is not None
+            else self.min_sl_dist
+        )
+
+        if sl_distance < minimum_sl_dist:
             self.logger.warning(
                 "Stop loss distance (%.5f) below minimum (%.5f); clamping to minimum",
                 sl_distance,
-                self.min_sl_dist,
+                minimum_sl_dist,
             )
-            sl_distance = self.min_sl_dist
+            sl_distance = minimum_sl_dist
 
-        units = int(risk_amount / sl_distance)
+        units = int(risk_amount / (sl_distance * quote_to_gbp))
         units = max(1, units)
 
         self.logger.debug(
@@ -127,7 +138,15 @@ class OrderManager:
         :param price_precision: Decimal places for prices
         :return: OANDA order payload dictionary
         """
-        prec = price_precision if price_precision is not None else self.price_precision
+        prec = (
+            price_precision
+            if price_precision is not None
+            else (
+                self.price_precision
+                if self.price_precision is not None
+                else pyTrade_instruments.price_precision(instrument)
+            )
+        )
         ord_type = order_type if order_type is not None else self.default_order_type
 
         # Determine signed units
@@ -165,6 +184,7 @@ class OrderManager:
         risk_percent: Optional[float] = None,
         money_risk: Optional[float] = None,
         order_type: Optional[str] = None,
+        quote_to_gbp: float = 1.0,
     ) -> Dict[str, Any]:
         """
         Helper method to calculate units and generate the complete OANDA order payload.
@@ -180,6 +200,7 @@ class OrderManager:
         :param money_risk: Fixed risk capital override, used only when
             account_balance is not supplied
         :param order_type: Order type override
+        :param quote_to_gbp: Conversion rate from one quote-currency unit to GBP.
         :return: OANDA order payload dictionary
         """
         units = self.calculate_units(
@@ -189,6 +210,8 @@ class OrderManager:
             account_balance=account_balance,
             risk_percent=risk_percent,
             money_risk=money_risk,
+            instrument=instrument,
+            quote_to_gbp=quote_to_gbp,
         )
 
         return self.build_order_data(
@@ -243,7 +266,7 @@ def order_data(
     instrument: str,
     units: int,
     trade_type: Optional[Union[str, bool]] = None,
-    price_precision: int = 3,
+    price_precision: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Build OANDA v20 order parameters payload.

@@ -13,6 +13,7 @@ import logging
 from typing import Optional, Tuple
 import pandas as pd
 import pandas_ta_classic as ta
+import pyTrade_instruments
 
 
 class TrendFollowingEngine:
@@ -224,16 +225,28 @@ class TrendFollowingEngine:
         self.logger.debug("No pullback trend signal triggered on current candle")
         return "NONE"
 
-    def calculate_stop(self, entry: float, atr: float, signal: str = "BUY") -> float:
+    def calculate_stop(
+        self,
+        entry: float,
+        atr: float,
+        signal: str = "BUY",
+        instrument: Optional[str] = None,
+    ) -> float:
         """
         Calculate ATR-based stop loss level.
 
         :param entry: Entry price
         :param atr: ATR value
         :param signal: 'BUY' or 'SELL'
+        :param instrument: Optional instrument symbol for pair-specific minimum stop distance
         :return: Stop loss price
         """
-        sl_distance = max(atr * self.atr_multiplier, self.min_sl_dist)
+        minimum_sl_dist = (
+            pyTrade_instruments.min_sl_dist(instrument)
+            if instrument is not None
+            else self.min_sl_dist
+        )
+        sl_distance = max(atr * self.atr_multiplier, minimum_sl_dist)
 
         if signal.upper() == "BUY":
             stop_price = entry - sl_distance
@@ -256,6 +269,7 @@ class TrendFollowingEngine:
         atr: float,
         signal: str = "BUY",
         stop: Optional[float] = None,
+        instrument: Optional[str] = None,
     ) -> float:
         """
         Calculate take profit level based on risk-to-reward ratio.
@@ -264,12 +278,18 @@ class TrendFollowingEngine:
         :param atr: ATR value
         :param signal: 'BUY' or 'SELL'
         :param stop: Optional stop loss price to calculate exact risk
+        :param instrument: Optional instrument symbol for pair-specific minimum stop distance
         :return: Take profit price level
         """
         if stop is not None:
             risk = abs(entry - stop)
         else:
-            risk = max(atr * self.atr_multiplier, self.min_sl_dist)
+            minimum_sl_dist = (
+                pyTrade_instruments.min_sl_dist(instrument)
+                if instrument is not None
+                else self.min_sl_dist
+            )
+            risk = max(atr * self.atr_multiplier, minimum_sl_dist)
 
         tp_distance = risk * self.rr_ratio
 
@@ -289,13 +309,14 @@ class TrendFollowingEngine:
         return tp_price
 
     def get_signal(
-        self, df: pd.DataFrame
+        self, df: pd.DataFrame, instrument: Optional[str] = None
     ) -> Tuple[str, Optional[float], Optional[float], Optional[float]]:
         """
         Main strategy entry point. Computes indicators, evaluates pullback conditions,
         and returns trading signal with entry, stop loss, and take profit levels.
 
         :param df: DataFrame containing OHLC candle data
+        :param instrument: Optional instrument symbol for pair-specific risk levels
         :return: Tuple of (signal, entry, stop, tp)
                  signal: 'BUY', 'SELL', or 'NONE'
         """
@@ -318,8 +339,19 @@ class TrendFollowingEngine:
         atr_col = f"ATR_{self.atr_len}"
         atr_val = float(last_row[atr_col]) if atr_col in last_row else 0.0
 
-        stop = self.calculate_stop(entry=entry, atr=atr_val, signal=signal)
-        tp = self.calculate_takeprofit(entry=entry, atr=atr_val, signal=signal, stop=stop)
+        stop = self.calculate_stop(
+            entry=entry,
+            atr=atr_val,
+            signal=signal,
+            instrument=instrument,
+        )
+        tp = self.calculate_takeprofit(
+            entry=entry,
+            atr=atr_val,
+            signal=signal,
+            stop=stop,
+            instrument=instrument,
+        )
 
         self.logger.info(
             "Trend Signal Generated: %s | Entry: %.5f | Stop Loss: %.5f | Take Profit: %.5f",

@@ -1,0 +1,43 @@
+The cause: Copilot has different session types, and some of them (the “Background” or CLI-style agents) automatically create a worktree and an agents/... branch. The “Local” session type edits the folder you have open. I can’t see your VS Code version, so check the menu names below against what you see.
+
+One-time setup
+
+In your main folder, open the Copilot Chat panel. Next to the chat input, find the session type picker. Choose Local (sometimes shown as “Agent” mode in the editor), not “Background”, “Copilot CLI” or “Cloud”.
+Open Settings (Ctrl+,) and search for worktree. If you see an option for agents or background sessions to use worktrees or isolation, turn it off. The exact name varies by version, so I can’t give you a precise setting.
+Leave your folder on the feature branch. Local sessions commit to whatever branch is checked out.
+
+Before each Copilot session (30 seconds)
+
+In the VS Code terminal, run:
+
+git branch --show-current
+git status
+The branch should be feature/pip-aware-sizing.
+git status should be clean, so run git commit first if it isn’t. A clean start makes it easy to see what Copilot changed.
+
+During the session
+
+Open the Source Control panel (Ctrl+Shift+G) and click the branch name in the bottom-left. It should still say your feature branch.
+Review Copilot’s edits with the diff view before you accept them.
+
+After each session
+
+git branch --show-current
+git worktree list
+git log --oneline -3
+If git worktree list shows only one line (your folder), Copilot worked in place and there’s nothing to merge.
+If it shows new agents/... lines, the wrong session type was used. Merge that branch with git merge <branch-name>, then remove it with git worktree remove <path> followed by git branch -d <branch-name>.
+
+Safety net
+
+Add this line to the start of every prompt, in case Copilot decides to branch:
+
+Work in the current folder and branch. Do not create new branches or worktrees.
+
+If you have a .github/copilot-instructions.md file, put that sentence in it once and Copilot will see it every session.
+
+Check that the right code runs
+
+Before starting the bot, run git log -1 --oneline in the folder you launch from. The commit shown should be your latest.
+
+If the session picker doesn’t show a “Local” option, tell me your VS Code version and what the picker lists, and I’ll narrow it down.
