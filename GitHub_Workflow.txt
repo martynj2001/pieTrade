@@ -1,0 +1,112 @@
+PYTRADE: COPILOT + GIT WORKFLOW (VS Code)
+==========================================
+Keep this file in the repo root. Run all commands in the VS Code
+terminal (Ctrl+`) with /home/martyn/pieTrade open as the folder.
+
+KEY IDEAS
+- A branch is not a folder. Your folder shows ONE branch at a time.
+- A worktree is an extra folder showing a different branch.
+  Copilot "Background"/"CLI" sessions create these (agents/... branches).
+  Avoid them. Use a LOCAL session so edits happen in your open folder.
+- A pull request (PR) is only the checkpoint before merging into main.
+  You do not need a PR to test code. Test on the branch first.
+
+
+1. START OF EVERY COPILOT SESSION
+---------------------------------
+  git branch --show-current     -> must show your feature branch
+  git status                    -> must be clean (commit first if not)
+  git worktree list             -> should show ONE line only
+
+In Copilot Chat:
+  - Start a NEW chat for each task.
+  - Set the session type to LOCAL (not Background / CLI / Cloud).
+  - Use Agent mode. Attach only the files needed (#file:name.py).
+  - First line of each prompt (safety net):
+      Work in the current folder and branch. Do not create new
+      branches or worktrees.
+
+
+2. DURING THE SESSION
+---------------------
+  - Check the branch name (bottom-left of VS Code) is still correct.
+  - Review Copilot's edits in the diff view before accepting.
+  - Source Control panel (Ctrl+Shift+G): stage and commit small steps.
+
+
+3. END OF EVERY SESSION
+-----------------------
+  git status
+  git log --oneline -3
+  git worktree list
+  - Only ONE worktree line = Copilot worked in place. Done.
+  - Extra agents/... lines = wrong session type. Fix:
+      git merge agents/<name>
+      git worktree remove <path>
+      git branch -d agents/<name>
+  git push                      -> back up the branch on GitHub
+
+
+4. TEST THE BRANCH (never test on the live account)
+---------------------------------------------------
+  - Use the OANDA DEMO key in config.py.
+  - Set a test database so live trades are untouched:
+      export PYTRADE_DB=/home/martyn/pieTrade_test.db
+  - Confirm you are running the newest code:
+      git branch --show-current
+      git log -1 --oneline
+
+
+5. PULL REQUEST: MERGE INTO MAIN
+--------------------------------
+Push first (commits are only local until you do):
+  git push -u origin <branch-name>
+
+VS Code method (GitHub Pull Requests extension):
+  1. Source Control panel > Create Pull Request.
+  2. Base = main, Compare = your branch. Add a title. Create.
+  3. GitHub sidebar > your PR > Files Changed. Review each diff.
+  4. Check NO config.py, API keys, .db or .log files are listed.
+  5. Click Merge Pull Request (Create Merge Commit or Squash).
+
+CLI method (GitHub CLI):
+  gh pr create --base main --head <branch-name> --title "..." --body "..."
+  gh pr diff --name-only        (check for secrets/db/log files)
+  gh pr diff                    (review changes)
+  gh pr merge --merge --delete-branch
+
+
+6. AFTER MERGING
+----------------
+  git switch main
+  git pull
+  git log -3 --oneline          (your changes should be at the top)
+  git branch -d <branch-name>
+  git switch -c <next-branch>   (fresh branch for the next feature)
+
+Your live bot only changes when main is pulled in the folder it
+runs from. Keep live config.py and the live database there.
+
+
+7. COMMON PROBLEMS
+------------------
+"fatal: not a git repository"
+  You are in the wrong folder. cd /home/martyn/pieTrade
+
+Code not showing in my folder
+  git branch --show-current. You may be on main, or Copilot
+  committed in a worktree. Check: git worktree list
+
+Create PR button missing
+  Branch not pushed yet: git push -u origin <branch-name>
+
+Merge conflict
+  git switch <branch-name>
+  git merge main
+  Fix the marked files, then: git add . && git commit && git push
+
+Worktree is missing config.py / resources_rc.py / venv
+  These are git-ignored. Copy them across, or avoid worktrees.
+
+Never edit the same branch in two folders at once.
+Never commit to main directly. Never commit API keys.
