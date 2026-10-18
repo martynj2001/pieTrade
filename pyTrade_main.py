@@ -9,6 +9,7 @@ from ui_pyTrade_GUI_v2 import Ui_pyTrade_v2
 import pyTrade_bot as pyt
 from position_cards import PositionCardsPanel
 from spinner_overlay import SpinnerOverlay
+from candle_chart import CandleChartPanel
 
 
 def apply_dark_theme(app):

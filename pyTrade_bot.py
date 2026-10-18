@@ -41,6 +41,7 @@ class pyTradeWorker(QObject):
     market_open = Signal(bool)
     account = Signal(dict)
     positions = Signal(list)
+    candles = Signal(str, object)
    
     def __init__(
         self,
@@ -96,8 +97,8 @@ class pyTradeWorker(QObject):
 
 
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
+       
         """Look for an entry signal on one strategy and place the order if the guards pass.
-
         Returns True if the strategy produced a trade signal (whether or not it was
         accepted by the guards), False if its conditions were not met.
         """
@@ -276,8 +277,8 @@ class pyTradeWorker(QObject):
         logger.addFilter(OandaInfoFilter())
         val_logger.addFilter(OandaInfoFilter())
         oanda_logger.addFilter(OandaInfoFilter())
-        
         # ----------------------------------------------------------------------------------
+
         # Change the version after every major modification, change or update 
         self.msg.emit("pyTrade version 1.0 last modified 16 Oct 2026")
         logger.info("pyTrade version 1.0 last modified 16 Oct 2026")
@@ -285,6 +286,7 @@ class pyTradeWorker(QObject):
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
 
+        
         try:
             database_path = trades_db.create_database()
             logger.info("Trade database ready at %s", database_path)
@@ -300,14 +302,17 @@ class pyTradeWorker(QObject):
         last_checked = None
         current_market = ""
         trade = False
+        update_candles = True
 
         # Open API connection
         client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
-        
+     
+                 
         while self.running: 
 
             current_time = datetime.now(timezone.utc)
             position_closed = False
+        
             # Get Open Market
             open_market = market.get_open_session(current_time)
             if open_market["market"] is not None:
@@ -348,11 +353,12 @@ class pyTradeWorker(QObject):
                 
                         self.msg.emit("Checking for trade signals")
 
-                        price = oanda.get_Candles(client, open_market["instrument"])
+                        price = oanda.get_Candles(client, open_market["instrument"]) 
 
                         if price is not None:
                             raw_price = price.copy()
                             price = self.strategy_primary.add_indicators(price)
+                            self.candles.emit(open_market["instrument"], price.copy()) 
                             self.msg.emit("New Candles recieved and indicators set")
                         else:
                             self.msg.emit("Failed to get Candles")
