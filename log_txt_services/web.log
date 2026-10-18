@@ -15,7 +15,7 @@ chunk-ATINUNJS.js   | -                      |   6.70 kB |
 chunk-KVARNFHC.js   | trade-detail-component |   6.66 kB | 
 chunk-34AKDFPK.js   | -                      |   2.17 kB | 
 
-Application bundle generation complete. [5.347 seconds]
+Application bundle generation complete. [5.386 seconds]
 
 Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
