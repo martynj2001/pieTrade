@@ -117,6 +117,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.worker.account.connect(self.update_account_info)
         self.worker.positions.connect(self.position_panel.update_positions)
         self.worker.candles.connect(self.candle_chart.update_candles)
+        self.worker.trade_levels.connect(self.candle_chart.update_trade_levels)
 
         self.thread.finished.connect(self._on_thread_finished)
         self.thread.start()

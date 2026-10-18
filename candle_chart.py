@@ -3,12 +3,12 @@
 Kept separate from ui_pyTrade_GUI_v2.py so Qt Designer regeneration never overwrites it.
 """
 import logging
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
-from PySide6.QtCore import QRectF
+from PySide6.QtCore import QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QPainter, QPen, QPicture
 from PySide6.QtWidgets import QStyleOptionGraphicsItem, QVBoxLayout, QWidget
 
@@ -90,6 +90,10 @@ class CandleChartPanel:
         self._candles = CandlestickItem()
         self._plot.addItem(self._candles)
 
+        self.instrument: Optional[str] = None
+        self.levels: List[Dict[str, Any]] = []
+        self.level_lines: Dict[Tuple[str, str], pg.InfiniteLine] = {}
+
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._plot)
@@ -109,6 +113,7 @@ class CandleChartPanel:
         spacing = xs[1] - xs[0] if len(xs) > 1 else 0
         width = 0.7 * spacing if spacing > 0 else 600.0
 
+        self.instrument = instrument
         self._candles.set_data(xs, df, width)
         self._plot.setTitle(instrument.replace("_", "/"), color=TEXT, size="12pt")
 
@@ -119,6 +124,57 @@ class CandleChartPanel:
         y_lo, y_hi = float(tail["low"].min()), float(tail["high"].max())
         pad = max((y_hi - y_lo) * 0.05, 1e-9)
         self._plot.setYRange(y_lo - pad, y_hi + pad, padding=0)
+        self._redraw_levels()
+
+    def update_trade_levels(self, levels: List[Dict[str, Any]]) -> None:
+        """Receive open-trade price levels from the worker and redraw them."""
+        self.levels = levels
+        self._redraw_levels()
+
+    def _redraw_levels(self) -> None:
+        """Draw entry/SL/TP InfiniteLines for open trades on the current instrument."""
+        wanted: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        if self.instrument is not None:
+            for level in self.levels:
+                if level.get("instrument") != self.instrument:
+                    continue
+                trade_id = str(level.get("id"))
+                specs = (
+                    ("entry", "entry_price", "#CCCCCC", Qt.PenStyle.DashLine,
+                     f"{level.get('direction')} entry"),
+                    ("sl", "stop_loss", RED, Qt.PenStyle.SolidLine, "SL"),
+                    ("tp", "take_profit", GREEN, Qt.PenStyle.SolidLine, "TP"),
+                )
+                for kind, key, colour, style, label in specs:
+                    price = level.get(key)
+                    if price is None:
+                        continue
+                    wanted[(trade_id, kind)] = {
+                        "price": float(price),
+                        "colour": colour,
+                        "style": style,
+                        "label": label,
+                    }
+
+        for key in list(self.level_lines):
+            if key not in wanted:
+                self._plot.removeItem(self.level_lines.pop(key))
+
+        for key, spec in wanted.items():
+            line = self.level_lines.get(key)
+            if line is not None:
+                line.setValue(spec["price"])
+                continue
+            line = pg.InfiniteLine(
+                angle=0,
+                pos=spec["price"],
+                movable=False,
+                pen=pg.mkPen(spec["colour"], width=1, style=spec["style"]),
+                label=spec["label"],
+                labelOpts={"position": 0.95, "color": spec["colour"]},
+            )
+            self.level_lines[key] = line
+            self._plot.addItem(line, ignoreBounds=True)
 
 
 if __name__ == "__main__":
@@ -151,6 +207,16 @@ if __name__ == "__main__":
     container.resize(1000, 600)
     panel = CandleChartPanel(container)
     panel.update_candles("EUR_USD", demo_df)
+
+    last_close = float(demo_df["close"].iloc[-1])
+    panel.update_trade_levels([
+        {"id": "1001", "instrument": "EUR_USD", "direction": "BUY",
+         "entry_price": last_close - 0.002, "stop_loss": last_close - 0.004,
+         "take_profit": last_close + 0.002},
+        {"id": "1002", "instrument": "EUR_USD", "direction": "SELL",
+         "entry_price": last_close + 0.003, "stop_loss": last_close + 0.005,
+         "take_profit": last_close + 0.001},
+    ])
     container.show()
 
     sys.exit(app.exec())

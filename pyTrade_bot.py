@@ -42,6 +42,7 @@ class pyTradeWorker(QObject):
     account = Signal(dict)
     positions = Signal(list)
     candles = Signal(str, object)
+    trade_levels = Signal(list)
    
     def __init__(
         self,
@@ -76,6 +77,26 @@ class pyTradeWorker(QObject):
         if open_trades is None:
             logging.getLogger("pyTrade_bot").error("API Call: Failed to get open trades for position cards")
         self.positions.emit(build_position_cards(positions, open_trades))
+
+    def _publish_trade_levels(self) -> None:
+        """Send all open-trade price levels (entry/SL/TP) to the GUI chart."""
+        logger = logging.getLogger("pyTrade")
+        try:
+            open_trades = trades_db.get_open_trades()
+        except (OSError, sqlite3.Error):
+            logger.exception("Could not read open trades for chart levels")
+            return
+        levels = []
+        for trade in open_trades:
+            levels.append({
+                "id": str(trade["trade_id"]),
+                "instrument": trade["instrument"],
+                "direction": trade["direction"],
+                "entry_price": float(trade["entry_price"]) if trade["entry_price"] is not None else None,
+                "stop_loss": float(trade["stop_loss"]) if trade["stop_loss"] is not None else None,
+                "take_profit": float(trade["take_profit"]) if trade["take_profit"] is not None else None,
+            })
+        self.trade_levels.emit(levels)
 
     def _sleep(self, seconds):
         # Sleep in short slices so stop_bot() takes effect promptly
@@ -232,6 +253,7 @@ class pyTradeWorker(QObject):
                         logger=logger,
                         signal_data=signal_data,
                     )
+                    self._publish_trade_levels()
                     self.msg.emit(
                         "Entry point detected & order placed: "
                         f'Instrument: {order["order"]["instrument"]} '
@@ -294,6 +316,8 @@ class pyTradeWorker(QObject):
         except (OSError, sqlite3.Error):
                 logger.exception("Could not initialize the local trade database")
 
+        self._publish_trade_levels()
+
         self.msg.emit(f"Primary Strategy: {self.strategy_primary.strategy_name}")
         logger.info("Primary Strategy: %s", self.strategy_primary.strategy_name)
         self.msg.emit(f"Secondary Strategy: {self.strategy_secondary.strategy_name}")
@@ -302,7 +326,6 @@ class pyTradeWorker(QObject):
         last_checked = None
         current_market = ""
         trade = False
-        update_candles = True
 
         # Open API connection
         client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
@@ -445,6 +468,7 @@ class pyTradeWorker(QObject):
                                                 validity["reason"],
                                                 logger,
                                             )
+                                            self._publish_trade_levels()
                                             self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             position_closed = True
@@ -478,6 +502,8 @@ class pyTradeWorker(QObject):
                                 else:
                                     self.msg.emit("Strategy conditions not met (primary and secondary)")
                             
+                        self._publish_trade_levels()
+
                         last_checked = current_time.minute # Update to prevent re-triggering
             self._sleep(10)
         self.finished.emit()
