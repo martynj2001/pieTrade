@@ -65,6 +65,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
             button.clicked.connect(lambda _=False, p=page: self.stackedWidget.setCurrentWidget(p))
 
         self.position_panel = PositionCardsPanel(self.positions_cards)
+        self.candle_chart = CandleChartPanel(self.candle_chart)
         self.spinner = SpinnerOverlay(self.centralwidget)
         self.log_spinner = SpinnerOverlay(self.pte_logOutput, diameter=40)
         self._closing = False
@@ -115,6 +116,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.worker.market_open.connect(self.update_market_open)
         self.worker.account.connect(self.update_account_info)
         self.worker.positions.connect(self.position_panel.update_positions)
+        self.worker.candles.connect(self.candle_chart.update_candles)
 
         self.thread.finished.connect(self._on_thread_finished)
         self.thread.start()

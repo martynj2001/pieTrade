@@ -845,7 +845,7 @@
              <item>
               <widget class="QStackedWidget" name="stackedWidget">
                <property name="currentIndex">
-                <number>2</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="pg_openpositions">
                 <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -965,7 +965,7 @@ background-position: center;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QFrame" name="frame_26">
+                  <widget class="QFrame" name="candle_chart">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                      <horstretch>0</horstretch>

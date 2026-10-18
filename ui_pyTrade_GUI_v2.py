@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2guiHYo.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2lHNJTO.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -572,17 +572,17 @@ class Ui_pyTrade_v2(object):
 
         self.verticalLayout_13.addWidget(self.frame_25)
 
-        self.frame_26 = QFrame(self.pg_candles)
-        self.frame_26.setObjectName(u"frame_26")
-        sizePolicy4.setHeightForWidth(self.frame_26.sizePolicy().hasHeightForWidth())
-        self.frame_26.setSizePolicy(sizePolicy4)
-        self.frame_26.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
+        self.candle_chart = QFrame(self.pg_candles)
+        self.candle_chart.setObjectName(u"candle_chart")
+        sizePolicy4.setHeightForWidth(self.candle_chart.sizePolicy().hasHeightForWidth())
+        self.candle_chart.setSizePolicy(sizePolicy4)
+        self.candle_chart.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
 "background-repeat: no-repeat;\n"
 "background-position: center;")
-        self.frame_26.setFrameShape(QFrame.Shape.NoFrame)
-        self.frame_26.setFrameShadow(QFrame.Shadow.Raised)
+        self.candle_chart.setFrameShape(QFrame.Shape.NoFrame)
+        self.candle_chart.setFrameShadow(QFrame.Shadow.Raised)
 
-        self.verticalLayout_13.addWidget(self.frame_26)
+        self.verticalLayout_13.addWidget(self.candle_chart)
 
         self.stackedWidget.addWidget(self.pg_candles)
         self.pg_output = QWidget()
@@ -731,7 +731,7 @@ class Ui_pyTrade_v2(object):
 
         self.retranslateUi(pyTrade_v2)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(pyTrade_v2)
