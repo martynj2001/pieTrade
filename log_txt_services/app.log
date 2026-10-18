@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/home/martyn/pieTrade/pyTrade_main.py", line 12, in <module>
-    from candle_chart import CandleChartPanel
-  File "/home/martyn/pieTrade/candle_chart.py", line 10, in <module>
-    import pyqtgraph as pg
-ModuleNotFoundError: No module named 'pyqtgraph'
