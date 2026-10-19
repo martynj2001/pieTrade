@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
-from PySide6.QtCore import QRectF, Qt
+from PySide6.QtCore import QObject, QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QPainter, QPen, QPicture
 from PySide6.QtWidgets import QStyleOptionGraphicsItem, QVBoxLayout, QWidget
 
@@ -75,10 +75,14 @@ class CandlestickItem(pg.GraphicsObject):
         return self._bounds
 
 
-class CandleChartPanel:
-    """Hosts a pyqtgraph candlestick chart inside a container widget. GUI thread only."""
+class CandleChartPanel(QObject):
+    """Hosts a pyqtgraph candlestick chart inside a container widget.
+
+    A QObject so signals from the worker thread are queued onto the GUI thread.
+    """
 
     def __init__(self, container: QWidget):
+        super().__init__(container)
         date_axis = pg.DateAxisItem(orientation="bottom", utcOffset=0)
         self._plot = pg.PlotWidget(axisItems={"bottom": date_axis}, background=BACKGROUND)
         self._plot.showGrid(x=True, y=True, alpha=0.2)
