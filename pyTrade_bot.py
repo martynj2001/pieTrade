@@ -281,15 +281,7 @@ class pyTradeWorker(QObject):
 
     def run_bot(self):
 
-        # Configure logging -----------------------------------------------------------------
-
-        logging.basicConfig(
-            filename=f"{datetime.now(timezone.utc).strftime('%d%m%y-%H%M')}-pyTrade.log",
-            level=logging.DEBUG if config.DEBUG_LOGGING else logging.INFO,
-            format="%(asctime)s [%(levelname)s] %(name)s : %(message)s",
-        )
-        logging.getLogger("urllib3").setLevel(logging.INFO)
-        logging.getLogger("oandapyV20.oandapyV20").setLevel(logging.INFO)
+        # Logging is configured by pyTrade_logging.setup_logging() at app startup ----------
 
         logger = logging.getLogger("pyTrade")
         val_logger = logging.getLogger("Validation")

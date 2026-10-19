@@ -1,3 +1,4 @@
+import logging
 import sys
 from PySide6 import QtWidgets as qtw
 from PySide6.QtCore import QThread, Qt, QTimer
@@ -11,6 +12,9 @@ import pyTrade_market_session as market
 from position_cards import PositionCardsPanel
 from spinner_overlay import SpinnerOverlay
 from candle_chart import CandleChartPanel
+from pyTrade_logging import setup_logging
+
+log = logging.getLogger("pyTrade.main")
 
 
 def apply_dark_theme(app):
@@ -100,6 +104,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
     def btn_Start_Clicked(self):
     
+        log.info("Start button clicked - starting bot")
         self.pb_Start.setStyleSheet("background-color: #4CE063; color: white;")
         self.pb_Stop.setStyleSheet(" ")
         self.pb_Start.setEnabled(False)
@@ -132,6 +137,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
     
     def btn_Stop_Clicked(self):
 
+        log.info("Stop button clicked")
         if self.started:
             self.update_output("Stopping.....")
             self.pb_Stop.setStyleSheet("background-color: rgb(224, 27, 36);")
@@ -162,6 +168,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
     def btn_Close_Clicked(self):
 
+        log.info("Close button clicked - shutting down")
         if self._closing:
             return
         self._closing = True
@@ -272,6 +279,9 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
 #Boiler plate - runs App
 if __name__ == "__main__":
+
+    setup_logging()
+    log.info("pyTrade GUI started")
 
     app = qtw.QApplication(sys.argv)
     apply_dark_theme(app)
