@@ -83,3 +83,15 @@ def is_market_closing(now: datetime, market: str, mins_before_closing=15):
 
     return timedelta(0) < time_to_close <= timedelta(minutes=mins_before_closing) 
 
+def next_open(now: datetime):
+    
+    """Return the next UTC datetime when any market session is open.
+    Walks forward one hour at a time (sessions start on the hour) and
+    asks get_open_session() if a market is open. Gives up after 8 days.
+    """
+    candidate = now.replace(minute=0, second=0, microsecond=0)
+    for _ in range(24 * 8):
+        candidate += timedelta(hours=1)
+        if get_open_session(candidate)["market"] is not None:
+            return candidate
+    return None

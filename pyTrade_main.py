@@ -1,12 +1,13 @@
 import sys
 from PySide6 import QtWidgets as qtw
-from PySide6.QtCore import QThread, Qt
+from PySide6.QtCore import QThread, Qt, QTimer
 from PySide6.QtGui import QColor, QIcon, QPalette
 import resources_rc # Contains GUI resources (images etc.)
 from datetime import datetime, timezone
 
 from ui_pyTrade_GUI_v2 import Ui_pyTrade_v2
 import pyTrade_bot as pyt
+import pyTrade_market_session as market
 from position_cards import PositionCardsPanel
 from spinner_overlay import SpinnerOverlay
 from candle_chart import CandleChartPanel
@@ -72,6 +73,11 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self._stopping = False
 
         self.lb_Markets.setVisible(False) # Close Markets Label
+        # Timer counting down to next open market.
+        self._next_open = None
+        self.countdown_timer = QTimer(self)
+        self.countdown_timer.setInterval(1000)   # 1 second
+        self.countdown_timer.timeout.connect(self._tick_countdown)
 
         self.stackedWidget.setCurrentWidget(self.pg_output)
         
@@ -131,6 +137,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
             self.pb_Stop.setStyleSheet("background-color: rgb(224, 27, 36);")
             self.pb_Stop.setEnabled(False)
             self.comboBox.setEnabled(True)
+            self.countdown_timer.stop()
             self.lb_Markets.setVisible(False)
             self.lb_market.setVisible(True)
             self.lb_instr.setVisible(True)
@@ -205,23 +212,19 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
     def update_market_open(self, is_open):
         if is_open:
+            self.countdown_timer.stop()
+            self.lb_Markets.setText("Markets Closed") # Reset for next time
             self.lb_market.setStyleSheet("color: #2ECC71;")
             self.lb_instr.setStyleSheet("color: #2ECC71;")
             self.lb_Markets.setVisible(False)
-            #self.lb_time.setVisible(False)
-            #self.lb_Title_1.setVisible(True)
-            #self.lb_title_2.setVisible(True)
-            #self.lb_market.setVisible(True)
-            #self.lb_instr.setVisible(True)
+            
         else:
             self.lb_market.setStyleSheet("color: rgb(224, 27, 36);")
             self.lb_instr.setStyleSheet("color: rgb(224, 27, 36);")
             self.lb_Markets.setVisible(True)
-            #self.lb_time.setVisible(True)
-            #self.lb_Title_1.setVisible(False)
-            #self.lb_title_2.setVisible(False)
-            #self.lb_market.setVisible(False)
-            #self.lb_instr.setVisible(False)
+            self._next_open = market.next_open(datetime.now(timezone.utc))
+            self._tick_countdown()          # show immediately, don't wait 1s
+            self.countdown_timer.start()
 
     def update_account_info(self, account_info):
 
@@ -251,6 +254,21 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.lb_ac_realPL.setText(str(account_info["pl"]))
         self.lb_ac_unrealPL.setText(str(account_info["unrealizedPL"]))
         self.lb_ac_balance.setText("£ " + str(account_info["balance"]))
+
+    def _tick_countdown(self):
+        if self._next_open is None:
+            return
+        secs = int((self._next_open - datetime.now(timezone.utc)).total_seconds())
+        if secs <= 0:
+            self.lb_Markets.setText("Markets opening...")
+            return
+        days, rem = divmod(secs, 86400)
+        hours, rem = divmod(rem, 3600)
+        mins, secs = divmod(rem, 60)
+        text = f"{hours:02}:{mins:02}:{secs:02}"
+        if days:
+            text = f"{days}d {text}"
+        self.lb_Markets.setText(f"Markets Closed - opens in {text}")
 
 #Boiler plate - runs App
 if __name__ == "__main__":

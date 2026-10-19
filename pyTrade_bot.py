@@ -302,8 +302,8 @@ class pyTradeWorker(QObject):
         # ----------------------------------------------------------------------------------
 
         # Change the version after every major modification, change or update 
-        self.msg.emit("pyTrade version 1.0 last modified 16 Oct 2026")
-        logger.info("pyTrade version 1.0 last modified 16 Oct 2026")
+        self.msg.emit("pyTrade version 1.1 last modified 19 Oct 2026")
+        logger.info("pyTrade version 1.1 last modified 19 Oct 2026")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
@@ -358,7 +358,8 @@ class pyTradeWorker(QObject):
                 self.market_open.emit(False)
                 self.msg.emit("Markets Closed")
                 trade = False
-                self._sleep(1000) # Sleep for 1000 seconds before checking again
+                wait = (market.next_open(current_time) - current_time).total_seconds()
+                self._sleep(min(1000, max(1, wait)))
                 #TODO: Add mechanisum to check time until the next market open session (if it is less than 1000 seconds then dont sleep for the full 1000 seconds)
             if trade:
                 # Get Account Summary & update GUI

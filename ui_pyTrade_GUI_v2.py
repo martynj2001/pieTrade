@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2lHNJTO.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2JuqgZk.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -25,7 +25,7 @@ class Ui_pyTrade_v2(object):
     def setupUi(self, pyTrade_v2):
         if not pyTrade_v2.objectName():
             pyTrade_v2.setObjectName(u"pyTrade_v2")
-        pyTrade_v2.resize(1072, 820)
+        pyTrade_v2.resize(1177, 820)
         self.centralwidget = QWidget(pyTrade_v2)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_7 = QVBoxLayout(self.centralwidget)
@@ -68,6 +68,17 @@ class Ui_pyTrade_v2(object):
 
         self.horizontalLayout_6.addWidget(self.label_10)
 
+        self.lb_Markets = QLabel(self.frame_14)
+        self.lb_Markets.setObjectName(u"lb_Markets")
+        self.lb_Markets.setMinimumSize(QSize(90, 0))
+        font = QFont()
+        font.setPointSize(16)
+        font.setBold(True)
+        self.lb_Markets.setFont(font)
+        self.lb_Markets.setStyleSheet(u"color: red;")
+
+        self.horizontalLayout_6.addWidget(self.lb_Markets)
+
 
         self.horizontalLayout_5.addWidget(self.frame_14, 0, Qt.AlignmentFlag.AlignVCenter)
 
@@ -83,17 +94,6 @@ class Ui_pyTrade_v2(object):
         self.frame_15.setFrameShadow(QFrame.Shadow.Plain)
         self.horizontalLayout_9 = QHBoxLayout(self.frame_15)
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.lb_Markets = QLabel(self.frame_15)
-        self.lb_Markets.setObjectName(u"lb_Markets")
-        self.lb_Markets.setMinimumSize(QSize(90, 0))
-        font = QFont()
-        font.setPointSize(16)
-        font.setBold(True)
-        self.lb_Markets.setFont(font)
-        self.lb_Markets.setStyleSheet(u"color: red;")
-
-        self.horizontalLayout_9.addWidget(self.lb_Markets)
-
 
         self.horizontalLayout_5.addWidget(self.frame_15)
 
@@ -359,7 +359,7 @@ class Ui_pyTrade_v2(object):
         self.frame_8.setObjectName(u"frame_8")
         sizePolicy3.setHeightForWidth(self.frame_8.sizePolicy().hasHeightForWidth())
         self.frame_8.setSizePolicy(sizePolicy3)
-        self.frame_8.setMinimumSize(QSize(65, 0))
+        self.frame_8.setMinimumSize(QSize(75, 0))
         self.frame_8.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_8.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_3 = QVBoxLayout(self.frame_8)
@@ -731,7 +731,7 @@ class Ui_pyTrade_v2(object):
 
         self.retranslateUi(pyTrade_v2)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(pyTrade_v2)
