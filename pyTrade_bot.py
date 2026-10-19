@@ -110,11 +110,15 @@ class pyTradeWorker(QObject):
     def on_set_strategy(self, strat):
 
         if strat == "EMA Pullback":
-            self.strategy_primary = TrendFollowingEngine()
-            self.strategy_secondary = BreakoutEngine()
+            primary_type, secondary_type = TrendFollowingEngine, BreakoutEngine
         else: # Breakout
-            self.strategy_primary = BreakoutEngine()
-            self.strategy_secondary = TrendFollowingEngine()
+            primary_type, secondary_type = BreakoutEngine, TrendFollowingEngine
+
+        # Reuse existing engines; only construct when the strategy actually changes
+        if not isinstance(self.strategy_primary, primary_type):
+            self.strategy_primary = primary_type()
+        if not isinstance(self.strategy_secondary, secondary_type):
+            self.strategy_secondary = secondary_type()
 
 
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):

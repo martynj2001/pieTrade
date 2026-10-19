@@ -15,10 +15,8 @@ chunk-ATINUNJS.js   | -                      |   6.70 kB |
 chunk-KVARNFHC.js   | trade-detail-component |   6.66 kB | 
 chunk-34AKDFPK.js   | -                      |   2.17 kB | 
 
-Application bundle generation complete. [5.676 seconds]
+Application bundle generation complete. [8.742 seconds]
 
 Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
-Watchpack Error (watcher): Error: ENOSPC: System limit for number of file watchers reached, watch '/home/martyn/pieTrade/web/src'
-Watchpack Error (watcher): Error: ENOSPC: System limit for number of file watchers reached, watch '/home/martyn/pieTrade/web/src'
   ➜  Local:   http://localhost:4200/
