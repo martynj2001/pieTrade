@@ -230,8 +230,22 @@ class pyTradeWorker(QObject):
                     take_profit=tp,
                     account_balance=summary["balance"],
                     quote_to_gbp=quote_to_gbp,
+                    margin_available=summary["marginAvailable"],
                 )
+                if order is None:
+                    self.msg.emit("Trade skipped: stop too tight for available margin")
+                    logger.warning(
+                        "Trade skipped: stop too tight for available margin on %s",
+                        open_market["instrument"],
+                    )
+                    return True
                 order_res = oanda.place_order(client, order)
+
+                if order_res is not None and "orderFillTransaction" not in order_res:
+                    reason = order_res.get("orderCancelTransaction", {}).get("reason", "UNKNOWN")
+                    self.msg.emit(f"Order NOT filled - cancelled by OANDA: {reason}")
+                    oanda_logger.error("Order NOT filled - cancelled by OANDA: %s", reason)
+                    return True
 
                 if order_res is not None:
                     try:
@@ -258,7 +272,7 @@ class pyTradeWorker(QObject):
                         signal_data=signal_data,
                     )
                     self._publish_trade_levels()
-                    self.msg.emit(
+                    message = (
                         "Entry point detected & order placed: "
                         f'Instrument: {order["order"]["instrument"]} '
                         f'Units: {order["order"]["units"]} '
@@ -266,20 +280,12 @@ class pyTradeWorker(QObject):
                         f'Take Profit: {order["order"]["takeProfitOnFill"]} '
                         f'Order No.: {order_res["orderCreateTransaction"]["id"]}'
                     )
-                    logger.info(
-                        "Entry point detected & order placed:\n"
-                        "Instrument: %s\nUnits: %s",
-                        order["order"]["instrument"],
-                        order["order"]["units"],
-                    )
+                    self.msg.emit(message)
+                    logger.info(message)
                 else:
-                    self.msg.emit(
-                        "Entry point detected - Order failed to place!"
-                    )
-                    oanda_logger.error(
-                        "API Call: Entry point detected - "
-                        "Order failed to place!"
-                    )
+                    message = "Entry point detected - Order failed to place!"
+                    self.msg.emit(message)
+                    oanda_logger.error(message)
         return True
 
 

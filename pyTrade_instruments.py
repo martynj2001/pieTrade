@@ -3,7 +3,7 @@ def pip_size(instr: str) -> float:
 
 
 def min_sl_dist(instr: str) -> float:
-    return 0.05 if instr.endswith("_JPY") else 0.0005
+    return 0.10 if instr.endswith("_JPY") else 0.0010
 
 
 def price_precision(instr: str) -> int:

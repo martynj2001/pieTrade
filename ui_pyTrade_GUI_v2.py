@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2JuqgZk.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2DPJlZL.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -308,10 +308,28 @@ class Ui_pyTrade_v2(object):
 
         self.label = QLabel(self.frame_3)
         self.label.setObjectName(u"label")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy6)
+        self.label.setMaximumSize(QSize(450, 16777215))
         self.label.setFont(font2)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.horizontalLayout_14.addWidget(self.label)
+
+        self.pushButton = QPushButton(self.frame_3)
+        self.pushButton.setObjectName(u"pushButton")
+        sizePolicy5.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
+        self.pushButton.setSizePolicy(sizePolicy5)
+        self.pushButton.setMinimumSize(QSize(85, 0))
+        self.pushButton.setMaximumSize(QSize(85, 16777215))
+        icon5 = QIcon()
+        icon5.addFile(u":/icons/icons/currency_exchange_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.pushButton.setIcon(icon5)
+
+        self.horizontalLayout_14.addWidget(self.pushButton)
 
 
         self.verticalLayout.addWidget(self.frame_3, 0, Qt.AlignmentFlag.AlignTop)
@@ -673,11 +691,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_20 = QFrame(self.frame_11)
         self.frame_20.setObjectName(u"frame_20")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-        sizePolicy6.setHorizontalStretch(0)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
-        self.frame_20.setSizePolicy(sizePolicy6)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
+        self.frame_20.setSizePolicy(sizePolicy7)
         self.frame_20.setMaximumSize(QSize(16777215, 30))
         self.frame_20.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_20.setFrameShadow(QFrame.Shadow.Raised)
@@ -758,6 +776,7 @@ class Ui_pyTrade_v2(object):
 
         self.label_19.setText("")
         self.label.setText(QCoreApplication.translate("pyTrade_v2", u"Account Summary", None))
+        self.pushButton.setText(QCoreApplication.translate("pyTrade_v2", u"Refresh", None))
         self.label_2.setText(QCoreApplication.translate("pyTrade_v2", u"Open Market:", None))
         self.label_3.setText(QCoreApplication.translate("pyTrade_v2", u"Current Instrument:", None))
         self.label_5.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))

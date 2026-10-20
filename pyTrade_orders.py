@@ -41,6 +41,9 @@ class OrderManager:
         self.min_sl_dist = min_sl_dist
         self.price_precision = price_precision
         self.default_order_type = default_order_type
+        self.leverage = 30
+        self.margin_safety = 0.5
+        self.min_risk_fraction = 0.5
         self.logger = logging.getLogger("pyTrade.OrderManager")
 
     def calculate_units(
@@ -53,6 +56,7 @@ class OrderManager:
         money_risk: Optional[float] = None,
         instrument: Optional[str] = None,
         quote_to_gbp: float = 1.0,
+        margin_available: Optional[float] = None,
     ) -> int:
         """
         Calculate the number of units to trade using risk-based position sizing.
@@ -100,8 +104,17 @@ class OrderManager:
             )
             sl_distance = minimum_sl_dist
 
-        units = int(risk_amount / (sl_distance * quote_to_gbp))
-        units = max(1, units)
+        units = max(1, int(risk_amount / (sl_distance * quote_to_gbp)))
+        if margin_available is not None and entry_price:
+            margin_per_unit = entry_price * quote_to_gbp / self.leverage
+            margin_units = int(margin_available * self.margin_safety / margin_per_unit)
+            if margin_units < units:
+                capped_risk = margin_units * sl_distance * quote_to_gbp
+                if capped_risk < risk_amount * self.min_risk_fraction:
+                    self.logger.warning("Trade skipped: capped risk %.2f below %.0f%% of target %.2f", capped_risk, self.min_risk_fraction * 100, risk_amount)
+                    return 0
+                self.logger.info("Units capped by margin: %d -> %d (risk %.2f of target %.2f)", units, margin_units, capped_risk, risk_amount)
+                units = margin_units
 
         self.logger.debug(
             "calculate_units: Signal=%s, Entry=%.5f, SL=%.5f, SL_Dist=%.5f, "
@@ -185,7 +198,8 @@ class OrderManager:
         money_risk: Optional[float] = None,
         order_type: Optional[str] = None,
         quote_to_gbp: float = 1.0,
-    ) -> Dict[str, Any]:
+        margin_available: Optional[float] = None,
+    ) -> Optional[Dict[str, Any]]:
         """
         Helper method to calculate units and generate the complete OANDA order payload.
 
@@ -212,7 +226,10 @@ class OrderManager:
             money_risk=money_risk,
             instrument=instrument,
             quote_to_gbp=quote_to_gbp,
+            margin_available=margin_available,
         )
+        if units <= 0:
+            return None
 
         return self.build_order_data(
             instrument=instrument,
