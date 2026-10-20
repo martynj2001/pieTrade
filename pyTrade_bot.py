@@ -120,7 +120,6 @@ class pyTradeWorker(QObject):
         if not isinstance(self.strategy_secondary, secondary_type):
             self.strategy_secondary = secondary_type()
 
-
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
        
         """Look for an entry signal on one strategy and place the order if the guards pass.
@@ -304,8 +303,8 @@ class pyTradeWorker(QObject):
         # ----------------------------------------------------------------------------------
 
         # Change the version after every major modification, change or update 
-        self.msg.emit("pyTrade version 1.1 last modified 19 Oct 2026")
-        logger.info("pyTrade version 1.1 last modified 19 Oct 2026")
+        self.msg.emit("pyTrade version 1.2 last modified 20 Oct 2026")
+        logger.info("pyTrade version 1.2 last modified 20 Oct 2026")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
@@ -355,14 +354,12 @@ class pyTradeWorker(QObject):
                 self.market_open.emit(False)
                 trade = False
             elif open_market["market"] is None and not trade:
-                #TODO: Add some sort of timer so you know bot is still alive.
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
                 self.msg.emit("Markets Closed")
                 trade = False
                 wait = (market.next_open(current_time) - current_time).total_seconds()
                 self._sleep(min(1000, max(1, wait)))
-                #TODO: Add mechanisum to check time until the next market open session (if it is less than 1000 seconds then dont sleep for the full 1000 seconds)
             if trade:
                 # Get Account Summary & update GUI
                 summary = oanda.account_summery(client)

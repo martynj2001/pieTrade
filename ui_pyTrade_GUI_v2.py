@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2DPJlZL.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2xtYMPJ.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -319,17 +319,17 @@ class Ui_pyTrade_v2(object):
 
         self.horizontalLayout_14.addWidget(self.label)
 
-        self.pushButton = QPushButton(self.frame_3)
-        self.pushButton.setObjectName(u"pushButton")
-        sizePolicy5.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
-        self.pushButton.setSizePolicy(sizePolicy5)
-        self.pushButton.setMinimumSize(QSize(85, 0))
-        self.pushButton.setMaximumSize(QSize(85, 16777215))
+        self.pb_refresh = QPushButton(self.frame_3)
+        self.pb_refresh.setObjectName(u"pb_refresh")
+        sizePolicy5.setHeightForWidth(self.pb_refresh.sizePolicy().hasHeightForWidth())
+        self.pb_refresh.setSizePolicy(sizePolicy5)
+        self.pb_refresh.setMinimumSize(QSize(85, 0))
+        self.pb_refresh.setMaximumSize(QSize(85, 16777215))
         icon5 = QIcon()
         icon5.addFile(u":/icons/icons/currency_exchange_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.pushButton.setIcon(icon5)
+        self.pb_refresh.setIcon(icon5)
 
-        self.horizontalLayout_14.addWidget(self.pushButton)
+        self.horizontalLayout_14.addWidget(self.pb_refresh)
 
 
         self.verticalLayout.addWidget(self.frame_3, 0, Qt.AlignmentFlag.AlignTop)
@@ -776,7 +776,7 @@ class Ui_pyTrade_v2(object):
 
         self.label_19.setText("")
         self.label.setText(QCoreApplication.translate("pyTrade_v2", u"Account Summary", None))
-        self.pushButton.setText(QCoreApplication.translate("pyTrade_v2", u"Refresh", None))
+        self.pb_refresh.setText(QCoreApplication.translate("pyTrade_v2", u"Refresh", None))
         self.label_2.setText(QCoreApplication.translate("pyTrade_v2", u"Open Market:", None))
         self.label_3.setText(QCoreApplication.translate("pyTrade_v2", u"Current Instrument:", None))
         self.label_5.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))
