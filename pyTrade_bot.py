@@ -448,7 +448,9 @@ class pyTradeWorker(QObject):
                                     )
                                     continue
                                 validity = self.validator.validate_position(pos, pos_price, open_market["market"], pos_strategy.strategy_name)
-                                val_logger.info(f'Position: Instrument: {validity["instrument"]}, Strategy: {pos_strategy.strategy_name}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
+                                message = f'Position Validity: Instrument: {validity["instrument"]}, Strategy: {pos_strategy.strategy_name}, Reason: {validity["reason"]}'
+                                self.msg.emit(message)
+                                val_logger.info(message)
 
                                 if not validity["validity"]: #Position is no longer valid
                                     posClose_res = None
