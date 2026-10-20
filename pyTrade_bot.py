@@ -41,6 +41,8 @@ class pyTradeWorker(QObject):
     market_open = Signal(bool)
     account = Signal(dict)
     positions = Signal(list)
+    candles = Signal(str, object)
+    trade_levels = Signal(list)
    
     def __init__(
         self,
@@ -76,6 +78,26 @@ class pyTradeWorker(QObject):
             logging.getLogger("pyTrade_bot").error("API Call: Failed to get open trades for position cards")
         self.positions.emit(build_position_cards(positions, open_trades))
 
+    def _publish_trade_levels(self) -> None:
+        """Send all open-trade price levels (entry/SL/TP) to the GUI chart."""
+        logger = logging.getLogger("pyTrade")
+        try:
+            open_trades = trades_db.get_open_trades()
+        except (OSError, sqlite3.Error):
+            logger.exception("Could not read open trades for chart levels")
+            return
+        levels = []
+        for trade in open_trades:
+            levels.append({
+                "id": str(trade["trade_id"]),
+                "instrument": trade["instrument"],
+                "direction": trade["direction"],
+                "entry_price": float(trade["entry_price"]) if trade["entry_price"] is not None else None,
+                "stop_loss": float(trade["stop_loss"]) if trade["stop_loss"] is not None else None,
+                "take_profit": float(trade["take_profit"]) if trade["take_profit"] is not None else None,
+            })
+        self.trade_levels.emit(levels)
+
     def _sleep(self, seconds):
         # Sleep in short slices so stop_bot() takes effect promptly
         end = time.monotonic() + seconds
@@ -88,16 +110,20 @@ class pyTradeWorker(QObject):
     def on_set_strategy(self, strat):
 
         if strat == "EMA Pullback":
-            self.strategy_primary = TrendFollowingEngine()
-            self.strategy_secondary = BreakoutEngine()
+            primary_type, secondary_type = TrendFollowingEngine, BreakoutEngine
         else: # Breakout
-            self.strategy_primary = BreakoutEngine()
-            self.strategy_secondary = TrendFollowingEngine()
+            primary_type, secondary_type = BreakoutEngine, TrendFollowingEngine
+
+        # Reuse existing engines; only construct when the strategy actually changes
+        if not isinstance(self.strategy_primary, primary_type):
+            self.strategy_primary = primary_type()
+        if not isinstance(self.strategy_secondary, secondary_type):
+            self.strategy_secondary = secondary_type()
 
 
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
+       
         """Look for an entry signal on one strategy and place the order if the guards pass.
-
         Returns True if the strategy produced a trade signal (whether or not it was
         accepted by the guards), False if its conditions were not met.
         """
@@ -231,6 +257,7 @@ class pyTradeWorker(QObject):
                         logger=logger,
                         signal_data=signal_data,
                     )
+                    self._publish_trade_levels()
                     self.msg.emit(
                         "Entry point detected & order placed: "
                         f'Instrument: {order["order"]["instrument"]} '
@@ -258,15 +285,7 @@ class pyTradeWorker(QObject):
 
     def run_bot(self):
 
-        # Configure logging -----------------------------------------------------------------
-
-        logging.basicConfig(
-            filename=f"{datetime.now(timezone.utc).strftime('%d%m%y-%H%M')}-pyTrade.log",
-            level=logging.DEBUG if config.DEBUG_LOGGING else logging.INFO,
-            format="%(asctime)s [%(levelname)s] %(name)s : %(message)s",
-        )
-        logging.getLogger("urllib3").setLevel(logging.INFO)
-        logging.getLogger("oandapyV20.oandapyV20").setLevel(logging.INFO)
+        # Logging is configured by pyTrade_logging.setup_logging() at app startup ----------
 
         logger = logging.getLogger("pyTrade")
         val_logger = logging.getLogger("Validation")
@@ -276,21 +295,24 @@ class pyTradeWorker(QObject):
         logger.addFilter(OandaInfoFilter())
         val_logger.addFilter(OandaInfoFilter())
         oanda_logger.addFilter(OandaInfoFilter())
-        
         # ----------------------------------------------------------------------------------
+
         # Change the version after every major modification, change or update 
-        self.msg.emit("pyTrade version 1.0 last modified 16 Oct 2026")
-        logger.info("pyTrade version 1.0 last modified 16 Oct 2026")
+        self.msg.emit("pyTrade version 1.1 last modified 19 Oct 2026")
+        logger.info("pyTrade version 1.1 last modified 19 Oct 2026")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
 
+        
         try:
             database_path = trades_db.create_database()
             logger.info("Trade database ready at %s", database_path)
             self.msg.emit(f"Trade database ready at {database_path}")
         except (OSError, sqlite3.Error):
                 logger.exception("Could not initialize the local trade database")
+
+        self._publish_trade_levels()
 
         self.msg.emit(f"Primary Strategy: {self.strategy_primary.strategy_name}")
         logger.info("Primary Strategy: %s", self.strategy_primary.strategy_name)
@@ -303,11 +325,13 @@ class pyTradeWorker(QObject):
 
         # Open API connection
         client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
-        
+     
+                 
         while self.running: 
 
             current_time = datetime.now(timezone.utc)
             position_closed = False
+        
             # Get Open Market
             open_market = market.get_open_session(current_time)
             if open_market["market"] is not None:
@@ -330,7 +354,8 @@ class pyTradeWorker(QObject):
                 self.market_open.emit(False)
                 self.msg.emit("Markets Closed")
                 trade = False
-                self._sleep(1000) # Sleep for 1000 seconds before checking again
+                wait = (market.next_open(current_time) - current_time).total_seconds()
+                self._sleep(min(1000, max(1, wait)))
                 #TODO: Add mechanisum to check time until the next market open session (if it is less than 1000 seconds then dont sleep for the full 1000 seconds)
             if trade:
                 # Get Account Summary & update GUI
@@ -348,11 +373,12 @@ class pyTradeWorker(QObject):
                 
                         self.msg.emit("Checking for trade signals")
 
-                        price = oanda.get_Candles(client, open_market["instrument"])
+                        price = oanda.get_Candles(client, open_market["instrument"]) 
 
                         if price is not None:
                             raw_price = price.copy()
                             price = self.strategy_primary.add_indicators(price)
+                            self.candles.emit(open_market["instrument"], price.copy()) 
                             self.msg.emit("New Candles recieved and indicators set")
                         else:
                             self.msg.emit("Failed to get Candles")
@@ -439,6 +465,7 @@ class pyTradeWorker(QObject):
                                                 validity["reason"],
                                                 logger,
                                             )
+                                            self._publish_trade_levels()
                                             self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             position_closed = True
@@ -472,6 +499,8 @@ class pyTradeWorker(QObject):
                                 else:
                                     self.msg.emit("Strategy conditions not met (primary and secondary)")
                             
+                        self._publish_trade_levels()
+
                         last_checked = current_time.minute # Update to prevent re-triggering
             self._sleep(10)
         self.finished.emit()

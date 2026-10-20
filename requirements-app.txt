@@ -1,0 +1,8 @@
+# pyTrade desktop app (Qt GUI + trading bot) dependencies.
+# Pinned to versions installed in ~/anaconda3 (base) python.
+PySide6==6.9.2
+pyqtgraph==0.14.0
+pandas==2.3.3
+numpy==2.2.6
+oandapyV20==0.7.2
+pandas-ta-classic==0.6.52
