@@ -15,6 +15,7 @@ from pyTrade_trade_guards import TradeGuards
 from pyTrade_position_data import build_position_cards
 from pyTrade_trade_persistence import persist_filled_trades, persist_closed_trades, sync_closed_trades
 from pyTrade_signal_data import build_signal_data
+import pyTrade_settings as settings
 
 import logging
 import config
@@ -63,6 +64,7 @@ class pyTradeWorker(QObject):
         self.trade_guards = (
             trade_guards if trade_guards is not None else TradeGuards()
         )
+        self._pending_settings = None
 
     def _strategy_engine(self, name):
         """Return the strategy engine matching a stored strategy name, or None."""
@@ -119,7 +121,19 @@ class pyTradeWorker(QObject):
             self.strategy_primary = primary_type()
         if not isinstance(self.strategy_secondary, secondary_type):
             self.strategy_secondary = secondary_type()
+        self._pending_settings = settings.load()
 
+    def apply_settings(self, values: dict) -> None:
+        """Store GUI settings for application on the worker thread."""
+        self._pending_settings = values
+
+    def _apply_pending_settings(self) -> None:
+        """Apply queued settings at a worker-loop boundary."""
+        values = self._pending_settings
+        if values is None:
+            return
+        self._pending_settings = None
+        settings.apply_to_worker(values, self)
 
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
        
@@ -230,8 +244,22 @@ class pyTradeWorker(QObject):
                     take_profit=tp,
                     account_balance=summary["balance"],
                     quote_to_gbp=quote_to_gbp,
+                    margin_available=summary["marginAvailable"],
                 )
+                if order is None:
+                    self.msg.emit("Trade skipped: stop too tight for available margin")
+                    logger.warning(
+                        "Trade skipped: stop too tight for available margin on %s",
+                        open_market["instrument"],
+                    )
+                    return True
                 order_res = oanda.place_order(client, order)
+
+                if order_res is not None and "orderFillTransaction" not in order_res:
+                    reason = order_res.get("orderCancelTransaction", {}).get("reason", "UNKNOWN")
+                    self.msg.emit(f"Order NOT filled - cancelled by OANDA: {reason}")
+                    oanda_logger.error("Order NOT filled - cancelled by OANDA: %s", reason)
+                    return True
 
                 if order_res is not None:
                     try:
@@ -258,7 +286,7 @@ class pyTradeWorker(QObject):
                         signal_data=signal_data,
                     )
                     self._publish_trade_levels()
-                    self.msg.emit(
+                    message = (
                         "Entry point detected & order placed: "
                         f'Instrument: {order["order"]["instrument"]} '
                         f'Units: {order["order"]["units"]} '
@@ -266,20 +294,12 @@ class pyTradeWorker(QObject):
                         f'Take Profit: {order["order"]["takeProfitOnFill"]} '
                         f'Order No.: {order_res["orderCreateTransaction"]["id"]}'
                     )
-                    logger.info(
-                        "Entry point detected & order placed:\n"
-                        "Instrument: %s\nUnits: %s",
-                        order["order"]["instrument"],
-                        order["order"]["units"],
-                    )
+                    self.msg.emit(message)
+                    logger.info(message)
                 else:
-                    self.msg.emit(
-                        "Entry point detected - Order failed to place!"
-                    )
-                    oanda_logger.error(
-                        "API Call: Entry point detected - "
-                        "Order failed to place!"
-                    )
+                    message = "Entry point detected - Order failed to place!"
+                    self.msg.emit(message)
+                    oanda_logger.error(message)
         return True
 
 
@@ -298,8 +318,8 @@ class pyTradeWorker(QObject):
         # ----------------------------------------------------------------------------------
 
         # Change the version after every major modification, change or update 
-        self.msg.emit("pyTrade version 1.1 last modified 19 Oct 2026")
-        logger.info("pyTrade version 1.1 last modified 19 Oct 2026")
+        self.msg.emit("pyTrade version 1.3 last modified 29 Oct 2026")
+        logger.info("pyTrade version 1.3 last modified 29 Oct 2026")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
@@ -327,7 +347,8 @@ class pyTradeWorker(QObject):
         client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
      
                  
-        while self.running: 
+        while self.running:
+            self._apply_pending_settings()
 
             current_time = datetime.now(timezone.utc)
             position_closed = False
@@ -349,14 +370,12 @@ class pyTradeWorker(QObject):
                 self.market_open.emit(False)
                 trade = False
             elif open_market["market"] is None and not trade:
-                #TODO: Add some sort of timer so you know bot is still alive.
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
                 self.msg.emit("Markets Closed")
                 trade = False
                 wait = (market.next_open(current_time) - current_time).total_seconds()
                 self._sleep(min(1000, max(1, wait)))
-                #TODO: Add mechanisum to check time until the next market open session (if it is less than 1000 seconds then dont sleep for the full 1000 seconds)
             if trade:
                 # Get Account Summary & update GUI
                 summary = oanda.account_summery(client)
@@ -445,7 +464,9 @@ class pyTradeWorker(QObject):
                                     )
                                     continue
                                 validity = self.validator.validate_position(pos, pos_price, open_market["market"], pos_strategy.strategy_name)
-                                val_logger.info(f'Position: Instrument: {validity["instrument"]}, Strategy: {pos_strategy.strategy_name}, Reason: {validity["reason"]}, Validity: {validity["validity"]}')
+                                message = f'Position Validity: Instrument: {validity["instrument"]}, Strategy: {pos_strategy.strategy_name}, Reason: {validity["reason"]}'
+                                self.msg.emit(message)
+                                val_logger.info(message)
 
                                 if not validity["validity"]: #Position is no longer valid
                                     posClose_res = None

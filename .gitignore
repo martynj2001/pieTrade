@@ -2,5 +2,6 @@
 /config.py
 #Do not commit log files
 *.log
+/log_txt_services/web.log
 #Do not commit database files
 *.db

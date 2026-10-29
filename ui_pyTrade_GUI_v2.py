@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2JuqgZk.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2tYYNdF.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -308,10 +308,28 @@ class Ui_pyTrade_v2(object):
 
         self.label = QLabel(self.frame_3)
         self.label.setObjectName(u"label")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy6)
+        self.label.setMaximumSize(QSize(450, 16777215))
         self.label.setFont(font2)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.horizontalLayout_14.addWidget(self.label)
+
+        self.pb_refresh = QPushButton(self.frame_3)
+        self.pb_refresh.setObjectName(u"pb_refresh")
+        sizePolicy5.setHeightForWidth(self.pb_refresh.sizePolicy().hasHeightForWidth())
+        self.pb_refresh.setSizePolicy(sizePolicy5)
+        self.pb_refresh.setMinimumSize(QSize(85, 0))
+        self.pb_refresh.setMaximumSize(QSize(85, 16777215))
+        icon5 = QIcon()
+        icon5.addFile(u":/icons/icons/currency_exchange_24dp_F19E39_FILL0_wght400_GRAD0_opsz24.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.pb_refresh.setIcon(icon5)
+
+        self.horizontalLayout_14.addWidget(self.pb_refresh)
 
 
         self.verticalLayout.addWidget(self.frame_3, 0, Qt.AlignmentFlag.AlignTop)
@@ -543,7 +561,7 @@ class Ui_pyTrade_v2(object):
         self.positions_cards.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 524, 527))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 619, 527))
         self.positions_cards.setWidget(self.scrollAreaWidgetContents)
 
         self.horizontalLayout_15.addWidget(self.positions_cards)
@@ -656,9 +674,7 @@ class Ui_pyTrade_v2(object):
         self.frame_30.setObjectName(u"frame_30")
         sizePolicy4.setHeightForWidth(self.frame_30.sizePolicy().hasHeightForWidth())
         self.frame_30.setSizePolicy(sizePolicy4)
-        self.frame_30.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
-"background-repeat: no-repeat;\n"
-"background-position: center;")
+        self.frame_30.setStyleSheet(u"")
         self.frame_30.setFrameShape(QFrame.Shape.Box)
         self.frame_30.setFrameShadow(QFrame.Shadow.Sunken)
 
@@ -673,11 +689,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_20 = QFrame(self.frame_11)
         self.frame_20.setObjectName(u"frame_20")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-        sizePolicy6.setHorizontalStretch(0)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
-        self.frame_20.setSizePolicy(sizePolicy6)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
+        self.frame_20.setSizePolicy(sizePolicy7)
         self.frame_20.setMaximumSize(QSize(16777215, 30))
         self.frame_20.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_20.setFrameShadow(QFrame.Shadow.Raised)
@@ -731,7 +747,7 @@ class Ui_pyTrade_v2(object):
 
         self.retranslateUi(pyTrade_v2)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(pyTrade_v2)
@@ -758,6 +774,7 @@ class Ui_pyTrade_v2(object):
 
         self.label_19.setText("")
         self.label.setText(QCoreApplication.translate("pyTrade_v2", u"Account Summary", None))
+        self.pb_refresh.setText(QCoreApplication.translate("pyTrade_v2", u"Refresh", None))
         self.label_2.setText(QCoreApplication.translate("pyTrade_v2", u"Open Market:", None))
         self.label_3.setText(QCoreApplication.translate("pyTrade_v2", u"Current Instrument:", None))
         self.label_5.setText(QCoreApplication.translate("pyTrade_v2", u"Open Positions", None))

@@ -13,6 +13,8 @@ from position_cards import PositionCardsPanel
 from spinner_overlay import SpinnerOverlay
 from candle_chart import CandleChartPanel
 from pyTrade_logging import setup_logging
+import pyTrade_settings as settings
+from settings_panel import SettingsPanel
 
 log = logging.getLogger("pyTrade.main")
 
@@ -71,6 +73,13 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
         self.position_panel = PositionCardsPanel(self.positions_cards)
         self.candle_chart = CandleChartPanel(self.candle_chart)
+        self.settings_panel = SettingsPanel()
+        settings_scroll = qtw.QScrollArea(self.frame_30)
+        settings_scroll.setWidgetResizable(True)
+        settings_scroll.setWidget(self.settings_panel)
+        settings_layout = qtw.QVBoxLayout(self.frame_30)
+        settings_layout.setContentsMargins(0, 0, 0, 0)
+        settings_layout.addWidget(settings_scroll)
         self.spinner = SpinnerOverlay(self.centralwidget)
         self.log_spinner = SpinnerOverlay(self.pte_logOutput, diameter=40)
         self._closing = False
@@ -105,6 +114,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
     def btn_Start_Clicked(self):
     
         log.info("Start button clicked - starting bot")
+        self.settings_panel.set_running(True)
         self.pb_Start.setStyleSheet("background-color: #4CE063; color: white;")
         self.pb_Stop.setStyleSheet(" ")
         self.pb_Start.setEnabled(False)
@@ -119,6 +129,8 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.comboBox.currentTextChanged.connect(self.worker.on_set_strategy)
         self.comboBox.setEnabled(False)
         self.worker.on_set_strategy(self.comboBox.currentText())
+        self.worker.apply_settings(settings.load())
+        self.settings_panel.settings_applied.connect(self.worker.apply_settings)
 
         self.thread.started.connect(self.worker.run_bot)
         self.worker.msg.connect(self.update_output)
@@ -138,6 +150,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
     def btn_Stop_Clicked(self):
 
         log.info("Stop button clicked")
+        self.settings_panel.set_running(False)
         if self.started:
             self.update_output("Stopping.....")
             self.pb_Stop.setStyleSheet("background-color: rgb(224, 27, 36);")
@@ -160,6 +173,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
     def _on_thread_finished(self):
 
         self.log_spinner.stop()
+        self.settings_panel.set_running(False)
         if self._stopping:
             self._stopping = False
             self.pb_Start.setStyleSheet(" ")
