@@ -9,6 +9,25 @@ export PATH="$HOME/anaconda3/bin:$PATH"
 # Hide the harmless Qt "Could not register app ID" portal warning
 export QT_LOGGING_RULES="qt.qpa.services=false"
 
+# Set this machine's Tailscale IP (run: tailscale ip -4). Leave as-is to use the placeholder check below.
+TAILSCALE_IP="100.122.148.93"
+
+# Ensure Tailscale is connected so remote devices can reach the dashboard
+if ! command -v tailscale >/dev/null 2>&1; then
+  echo "ERROR: tailscale is not installed."; exit 1
+fi
+if ! tailscale status >/dev/null 2>&1; then
+  echo "Starting Tailscale..."
+  sudo -n tailscale up || { echo "ERROR: could not start Tailscale (run 'sudo tailscale up' once)."; exit 1; }
+fi
+if [ "$TAILSCALE_IP" = "100.x.y.z" ]; then
+  echo "ERROR: set TAILSCALE_IP at the top of start_pytrade.sh (find it with: tailscale ip -4)."
+  exit 1
+fi
+
+# Allow the dashboard origin through the API's CORS check
+export CORS_ORIGINS="http://localhost:4200,http://127.0.0.1:4200,http://$TAILSCALE_IP:4200"
+
 # Check the app's Python libraries before starting anything.
 # --dry-run makes pip work out what it WOULD install without changing anything,
 # so it fails if a library is missing or at the wrong version.
@@ -59,11 +78,11 @@ setsid python pyTrade_main.py >"$LOG_DIR/app.log" 2>&1 &
 APP_PID=$!; PIDS+=("$APP_PID")
 
 echo "Starting API server..."
-setsid uvicorn api.main:app --port 8000 >"$LOG_DIR/api.log" 2>&1 &
+setsid uvicorn api.main:app --host 0.0.0.0 --port 8000 >"$LOG_DIR/api.log" 2>&1 &
 PIDS+=("$!")
 
 echo "Starting Angular web app..."
-(cd "$ROOT/web" && exec setsid npx ng serve >"$LOG_DIR/web.log" 2>&1) &
+(cd "$ROOT/web" && exec setsid npx ng serve --host 0.0.0.0 --port 4200 >"$LOG_DIR/web.log" 2>&1) &
 PIDS+=("$!")
 
 echo "Waiting for http://localhost:4200 ..."
@@ -87,5 +106,6 @@ fi
 
 nohup firefox --new-tab http://localhost:4200 >/dev/null 2>&1 &
 
+echo "Remote dashboard: http://$TAILSCALE_IP:4200"
 echo "pyTrade running. Close the pyTrade app window or press Ctrl+C to stop everything."
 wait "$APP_PID"

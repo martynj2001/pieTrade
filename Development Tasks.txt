@@ -19,9 +19,9 @@ TODO: Display time left in current Market/Time until Market closes/Time unstil s
 
 TODO: Compile text files and build a concise README.md
 
-TODO: Refine market Session Engine to a) more accurate timings, b) stay in more productive markets longer.
+TODO: Add AI Agent to refine market Session Engine to a) more accurate timings, b) stay in more productive markets longer.
 
-TODO: Add an Account summery refresh button.
+TODO: Add an Account summery refresh button. REfresh the account details when pressed.
 
 TODO: Update position cards when we update the Account summery (inc. the Refresh Btn)
 -------------------------------------------------------------------------
