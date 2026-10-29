@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2xtYMPJ.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2tYYNdF.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -561,7 +561,7 @@ class Ui_pyTrade_v2(object):
         self.positions_cards.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 524, 527))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 619, 527))
         self.positions_cards.setWidget(self.scrollAreaWidgetContents)
 
         self.horizontalLayout_15.addWidget(self.positions_cards)
@@ -674,9 +674,7 @@ class Ui_pyTrade_v2(object):
         self.frame_30.setObjectName(u"frame_30")
         sizePolicy4.setHeightForWidth(self.frame_30.sizePolicy().hasHeightForWidth())
         self.frame_30.setSizePolicy(sizePolicy4)
-        self.frame_30.setStyleSheet(u"background-image: url(:/images/images/Icon_trans.png);\n"
-"background-repeat: no-repeat;\n"
-"background-position: center;")
+        self.frame_30.setStyleSheet(u"")
         self.frame_30.setFrameShape(QFrame.Shape.Box)
         self.frame_30.setFrameShadow(QFrame.Shadow.Sunken)
 
@@ -749,7 +747,7 @@ class Ui_pyTrade_v2(object):
 
         self.retranslateUi(pyTrade_v2)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(pyTrade_v2)

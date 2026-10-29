@@ -15,6 +15,7 @@ from pyTrade_trade_guards import TradeGuards
 from pyTrade_position_data import build_position_cards
 from pyTrade_trade_persistence import persist_filled_trades, persist_closed_trades, sync_closed_trades
 from pyTrade_signal_data import build_signal_data
+import pyTrade_settings as settings
 
 import logging
 import config
@@ -63,6 +64,7 @@ class pyTradeWorker(QObject):
         self.trade_guards = (
             trade_guards if trade_guards is not None else TradeGuards()
         )
+        self._pending_settings = None
 
     def _strategy_engine(self, name):
         """Return the strategy engine matching a stored strategy name, or None."""
@@ -119,6 +121,19 @@ class pyTradeWorker(QObject):
             self.strategy_primary = primary_type()
         if not isinstance(self.strategy_secondary, secondary_type):
             self.strategy_secondary = secondary_type()
+        self._pending_settings = settings.load()
+
+    def apply_settings(self, values: dict) -> None:
+        """Store GUI settings for application on the worker thread."""
+        self._pending_settings = values
+
+    def _apply_pending_settings(self) -> None:
+        """Apply queued settings at a worker-loop boundary."""
+        values = self._pending_settings
+        if values is None:
+            return
+        self._pending_settings = None
+        settings.apply_to_worker(values, self)
 
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
        
@@ -332,7 +347,8 @@ class pyTradeWorker(QObject):
         client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
      
                  
-        while self.running: 
+        while self.running:
+            self._apply_pending_settings()
 
             current_time = datetime.now(timezone.utc)
             position_closed = False

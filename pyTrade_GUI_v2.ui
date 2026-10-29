@@ -885,7 +885,7 @@
              <item>
               <widget class="QStackedWidget" name="stackedWidget">
                <property name="currentIndex">
-                <number>2</number>
+                <number>3</number>
                </property>
                <widget class="QWidget" name="pg_openpositions">
                 <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -962,7 +962,7 @@ background-position: center;</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>524</width>
+                         <width>619</width>
                          <height>527</height>
                         </rect>
                        </property>
@@ -1140,9 +1140,7 @@ border: line 1px;</string>
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
-background-repeat: no-repeat;
-background-position: center;</string>
+                    <string notr="true"/>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::Box</enum>
