@@ -20,12 +20,13 @@ class Setting:
 
     key: str
     label: str
-    kind: Literal["bool", "float", "int"]
+    kind: Literal["bool", "float", "int", "choice"]
     default: Any
     min: Optional[float] = None
     max: Optional[float] = None
     step: Optional[float] = None
     scale: float = 1.0
+    choices: tuple[tuple[str, str], ...] = ()  # (value, label) pairs for kind "choice"
     section: str = "General"
     live: bool = True
     targets: tuple[str, ...] = ()
@@ -38,6 +39,14 @@ def _set_debug_logging(value: bool, worker: Any) -> None:
 
 SETTINGS: list[Setting] = [
     Setting("debug_logging", "Debug Logging", "bool", config.DEBUG_LOGGING, on_apply=_set_debug_logging),
+    Setting(
+        "strategy_mode", "Strategy mode", "choice", "dual", section="Strategies",
+        targets=("strategy_mode",),
+        choices=(
+            ("dual", "Primary + secondary (secondary tried if primary has no signal)"),
+            ("single", "Selected strategy only (the one chosen in the menu)"),
+        ),
+    ),
     Setting("risk_percent", "Risk per Trade (%)", "float", config.RISK_PERCENT, min=0.001, max=0.05, step=0.001, scale=100, section="Trading", targets=("order_manager.risk_percent",)),
     Setting("adx_threshold", "ADX Threshold", "float", 24.0, min=10, max=50, step=1, section="Trade guards", targets=("trade_guards.adx_threshold",)),
     Setting("atr_multiplier", "ATR Stop Multiplier", "float", 1.5, min=0.5, max=5, step=0.1, section="Strategies", targets=("strategies.atr_multiplier",)),
@@ -51,6 +60,8 @@ def _normalize(setting: Setting, value: Any) -> Any:
     """Validate one value, clamp numbers, and use the default when invalid."""
     if setting.kind == "bool":
         return value if isinstance(value, bool) else setting.default
+    if setting.kind == "choice":
+        return value if value in dict(setting.choices) else setting.default
     if setting.kind == "int":
         if isinstance(value, bool) or not isinstance(value, int):
             return setting.default

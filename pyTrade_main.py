@@ -74,6 +74,8 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.position_panel = PositionCardsPanel(self.positions_cards)
         self.candle_chart = CandleChartPanel(self.candle_chart)
         self.settings_panel = SettingsPanel()
+        self.settings_panel.settings_applied.connect(self._update_strategy_label)
+        self._update_strategy_label(settings.load())
         settings_scroll = qtw.QScrollArea(self.frame_30)
         settings_scroll.setWidgetResizable(True)
         settings_scroll.setWidget(self.settings_panel)
@@ -110,6 +112,11 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
     def mouseReleaseEvent(self, event):
         self._drag_pos = None
         super().mouseReleaseEvent(event)
+
+    def _update_strategy_label(self, values: dict) -> None:
+        """Show 'Selected Strategy' in single mode, otherwise 'Primary Strategy'."""
+        single = values.get("strategy_mode") == "single"
+        self.label_11.setText("Selected Strategy" if single else "Primary Strategy")
 
     def btn_Start_Clicked(self):
     

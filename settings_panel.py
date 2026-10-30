@@ -5,6 +5,7 @@ from typing import Any
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
@@ -75,6 +76,11 @@ class SettingsPanel(QWidget):
         """Create the numeric or boolean control for a setting definition."""
         if setting.kind == "bool":
             return QCheckBox()
+        if setting.kind == "choice":
+            control = QComboBox()
+            for value, label in setting.choices:
+                control.addItem(label, value)
+            return control
         if setting.kind == "int":
             control = QSpinBox()
             control.setRange(
@@ -100,6 +106,8 @@ class SettingsPanel(QWidget):
             value = values.get(key, setting.default)
             if setting.kind == "bool":
                 control.setChecked(value)  # type: ignore[attr-defined]
+            elif setting.kind == "choice":
+                control.setCurrentIndex(max(0, control.findData(value)))  # type: ignore[attr-defined]
             else:
                 control.setValue(value * setting.scale)  # type: ignore[attr-defined]
 
@@ -110,6 +118,8 @@ class SettingsPanel(QWidget):
             setting = self._definitions[key]
             if setting.kind == "bool":
                 value = control.isChecked()  # type: ignore[attr-defined]
+            elif setting.kind == "choice":
+                value = control.currentData()  # type: ignore[attr-defined]
             else:
                 value = control.value() / setting.scale  # type: ignore[attr-defined]
             values[key] = value

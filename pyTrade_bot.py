@@ -65,6 +65,7 @@ class pyTradeWorker(QObject):
             trade_guards if trade_guards is not None else TradeGuards()
         )
         self._pending_settings = None
+        self.strategy_mode = "dual"
 
     def _strategy_engine(self, name):
         """Return the strategy engine matching a stored strategy name, or None."""
@@ -336,8 +337,15 @@ class pyTradeWorker(QObject):
 
         self.msg.emit(f"Primary Strategy: {self.strategy_primary.strategy_name}")
         logger.info("Primary Strategy: %s", self.strategy_primary.strategy_name)
-        self.msg.emit(f"Secondary Strategy: {self.strategy_secondary.strategy_name}")
-        logger.info("Secondary Strategy: %s", self.strategy_secondary.strategy_name)
+        last_mode = settings.load()["strategy_mode"]
+        self.msg.emit(f"Strategy mode: {last_mode}")
+        logger.info("Strategy mode: %s", last_mode)
+        if last_mode == "single":
+            secondary_line = "Secondary Strategy: not used (single-strategy mode)"
+        else:
+            secondary_line = f"Secondary Strategy: {self.strategy_secondary.strategy_name}"
+        self.msg.emit(secondary_line)
+        logger.info(secondary_line)
 
         last_checked = None
         current_market = ""
@@ -499,7 +507,16 @@ class pyTradeWorker(QObject):
 
                         if not position_closed:  # No positions closed, check this candle for new entry signals
 
-                            for index, strategy in enumerate((self.strategy_primary, self.strategy_secondary)):
+                            mode = self.strategy_mode
+                            if mode != last_mode:
+                                self.msg.emit(f"Strategy mode changed to: {mode}")
+                                logger.info("Strategy mode changed to: %s", mode)
+                                last_mode = mode
+                            strategies = (
+                                (self.strategy_primary,) if mode == "single"
+                                else (self.strategy_primary, self.strategy_secondary)
+                            )
+                            for index, strategy in enumerate(strategies):
                                 if index == 0:
                                     strat_price = price
                                 else:
@@ -510,7 +527,9 @@ class pyTradeWorker(QObject):
                                         break
                                 if self._try_entry(strategy, strat_price, client, open_market, summary, logger, oanda_logger):
                                     break
-                                if index == 0:
+                                if mode == "single":
+                                    self.msg.emit(f"Strategy conditions not met ({strategy.strategy_name})")
+                                elif index == 0:
                                     msg = (
                                         f"No trade signal from primary strategy ({strategy.strategy_name}) "
                                         f"- moving to secondary strategy ({self.strategy_secondary.strategy_name})"

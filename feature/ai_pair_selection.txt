@@ -1,0 +1,413 @@
+// Phase 0: Preparation (about 45 minutes, before any prompt)
+
+[x] Back up and branch: copy Trades_db/pytrade.db, and make a git branch (or commit) before each prompt. Run one prompt at a time.
+[x] Create an Anthropic API account at platform.claude.com. Add a small amount of billing credit (about $5), create an API key, and set a low monthly spend limit.
+[x] Put ANTHROPIC_API_KEY in config.py and confirm config.py is in .gitignore. Never attach config.py to Copilot.
+[x] Run pip install anthropic.
+[x] Add these to config.py by hand: AGENT_MODEL = "claude-haiku-5-5", AGENT_SHADOW = True, and optionally NEWS_BEFORE_MIN = 30 and NEWS_AFTER_MIN = 15.
+Open the news feed URL in a browser and check it is live (the URL is in Prompt 1).
+[x] Decide whether the break in the position-validation loop was intentional. Prompt 2 removes it. Delete that sentence from Prompt 2 if it was.
+[x] Decide whether to edit the new session_pairs table in Prompt 2 (the pairs I suggested are only a default).
+
+//Phase 1: Strategy mode setting (Prompt 3, rewritten version)
+
+[x] Run Prompt 3 with pyTrade_settings.py, settings_panel.py, pyTrade_main.py and pyTrade_bot.py attached.
+Test (5 minutes): the log shows the mode at start, switching it while running takes effect at the next 15-minute check, 
+the choice survives a restart, and the label changes. Check git status for stray new files.
+[x] Add settings to the git ignore.
+
+//Phase 2: News filter (Prompt 1)
+
+Run Prompt 1.
+Test in a Python shell: NewsFilter().blocked_currencies(datetime.now(timezone.utc)). Compare the times with a calendar, especially timezones.
+Wait: about 1 week (5 trading days). Run the bot normally and check the log for “News blackout” messages. Confirm they land on the right high-impact events, and that nothing is blocked for hours.
+
+//Phase 3: AI selector and shadow logging (Prompt 2)
+
+Run Prompt 2.
+Fallback test: with the toggle ON, give it a wrong API key (or disconnect the internet) briefly. The bot should keep trading the fixed pair, and the log should show the error and a 5-minute retry.
+Check the new tables exist, and that valid pairs pass the valid_session_pairs() check without errors in the log.
+Add the cron job: 10 * * * * cd ~/pieTrade && python3 pyTrade_agent_outcomes.py.
+Start shadow mode: AGENT_SHADOW = True, toggle ON, using your demo account.
+Wait: 1-2 days, then check. Run SELECT status, COUNT(*) FROM agent_decisions GROUP BY status; You want nearly all ok. If many are invalid or error, fix before waiting longer.
+
+// Phase 4: Analysis report and web page (Prompt 4)
+
+Run Prompt 4 once a few days of shadow data exist, so you can check it against real numbers.
+Verify: python pyTrade_agent_report.py --mode shadow, the /api/agent/report endpoint in /docs, and the /agent page.
+
+// Phase 5: Shadow run and analysis
+
+Wait: at least 2 weeks of shadow running (about 10 trading days). That should give 150+ usable hours of decisions. If you hit weekends or gaps, wait longer.
+Review the report and apply the go-live rule:
+at least 150 usable hours;
+at least 95% ok;
+the agent beats both the fixed and highest-ADX baselines on efficiency;
+it beats fixed in about 55% or more of hours;
+the result isn’t driven by only one session.
+
+
+// Phase 6: Go live (only if it passes)
+Set AGENT_SHADOW = False and run on the demo account.
+Wait: at least 2 weeks live on demo (my suggested minimum). Check the live P&L section of the report, comparing results per market.
+Decide whether to use it with real money. If it never clearly beat the fixed table, keep the fixed sessions or use the free highest-ADX rule.
+
+
+//******* Prompts *********
+
+// Prompt 3/Phase 1: Strategy Mode
+
+Work in the current folder and branch. Do not create new
+branches or worktrees.
+
+Add a "strategy mode" setting to my EXISTING settings system. Make ONLY the changes
+below: no refactors, tests, docs or unrelated files. Do NOT create new settings files,
+panels or windows. Do not edit ui_pyTrade_GUI_v2.py or the .ui file. Do not open or
+edit config.py. Keep the existing code style. Reply with a short summary. Signal,
+guard, order sizing and validation logic must not change.
+
+Behaviour:
+- "dual" (default, = current behaviour): the primary strategy looks for an entry; if it
+  has no signal, the secondary strategy is tried.
+- "single": only the strategy selected in the menu combo box (comboBox, which sets
+  strategy_primary via on_set_strategy) looks for entries. The secondary is NOT tried.
+- Keep BOTH engines constructed in both modes, so _strategy_engine() and open-position
+  validation keep working for positions opened by either strategy. Only the new-entry
+  loop changes.
+
+1. pyTrade_settings.py and settings_panel.py (existing files). First read both and
+   follow exactly how current settings are defined, stored, validated, shown and read.
+   Add one setting:
+ - key "strategy_mode", label "Strategy mode", default "dual", with two choices:
+   "dual" = "Primary + secondary (secondary tried if primary has no signal)" and
+   "single" = "Selected strategy only (the one chosen in the menu)".
+ - Store and load it with the existing persistence mechanism (do not add a second
+   settings file). Missing or invalid saved values fall back to "dual".
+ - Show it on the existing Settings page in the existing panel, as a dropdown
+   (QComboBox) or the closest existing control type. If the panel has no control for a
+   choice-type setting, add the smallest one in the same style as the existing controls.
+   Preselect the saved value; save through the existing path when the user changes it.
+ - Keep it easy to add further settings later (follow the existing pattern; do not add
+   new abstractions).
+ - The bot thread will read this setting, so make sure the read is thread-safe; only
+   change existing code for this if it is not already.
+ - Note: the Settings page frame (frame_30) has a stylesheet with a background-image
+   that cascades to child widgets. If the new control inherits it incorrectly, scope
+   the style with an objectName selector and background: transparent, as existing
+   settings do.
+
+2. pyTrade_main.py: use the existing settings panel instance and its existing change
+   notification (if it has none, add the smallest one). When "strategy_mode" changes,
+   set self.label_11 text to "Selected Strategy" when the value is "single", otherwise
+   "Primary Strategy". Apply the same label once at startup from the saved value.
+
+3. pyTrade_bot.py:
+ - Import the settings module the way other modules import it.
+ - In run_bot, where the primary and secondary strategies are announced at start, also
+   emit and log the current mode. In single mode, replace the secondary line with
+   "Secondary Strategy: not used (single-strategy mode)".
+ - In the new-entry section, read the mode fresh at each candle check, so changes apply
+   without a restart. Emit and log a message only when it differs from the previous
+   check. Build strategies = (self.strategy_primary,) if mode == "single" else
+   (self.strategy_primary, self.strategy_secondary) and loop over that tuple instead of
+   the hard-coded pair. Keep the existing index logic (index 0 uses `price`, later ones
+   compute their own indicators from raw_price).
+ - The "moving to secondary strategy" message must appear only in dual mode. In single
+   mode, when there is no signal, emit "Strategy conditions not met (<primary
+   strategy_name>)".
+ - Keep the line `if not position_closed:` and its surrounding structure unchanged,
+   because later edits will anchor on it.
+
+//Prompt 1/Phase 2: News filter
+
+Work in the current folder and branch. Do not create new
+branches or worktrees.
+
+Add a news blackout rule to my forex bot. Make ONLY the changes below: no refactors,
+tests, docs or extra files. Do not open or edit config.py. Reply with a short summary.
+
+1. New file pyTrade_news_filter.py with class NewsFilter:
+ - NEWS_URL constant, default "https://nfs.faireconomy.media/ff_calendar_thisweek.json".
+   Fetch with requests, timeout=10. Items have "country" (currency code e.g. "USD"),
+   "date" (ISO datetime with UTC offset) and "impact" ("High","Medium","Low","Holiday").
+   Keep only impact == "High"; convert dates to tz-aware UTC; skip malformed items.
+ - Cache the raw JSON in news_cache.json beside the module. Refetch at most every 4
+   hours. On any failure (including HTTP 429) use the cache, even if old. If there is
+   no data at all, log a warning and block nothing (fail open).
+ - Window sizes: getattr(config, "NEWS_BEFORE_MIN", 30) and
+   getattr(config, "NEWS_AFTER_MIN", 15) (import config, do not edit it).
+ - blocked_currencies(now) -> set[str]: currencies with an event where
+   event - before <= now <= event + after.
+ - blocked_during(start, end) -> set[str]: currencies whose blackout window overlaps
+   [start, end].
+ - is_pair_blocked(instrument, now) -> bool: true if either currency of a pair like
+   "EUR_USD" is in blocked_currencies(now).
+ - All datetimes tz-aware UTC. Thread-safe (threading.Lock): it will also be called
+   from a background thread. Logger "pyTrade.NewsFilter". Type hints, short docstrings.
+
+2. pyTrade_bot.py:
+ - In pyTradeWorker.__init__: self.news_filter = NewsFilter()
+ - In run_bot, just before the `if not position_closed:` new-entry block: if
+   self.news_filter.is_pair_blocked(open_market["instrument"], current_time), emit a
+   message and log "News blackout - no new entries for <instrument>" and skip the
+   entry search for this candle (use if/else). Position validation and closing must
+   still run exactly as before.
+
+Do not touch signal, guard, sizing or validation logic.
+
+//Prompt 2/Phase 3
+
+Work in the current folder and branch. Do not create new
+branches or worktrees.
+
+Implement an AI pair/market selector ("agent") for my forex bot. Make ONLY the changes
+below: no refactors, tests, docs or unrelated files. Do not open, print or edit
+config.py; read settings with getattr(config, NAME, default). Never log the API key.
+Reply with a short summary. Signal detection, guards, order sizing, risk and validation
+logic must NOT change: the agent only chooses WHICH (market, instrument) the bot
+watches for the next hour. Use the `anthropic` SDK with Claude Haiku. Do NOT use prompt
+caching (no cache_control) and do NOT pass temperature, top_p, tools or assistant prefill.
+
+Fact: pyTrade_instruments.py (do not modify) sets pip size, min stop distance and price
+precision only by the "_JPY" suffix (JPY: 0.01/0.05/3dp; others 0.0001/0.0005/5dp).
+
+1) pyTrade_market_session.py. Keep market_instruments unchanged (it is the fixed fallback).
+ - Add session_pairs = {"sydney": ["AUD_USD","NZD_USD","USD_JPY"],
+   "tokyo": ["USD_JPY","AUD_USD","EUR_JPY"],
+   "london": ["EUR_USD","GBP_USD","USD_CHF","EUR_GBP"],
+   "new_york": ["GBP_USD","EUR_USD","USD_CAD","USD_JPY"]}
+ - Add get_open_sessions(now) -> list of ALL open session names (same rules as
+   get_open_session, so overlaps return several; [] on weekends).
+ - Add valid_session_pairs() -> dict. It returns session_pairs after checks, logging an
+   error and dropping any pair that fails: matches ^[A-Z]{3}_[A-Z]{3}$; both currencies in
+   {USD,EUR,GBP,JPY,AUD,NZD,CAD,CHF}; quote currency in {USD,JPY,CAD,CHF,AUD,NZD,GBP}
+   (needed by oanda.get_quote_to_gbp); pyTrade_instruments pip_size/min_sl_dist/
+   price_precision return the values above for it; and the first pair of each session
+   equals market_instruments[session].
+
+2) pyTrade_trades_db.py: add to _SCHEMA (CREATE ... IF NOT EXISTS):
+ agent_decisions(id INTEGER PRIMARY KEY AUTOINCREMENT, decision_time DATETIME,
+  target_hour DATETIME, mode TEXT, status TEXT, error TEXT, model TEXT, market TEXT,
+  instrument TEXT, reason TEXT, fixed_market TEXT, fixed_instrument TEXT,
+  baseline_instrument TEXT, candidates TEXT, excluded_news TEXT, latency_s REAL,
+  input_tokens INTEGER, output_tokens INTEGER)
+ agent_outcomes(id INTEGER PRIMARY KEY AUTOINCREMENT, decision_id INTEGER,
+  instrument TEXT, range_pips REAL, net_move_pips REAL, efficiency REAL,
+  range_atr REAL, candles INTEGER, UNIQUE(decision_id, instrument))
+ and this view:
+ CREATE VIEW IF NOT EXISTS v_agent_eval AS
+ SELECT d.id, d.target_hour, d.mode, d.market, d.instrument AS agent_pair,
+  d.fixed_instrument, d.baseline_instrument,
+  a.efficiency AS agent_eff, a.range_atr AS agent_range_atr, a.net_move_pips AS agent_net,
+  f.efficiency AS fixed_eff, f.range_atr AS fixed_range_atr,
+  b.efficiency AS base_eff, b.range_atr AS base_range_atr,
+  (SELECT AVG(efficiency) FROM agent_outcomes WHERE decision_id=d.id) AS avg_eff,
+  (SELECT AVG(range_atr) FROM agent_outcomes WHERE decision_id=d.id) AS avg_range_atr
+ FROM agent_decisions d
+ LEFT JOIN agent_outcomes a ON a.decision_id=d.id AND a.instrument=d.instrument
+ LEFT JOIN agent_outcomes f ON f.decision_id=d.id AND f.instrument=d.fixed_instrument
+ LEFT JOIN agent_outcomes b ON b.decision_id=d.id AND b.instrument=d.baseline_instrument
+ WHERE d.status='ok';
+ (insert_row already exists; use it for agent_decisions.)
+
+3) New pyTrade_agent.py: class AgentPlanner(trade_guards, news_filter).
+ - Constructor must never raise (even if the API key is missing); create the Anthropic
+   client lazily inside _make_plan. Own OANDA client:
+   API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON),
+   because it runs in a background thread. ThreadPoolExecutor(max_workers=1).
+ - State: plans {hour_start_utc: plan_dict}, pending (hour, future), retry_after.
+ - tick(now), cheap and non-blocking, called every loop pass: collect a finished
+   future (store plan, or set retry_after = now+5min on None/exception); if a request is
+   pending or now < retry_after return; target = next hour start if now.minute >= 55
+   else current hour start; if no plan for target, submit _make_plan(target); delete
+   plans older than the current hour.
+ - current_plan(now) -> plan for the current hour only if plan["market"] is in
+   market.get_open_sessions(now), else None.
+ - _make_plan(target) (tz-aware UTC):
+   a. sessions = market.get_open_sessions(target + 1 minute); candidates = (session,
+      instrument) pairs from market.valid_session_pairs(). fixed = market.get_open_session(
+      target + 1 minute).
+   b. blocked = news_filter.blocked_during(target, target + 1 hour); drop candidates
+      whose currencies intersect it and record them in excluded_news (JSON list).
+   c. For each unique instrument fetch oanda.get_Candles(client, instr) (M15) and
+      granularity="H1"; skip it if either is None, has < 60 rows, or any value is NaN
+      (try/except per instrument). Stats: adx = trade_guards.calculate_adx(m15) last
+      value; atr_pips = pandas_ta_classic ATR(14) last / pyTrade_instruments.pip_size;
+      volatility_expanding = ATR > its 14-bar mean; h1_trend "up"/"down" (H1 close vs
+      EMA50 via ewm span=50 adjust=False); h1_distance_atr = |H1 close - EMA50| / H1
+      ATR14. Round to 1-2 decimals.
+   d. baseline_instrument = candidate with the highest adx. If no candidates: write a
+      row with status "no_candidates" and return None.
+   e. Call Anthropic: model getattr(config,"AGENT_MODEL","claude-haiku-5-5"),
+      max_tokens=300, timeout 30s, max_retries 1, system = SYSTEM below, one user
+      message with JSON {"hour_utc":..., "candidates":[{"market","instrument",
+      ...stats}]}. Parse the reply text: strip any markdown code fences, take the first
+      {...} block, json.loads.
+   f. Validate that (market, instrument) is exactly one of the candidates; reason
+      truncated to 200 chars. Otherwise status "invalid" with the raw text in error.
+   g. ALWAYS write one agent_decisions row (status ok / invalid / error /
+      no_candidates), including mode ("shadow" if getattr(config,"AGENT_SHADOW",True)
+      else "live"), model, fixed_market, fixed_instrument, baseline_instrument,
+      candidates (json.dumps of the candidate list with stats), excluded_news,
+      latency_s, input_tokens, output_tokens (from response.usage), error text on
+      failures (never include the API key). Wrap DB writes in try/except + log.
+      Return the plan dict {"market","instrument","reason"} only when status is ok.
+ - SYSTEM = "You select ONE forex pair and market session to trade for the next hour for
+   an automated bot. The bot trades M15 EMA-pullback and Donchian-breakout strategies,
+   which only work in trending, volatile conditions; it rejects entries unless
+   ADX(14) > 24 and the H1 trend agrees with the trade direction. Prefer candidates
+   with higher adx, larger h1_distance_atr and volatility_expanding true. Choose ONLY
+   from the candidates given, copying the market and instrument strings exactly. Reply
+   with ONLY a JSON object: {\"market\": \"...\", \"instrument\": \"...\", \"reason\":
+   \"<max 20 words>\"}."
+
+4) New pyTrade_agent_outcomes.py (standalone script, run manually or by cron, not
+   imported by the bot). For each agent_decisions row with status "ok" whose
+   target_hour + 1h + 5min is in the past and that has no agent_outcomes rows: for each
+   unique candidate instrument in its candidates JSON, fetch M15 candles from
+   target_hour to target_hour + 1h (oandapyV20 InstrumentsCandles, price "M", same
+   OANDA client setup as above), and insert: range_pips = (max high - min low)/pip_size;
+   net_move_pips = (last close - first open)/pip_size; efficiency = abs(net)/range
+   (0 if range is 0); range_atr = range_pips / that candidate's atr_pips from the
+   candidates JSON; candles = count. Print how many decisions were processed.
+
+5) pyTrade_bot.py:
+ - __init__: self.agent_enabled = False; self.planner = AgentPlanner(self.trade_guards,
+   self.news_filter) (news_filter exists from the earlier change).
+ - Add select_market(self, now): fallback = market.get_open_session(now) plus
+   fallback["source"]="fixed sessions". If not self.agent_enabled or
+   fallback["market"] is None: return fallback. Call self.planner.tick(now); plan =
+   self.planner.current_plan(now). If plan is None or getattr(config,"AGENT_SHADOW",True):
+   return fallback. Otherwise return {"market","instrument","source":"AI agent","reason"}.
+ - run_bot: replace market.get_open_session(current_time) with
+   self.select_market(current_time). Replace the `current_market` comparison with a
+   (market, instrument) key (current_key, initially None; also reset to None in the
+   market-closed branches) so a pair change inside a session is announced:
+   "Trading <instr> in <market> (<source>)". Existing market_info/market_open signals
+   unchanged.
+ - Position validation must use each position's OWN instrument candles, not the
+   current pair's: build raw_cache {instrument: raw candles} and indicator_cache
+   {(instrument, strategy_name): indicator df}, seeded with the current pair, and for
+   other instruments fetch oanda.get_Candles(client, instr) then strategy.add_indicators
+   on a copy; skip the position if candles are None. Also remove the `break` at the end
+   of the position loop body so every position is validated.
+
+6) pyTrade_main.py (do NOT edit ui_pyTrade_GUI_v2.py): in App_pyTrade.__init__ after
+   setupUi add self.agent_enabled=False and a checkable QPushButton "AI Agent: OFF"
+   (self.pb_agent) added to self.horizontalLayout_7, toggled -> self.agent_toggled(on):
+   set self.agent_enabled, update text to "AI Agent: ON/OFF", green style when on, set
+   self.worker.agent_enabled = on if a worker exists, and call update_output with
+   "AI agent enabled" / "AI agent disabled - using fixed market sessions". Connect to
+   this window method, NOT a worker method (the worker thread is busy in run_bot). In
+   btn_Start_Clicked set self.worker.agent_enabled = self.agent_enabled. The button must
+   stay enabled while the bot runs.
+
+//Prompt 4/Phase 4
+
+Work in the current folder and branch. Do not create new
+branches or worktrees.
+
+Add an AI-agent analysis report in three layers: a shared analysis module, a CLI report
+script, and API + Angular page. Make ONLY the changes below: no refactors, tests, docs
+or unrelated files. Do not modify the bot, the trades DB writer, existing endpoints or
+existing pages (except the one nav link and one route). Match existing code style.
+Everything here is READ-ONLY on the database. Reply with a short summary.
+
+Tables/view already exist (written by the bot): agent_decisions(id, decision_time,
+target_hour, mode, status, error, model, market, instrument, reason, fixed_market,
+fixed_instrument, baseline_instrument, candidates, excluded_news, latency_s,
+input_tokens, output_tokens), agent_outcomes(decision_id, instrument, range_pips,
+net_move_pips, efficiency, range_atr, candles) and view v_agent_eval(id, target_hour,
+mode, market, agent_pair, fixed_instrument, baseline_instrument, agent_eff,
+agent_range_atr, agent_net, fixed_eff, fixed_range_atr, base_eff, base_range_atr,
+avg_eff, avg_range_atr). target_hour is an ISO string like 2026-10-29T13:00:00+00:00.
+trades.entry_time looks like 2026-10-29T13:05:12.123456789Z.
+
+1. api/agent_analysis.py (no FastAPI imports). Use parameterised SQL only.
+ - Constants at top: PRICE_IN_PER_M = 0.10, PRICE_OUT_PER_M = 0.50 (USD per million
+   tokens), MIN_HOURS = 150, MIN_OK_PCT = 95, MIN_BEAT_FIXED_PCT = 55,
+   MIN_SESSION_HOURS = 20.
+ - build_report(conn, mode="all", days=None) -> dict. mode in all/shadow/live; days
+   filters target_hour >= strftime('%Y-%m-%dT%H:%M:%S','now',?) with '-N days'. If a
+   table/view is missing (sqlite3.OperationalError "no such") or agent_decisions is
+   empty, return {"available": False, "message": "<plain-English reason: run the bot
+   with the AI agent toggle ON, and run pyTrade_agent_outcomes.py>"}. Otherwise
+   {"available": True, "message": None, "filters": {...}, plus the keys below}.
+   Comparison objects use only rows where agent_eff, fixed_eff and base_eff are all
+   non-null (range metrics additionally need their range_atr values non-null):
+   * reliability: {total, ok_pct, avg_latency_s, by_status:[{status,count}]} from
+     agent_decisions (all statuses).
+   * agreement: {n, pct_same_as_fixed, pct_same_as_baseline} from v_agent_eval.
+   * comparison: {n, agent_eff, fixed_eff, base_eff, any_eff (avg of avg_eff),
+     agent_range_atr, fixed_range_atr, base_range_atr, any_range_atr,
+     pct_beats_fixed_eff, pct_beats_base_eff, pct_beats_fixed_range,
+     pct_beats_base_range}  (averages rounded to 3 dp for eff, 2 dp for range_atr,
+     percentages to 1 dp; null when n is 0).
+   * disagreements: same shape as comparison, restricted to agent_pair !=
+     fixed_instrument.
+   * by_market: list of comparison-shaped objects plus "market", grouped by market.
+   * news_cost: {decisions_with_news_exclusion (excluded_news not in ('', '[]')),
+     input_tokens, output_tokens, est_cost_usd (from the constants)}.
+   * live_pnl: list {market, trades, pnl, win_pct} from closed trades joined to
+     agent_decisions where mode='live' and status='ok' on same instrument and
+     substr(entry_time,1,13) = substr(target_hour,1,13); empty list if none.
+   * go_live: {ready, checks:[{name, passed, value, target}]} with checks: usable
+     hours >= MIN_HOURS (comparison.n); ok_pct >= MIN_OK_PCT; agent_eff beats both
+     fixed_eff and base_eff on average; pct_beats_fixed_eff >= MIN_BEAT_FIXED_PCT;
+     agent_eff > fixed_eff in at least 2 markets that each have >= MIN_SESSION_HOURS
+     hours (fail with value "not enough data" if fewer than 2 such markets).
+     ready = all passed. value/target are short human-readable strings.
+ - recent_decisions(conn, limit=50, offset=0, status=None, mode="all", days=None) ->
+   {"total", "limit", "offset", "items"}: agent_decisions rows newest first by
+   target_hour, only the columns: id, target_hour, mode, status, market, instrument,
+   fixed_instrument, baseline_instrument, reason, latency_s, error.
+
+2. pyTrade_agent_report.py in the repo root: argparse --mode (all/shadow/live, default
+   all) and --days (int, optional). Open the DB read-only
+   (sqlite3.connect(f"file:{api.db.db_path()}?mode=ro", uri=True), row_factory
+   sqlite3.Row), call api.agent_analysis.build_report and print a readable plain-text
+   report with aligned columns (no new dependencies): title with filters, then one
+   section per key above (reliability, agreement, agent vs fixed vs baseline,
+   disagreement hours only, by market, news & cost, live P&L if any, go-live checklist
+   with PASS/FAIL per check and READY / NOT YET). Under the comparison heading print
+   one line each explaining: "efficiency = net move / total range in the hour (1 = clean
+   trend, 0 = went nowhere)" and "range_atr = hour's range vs normal candle size". End
+   with "These are proxies for trendiness, not profit." If available is False, print the
+   message and exit 0.
+
+3. API: new api/routers/agent.py (prefix "/api/agent", tags ["agent"], same style as
+   api/routers/analytics.py, Depends(get_conn)):
+ - GET /api/agent/report?mode=all|shadow|live&days=<int 1-365, optional> ->
+   build_report(...). Validate mode with Literal.
+ - GET /api/agent/decisions?mode&days&status&limit(1-500, default 50)&offset ->
+   recent_decisions(...).
+ Register the router in api/main.py next to the others. GET only; do not change CORS.
+
+4. Angular (folder web/). First read the existing routing, the existing API service(s)
+   (how they use environment.ts for the API base URL), one existing page component and
+   the nav/menu component, and follow their exact patterns (module vs standalone
+   components, state handling, styling, loading/error handling, any chart/table
+   library already used). Add no new dependencies.
+ - New page "AI Agent" at route /agent, plus a nav link labelled "AI Agent" next to the
+   existing dashboard/trade links.
+ - TypeScript interfaces matching the report JSON above. Service methods for the two
+   endpoints, in the existing service style (or a new small service if that is how
+   existing ones are organised).
+ - Page layout, top to bottom: filter bar (mode: All/Shadow/Live; period: 7/14/30
+   days/All; Refresh; reload on change); if available is false show the message in an
+   info panel and nothing else; go-live checklist card (PASS/FAIL badge per check and a
+   clear READY / NOT YET banner); reliability card (ok %, avg latency, status counts);
+   agreement card; comparison table with rows Agent / Fixed / Baseline / Any pair and
+   columns Avg efficiency, Avg range/ATR, plus a line for the "% of hours the agent
+   beats fixed / baseline"; the same table for "hours where the agent differed from the
+   fixed pair"; by-market table; news & cost card; live P&L table shown only when it has
+   rows; latest decisions table (target hour, mode, status, agent pick, fixed, baseline,
+   reason) with simple paging in the existing paging style. Under the comparison
+   heading show the two plain-language explanations of efficiency and range/ATR from
+   section 2 and the note "Proxies for trendiness, not profit." Show 3-dp/2-dp/1-dp
+   numbers as returned; show "-" for nulls. Handle loading and error states like the
+   existing pages.
+
+5. README.md: under the existing API section add two short bullets: the
+   `python pyTrade_agent_report.py [--mode shadow] [--days 14]` command and the two new
+   endpoints.
