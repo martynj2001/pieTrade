@@ -15,6 +15,7 @@ from pyTrade_trade_guards import TradeGuards
 from pyTrade_position_data import build_position_cards
 from pyTrade_trade_persistence import persist_filled_trades, persist_closed_trades, sync_closed_trades
 from pyTrade_signal_data import build_signal_data
+from pyTrade_news_filter import NewsFilter
 import pyTrade_settings as settings
 
 import logging
@@ -66,6 +67,7 @@ class pyTradeWorker(QObject):
         )
         self._pending_settings = None
         self.strategy_mode = "dual"
+        self.news_filter = NewsFilter()
 
     def _strategy_engine(self, name):
         """Return the strategy engine matching a stored strategy name, or None."""
@@ -372,15 +374,15 @@ class pyTradeWorker(QObject):
                     self.market_open.emit(True)
                     trade = True
             elif open_market["market"] is None and trade:
-                self.msg.emit("Markets Closed")
-                logger.warning("Markets Closed: No active market session at %s UTC", str(current_time))
+                message = "Markets Closed: No active market session at %s UTC", str(current_time)
+                self.msg.emit(message)
+                logger.warning(message)
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
                 trade = False
             elif open_market["market"] is None and not trade:
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
-                self.msg.emit("Markets Closed")
                 trade = False
                 wait = (market.next_open(current_time) - current_time).total_seconds()
                 self._sleep(min(1000, max(1, wait)))
@@ -505,7 +507,11 @@ class pyTradeWorker(QObject):
                         if positions is not None:
                             self._publish_positions(client, positions)
 
-                        if not position_closed:  # No positions closed, check this candle for new entry signals
+                        if self.news_filter.is_pair_blocked(open_market["instrument"], current_time):
+                            message = f'News blackout - no new entries for {open_market["instrument"]}'
+                            self.msg.emit(message)
+                            logger.info(message)
+                        elif not position_closed:  # No positions closed, check this candle for new entry signals
 
                             mode = self.strategy_mode
                             if mode != last_mode:

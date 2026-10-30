@@ -5,20 +5,20 @@
 [x] Put ANTHROPIC_API_KEY in config.py and confirm config.py is in .gitignore. Never attach config.py to Copilot.
 [x] Run pip install anthropic.
 [x] Add these to config.py by hand: AGENT_MODEL = "claude-haiku-5-5", AGENT_SHADOW = True, and optionally NEWS_BEFORE_MIN = 30 and NEWS_AFTER_MIN = 15.
-Open the news feed URL in a browser and check it is live (the URL is in Prompt 1).
+[x] Open the news feed URL in a browser and check it is live (the URL is in Prompt 1).
 [x] Decide whether the break in the position-validation loop was intentional. Prompt 2 removes it. Delete that sentence from Prompt 2 if it was.
 [x] Decide whether to edit the new session_pairs table in Prompt 2 (the pairs I suggested are only a default).
 
 //Phase 1: Strategy mode setting (Prompt 3, rewritten version)
 
 [x] Run Prompt 3 with pyTrade_settings.py, settings_panel.py, pyTrade_main.py and pyTrade_bot.py attached.
-Test (5 minutes): the log shows the mode at start, switching it while running takes effect at the next 15-minute check, 
+[x] Test (5 minutes): the log shows the mode at start, switching it while running takes effect at the next 15-minute check, 
 the choice survives a restart, and the label changes. Check git status for stray new files.
 [x] Add settings to the git ignore.
 
 //Phase 2: News filter (Prompt 1)
 
-Run Prompt 1.
+[x] Run Prompt 1.
 Test in a Python shell: NewsFilter().blocked_currencies(datetime.now(timezone.utc)). Compare the times with a calendar, especially timezones.
 Wait: about 1 week (5 trading days). Run the bot normally and check the log for “News blackout” messages. Confirm they land on the right high-impact events, and that nothing is blocked for hours.
 
@@ -55,7 +55,7 @@ Decide whether to use it with real money. If it never clearly beat the fixed tab
 
 //******* Prompts *********
 
-// Prompt 3/Phase 1: Strategy Mode
+[x] Prompt 3/Phase 1: Strategy Mode
 
 Work in the current folder and branch. Do not create new
 branches or worktrees.
@@ -155,7 +155,7 @@ tests, docs or extra files. Do not open or edit config.py. Reply with a short su
 
 Do not touch signal, guard, sizing or validation logic.
 
-//Prompt 2/Phase 3
+[x] Prompt 2/Phase 3
 
 Work in the current folder and branch. Do not create new
 branches or worktrees.
