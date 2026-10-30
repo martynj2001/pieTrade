@@ -19,12 +19,12 @@ the choice survives a restart, and the label changes. Check git status for stray
 //Phase 2: News filter (Prompt 1)
 
 [x] Run Prompt 1.
-Test in a Python shell: NewsFilter().blocked_currencies(datetime.now(timezone.utc)). Compare the times with a calendar, especially timezones.
+[x] Test in a Python shell: NewsFilter().blocked_currencies(datetime.now(timezone.utc)). Compare the times with a calendar, especially timezones.
 Wait: about 1 week (5 trading days). Run the bot normally and check the log for “News blackout” messages. Confirm they land on the right high-impact events, and that nothing is blocked for hours.
 
 //Phase 3: AI selector and shadow logging (Prompt 2)
 
-Run Prompt 2.
+[x] Run Prompt 2.
 Fallback test: with the toggle ON, give it a wrong API key (or disconnect the internet) briefly. The bot should keep trading the fixed pair, and the log should show the error and a 5-minute retry.
 Check the new tables exist, and that valid pairs pass the valid_session_pairs() check without errors in the log.
 Add the cron job: 10 * * * * cd ~/pieTrade && python3 pyTrade_agent_outcomes.py.
@@ -160,13 +160,15 @@ Do not touch signal, guard, sizing or validation logic.
 Work in the current folder and branch. Do not create new
 branches or worktrees.
 
-Implement an AI pair/market selector ("agent") for my forex bot. Make ONLY the changes
-below: no refactors, tests, docs or unrelated files. Do not open, print or edit
-config.py; read settings with getattr(config, NAME, default). Never log the API key.
-Reply with a short summary. Signal detection, guards, order sizing, risk and validation
-logic must NOT change: the agent only chooses WHICH (market, instrument) the bot
-watches for the next hour. Use the `anthropic` SDK with Claude Haiku. Do NOT use prompt
-caching (no cache_control) and do NOT pass temperature, top_p, tools or assistant prefill.
+Implement an AI pair/market selector ("agent") for my forex bot, with an iOS-style
+on/off switch on the existing Settings page. Make ONLY the changes below: no
+refactors, tests, docs or unrelated files. Do NOT create new settings files, panels or
+windows. Do not open, print or edit config.py; read settings from it with
+getattr(config, NAME, default). Never log the API key. Reply with a short summary.
+Signal detection, guards, order sizing, risk and validation logic must NOT change: the
+agent only chooses WHICH (market, instrument) the bot watches for the next hour. Use
+the `anthropic` SDK with Claude Haiku. Do NOT use prompt caching (no cache_control) and
+do NOT pass temperature, top_p, tools or assistant prefill.
 
 Fact: pyTrade_instruments.py (do not modify) sets pip size, min stop distance and price
 precision only by the "_JPY" suffix (JPY: 0.01/0.05/3dp; others 0.0001/0.0005/5dp).
@@ -272,13 +274,18 @@ precision only by the "_JPY" suffix (JPY: 0.01/0.05/3dp; others 0.0001/0.0005/5d
    candidates JSON; candles = count. Print how many decisions were processed.
 
 5) pyTrade_bot.py:
- - __init__: self.agent_enabled = False; self.planner = AgentPlanner(self.trade_guards,
-   self.news_filter) (news_filter exists from the earlier change).
+ - import pyTrade_settings as settings (if not already imported). In __init__ add
+   self.planner = AgentPlanner(self.trade_guards, self.news_filter) and
+   self._agent_was_on = False. There is NO agent_enabled attribute: the on/off state
+   comes only from the settings store (key "ai_agent_enabled", see section 6).
  - Add select_market(self, now): fallback = market.get_open_session(now) plus
-   fallback["source"]="fixed sessions". If not self.agent_enabled or
-   fallback["market"] is None: return fallback. Call self.planner.tick(now); plan =
-   self.planner.current_plan(now). If plan is None or getattr(config,"AGENT_SHADOW",True):
-   return fallback. Otherwise return {"market","instrument","source":"AI agent","reason"}.
+   fallback["source"]="fixed sessions". enabled = bool(settings.get("ai_agent_enabled")).
+   If enabled != self._agent_was_on: self.msg.emit and log "AI agent enabled" or "AI
+   agent disabled - using fixed market sessions", then update self._agent_was_on. If not
+   enabled or fallback["market"] is None: return fallback. Call self.planner.tick(now);
+   plan = self.planner.current_plan(now). If plan is None or
+   getattr(config,"AGENT_SHADOW",True): return fallback. Otherwise return {"market",
+   "instrument","source":"AI agent","reason"}.
  - run_bot: replace market.get_open_session(current_time) with
    self.select_market(current_time). Replace the `current_market` comparison with a
    (market, instrument) key (current_key, initially None; also reset to None in the
@@ -292,15 +299,83 @@ precision only by the "_JPY" suffix (JPY: 0.01/0.05/3dp; others 0.0001/0.0005/5d
    on a copy; skip the position if candles are None. Also remove the `break` at the end
    of the position loop body so every position is validated.
 
-6) pyTrade_main.py (do NOT edit ui_pyTrade_GUI_v2.py): in App_pyTrade.__init__ after
-   setupUi add self.agent_enabled=False and a checkable QPushButton "AI Agent: OFF"
-   (self.pb_agent) added to self.horizontalLayout_7, toggled -> self.agent_toggled(on):
-   set self.agent_enabled, update text to "AI Agent: ON/OFF", green style when on, set
-   self.worker.agent_enabled = on if a worker exists, and call update_output with
-   "AI agent enabled" / "AI agent disabled - using fixed market sessions". Connect to
-   this window method, NOT a worker method (the worker thread is busy in run_bot). In
-   btn_Start_Clicked set self.worker.agent_enabled = self.agent_enabled. The button must
-   stay enabled while the bot runs.
+6) Settings page: extend the EXISTING pyTrade_settings.py and settings_panel.py. First
+   read both and follow exactly how current settings (including "strategy_mode") are
+   defined, stored, validated, laid out and read. pyTrade_main.py needs no changes.
+ - Add a boolean setting: key "ai_agent_enabled", label "AI Agent", default False.
+   Support a boolean kind in the existing mechanism (smallest change): saved/loaded
+   with the existing persistence as a JSON bool; any invalid or missing value -> False;
+   get() stays thread-safe because the bot thread reads it every loop.
+ - In settings_panel.py add a small widget class ToggleSwitch(QAbstractButton) that
+   looks like an iPhone slider switch, drawn entirely in paintEvent (no stylesheet, so
+   frame_30's cascading background-image cannot affect it):
+   * fixed size 51x31 px; pill-shaped track, radius 15.5; OFF colour #636366, ON colour
+     #34C759, blended smoothly during the animation; white circular knob of 27 px with a
+     2 px margin and a subtle soft shadow; QPainter antialiasing on.
+   * checkable; clicking toggles it; animate the knob with a QPropertyAnimation (150 ms,
+     InOutCubic) on a float Qt Property "position" (0..1) that calls update(); set the
+     position instantly (no animation) when the state is set programmatically, e.g.
+     the initial load from saved settings.
+   * pointing-hand cursor; disabled state drawn at 40% opacity; sizeHint 51x31;
+     keyboard (space) toggling works; setAccessibleName("AI Agent").
+ - Show it in the existing settings card/section style as one row: on the left a bold
+   "AI Agent" label with a small grey caption "Lets the AI choose the pair and market
+   each hour. Off = fixed market sessions."; on the right the ToggleSwitch, vertically
+   centred. Preset it from the saved value; on toggle save through the existing path
+   and emit the existing change notification. Add a second small caption line under the
+   row only when getattr(config, "AGENT_SHADOW", True) is True: "Shadow mode is on
+   (config.py): the AI's picks are logged but not used for trading." Scope any label
+   styles with objectName selectors and background: transparent. The switch must stay
+   usable while the bot is running.
+ - Do not add a separate GUI button, header control or worker attribute for this.
+
+7) AI agent display card (display only; this is NOT a settings panel). This is the one
+   exception to "pyTrade_main.py needs no changes" in section 6. Do NOT edit
+   pyTrade_GUI_v2.ui or any generated ui_*.py file (they are regenerated by Qt Designer
+   and would be overwritten): do everything in code.
+ - Find the Designer frame with objectName "news_ai" in the generated ui_*.py (do not
+   edit that file) and find how the existing news card is placed in it (search
+   pyTrade_main.py and the news card module). If no widget named news_ai exists, STOP
+   and report it instead of inventing one. Do not change the news card.
+ - New file agent_card.py (same style as position_cards.py, kept outside the generated
+   UI): class AgentCard(QFrame) styled like the existing news card (read it and match
+   its look; if unavailable match PositionCard in position_cards.py), objectName
+   "agentCard", styles scoped by #agentCard and QLabel background transparent. Header
+   "AI Agent" plus a small status badge. Rows (label: value): Status (OFF / ON - shadow
+   (not used for trading) / ON - live), Using (AI agent / fixed sessions), Market,
+   Pair (EUR_USD shown as EUR/USD), Hour ("13:00-14:00 UTC"), Reason (word-wrapped),
+   Chosen at ("12:55 UTC", plus latency), Next hour ("new york GBP/USD from 14:00 UTC"
+   or "-"), Fixed-session pair ("london EUR/USD"), Last request ("ok" / "failed -
+   retry 13:05 UTC" / "waiting"), Updated (HH:MM:SS UTC). Show "-" for missing values,
+   market names as "New York" (replace _ and title-case). In shadow mode label the plan
+   rows "Would trade". Colours: ON green, shadow amber, OFF grey, failed red. Public
+   slots: update_plan(snapshot: dict) (decorated @Slot(dict)), show_idle(enabled: bool)
+   (text "Bot stopped" plus the status from settings), set_enabled(enabled: bool).
+ - Placement: put AgentCard inside the news_ai frame SIDE BY SIDE with the news card
+   (horizontal, equal stretch 1:1, both top-aligned). Use the smallest change: if the
+   frame already has a horizontal layout add the card to it; otherwise build a
+   QHBoxLayout inside a container QWidget in code, move the existing news card into it,
+   and put the container where the news card was. If no news card exists yet, add only
+   the agent card using the same horizontal layout.
+ - pyTrade_bot.py: add signal agent_plan = Signal(dict) to pyTradeWorker. Extend the
+   dict returned by AgentPlanner._make_plan with extra keys only (existing keys
+   unchanged): target_hour, decided_at (ISO UTC strings), latency_s, fixed_market,
+   fixed_instrument. In AgentPlanner.tick set self.last_result = {"status": "ok" |
+   "failed" | "waiting", "time": iso, "retry_at": iso or None} when a future is
+   collected (or a request is submitted -> "waiting"). In select_market, once on every
+   return path, emit self.agent_plan with a snapshot dict {enabled, shadow
+   (getattr(config,"AGENT_SHADOW",True)), market_open, using, current (plan for the
+   current hour or None), next (plan for the next hour or None), fixed ({"market",
+   "instrument"} or None), last (planner.last_result), updated (ISO UTC)}, but only
+   when the snapshot differs from the last emitted one (ignore "updated"). All values
+   JSON-friendly (ISO strings, no datetime objects). Read planner.plans only from the
+   worker thread. The on/off state still comes only from the settings store; the signal
+   is display only.
+ - pyTrade_main.py: create the AgentCard as above; in btn_Start_Clicked connect
+   self.worker.agent_plan to self.agent_card.update_plan next to the other worker
+   connects; in _on_thread_finished call self.agent_card.show_idle(...) with the saved
+   setting; connect the existing settings change notification (from section 6) for key
+   "ai_agent_enabled" to self.agent_card.set_enabled; at startup call show_idle(...).
 
 //Prompt 4/Phase 4
 

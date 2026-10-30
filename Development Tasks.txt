@@ -18,6 +18,11 @@ TODO: Add an Account summery refresh button. REfresh the account details when pr
 TODO: Update position cards when we update the Account summery (inc. the Refresh Btn)
 
 TODO: Add AI Output (Pairs Plan) & News Events panels to teh Output/Log Page.
+
+TODO: Add an AI Pair selection ON/OFF to GUI (Setting Page).
+
+TODO: Optional AI upgrade: pass the model the upcoming events (time, currency, forecast vs previous) 
+so it can judge softer risk between the remaining pairs. Add that only after the hard rule is proven.
 -------------------------------------------------------------------------
 
 NOTES:

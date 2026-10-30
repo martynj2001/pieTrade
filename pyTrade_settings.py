@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import tempfile
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Literal, Optional
@@ -12,6 +13,8 @@ import config
 
 logger = logging.getLogger("pyTrade.Settings")
 SETTINGS_PATH = Path(__file__).with_name("settings.json")
+_cache: Optional[dict] = None  # last loaded/saved values, guarded by _cache_lock
+_cache_lock = threading.Lock()
 
 
 @dataclass(frozen=True)
@@ -27,6 +30,7 @@ class Setting:
     step: Optional[float] = None
     scale: float = 1.0
     choices: tuple[tuple[str, str], ...] = ()  # (value, label) pairs for kind "choice"
+    switch: bool = False  # draw a bool as a ToggleSwitch row instead of a checkbox
     section: str = "General"
     live: bool = True
     targets: tuple[str, ...] = ()
@@ -39,6 +43,7 @@ def _set_debug_logging(value: bool, worker: Any) -> None:
 
 SETTINGS: list[Setting] = [
     Setting("debug_logging", "Debug Logging", "bool", config.DEBUG_LOGGING, on_apply=_set_debug_logging),
+    Setting("ai_agent_enabled", "AI Agent", "bool", False, section="AI Agent", switch=True),
     Setting(
         "strategy_mode", "Strategy mode", "choice", "dual", section="Strategies",
         targets=("strategy_mode",),
@@ -97,6 +102,7 @@ def load() -> dict[str, Any]:
 
 def save(values: dict) -> None:
     """Atomically save known settings beside this module."""
+    global _cache
     normalized = {
         setting.key: _normalize(setting, values.get(setting.key, setting.default))
         for setting in SETTINGS
@@ -111,9 +117,20 @@ def save(values: dict) -> None:
             json.dump(normalized, settings_file, indent=2)
             settings_file.write("\n")
         os.replace(temporary_path, SETTINGS_PATH)
+        with _cache_lock:
+            _cache = normalized
     finally:
         if temporary_path is not None and temporary_path.exists():
             temporary_path.unlink()
+
+
+def get(key: str) -> Any:
+    """Thread-safe read of one setting (loaded once, refreshed by save())."""
+    global _cache
+    with _cache_lock:
+        if _cache is None:
+            _cache = load()
+        return _cache.get(key)
 
 
 def _resolve_target(worker: Any, path: str) -> tuple[Any, str]:

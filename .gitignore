@@ -5,6 +5,5 @@
 /log_txt_services/web.log
 #Do not commit database files
 *.db
-
-#Do not commit the settings.json file
-/settings.json
+#Do not commit .json files
+*.json

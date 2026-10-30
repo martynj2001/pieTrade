@@ -103,3 +103,49 @@ class NewsFilter:
     def is_pair_blocked(self, instrument: str, now: datetime) -> bool:
         """True if either currency of a pair like 'EUR_USD' is blocked at `now`."""
         return bool(set(instrument.split("_")) & self.blocked_currencies(now))
+
+    def events_today(self, now: datetime, fetch: bool = True) -> list[dict]:
+        """All events (any impact) on the UTC day of `now`, sorted by time. fetch=False uses the cache only."""
+        with self._lock:
+            if fetch:
+                self._refresh()
+            elif not self._raw:
+                self._raw = self._read_cache()
+            raw = list(self._raw)
+        day = now.astimezone(timezone.utc).date()
+        events = []
+        for item in raw:
+            try:
+                when = datetime.fromisoformat(item["date"])
+                if when.tzinfo is None:
+                    continue
+                when = when.astimezone(timezone.utc)
+                if when.date() != day:
+                    continue
+                events.append({
+                    "time": when.isoformat(),
+                    "currency": str(item["country"]).upper(),
+                    "title": str(item["title"]),
+                    "impact": str(item["impact"]),
+                    "forecast": str(item.get("forecast", "")),
+                    "previous": str(item.get("previous", "")),
+                })
+            except (KeyError, TypeError, ValueError):
+                continue
+        return sorted(events, key=lambda event: event["time"])
+
+
+def relevant_events(events: list[dict], instrument: str | None, now: datetime) -> list[dict]:
+    """Events for either currency of `instrument` whose blackout window overlaps the current UTC hour."""
+    if not instrument:
+        return []
+    currencies = set(instrument.split("_"))
+    before, after = NewsFilter._windows()
+    hour_start = now.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    hour_end = hour_start + timedelta(hours=1)
+    return [
+        event for event in events
+        if event["currency"] in currencies
+        and datetime.fromisoformat(event["time"]) - before <= hour_end
+        and datetime.fromisoformat(event["time"]) + after >= hour_start
+    ]

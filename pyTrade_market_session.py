@@ -1,4 +1,6 @@
 from datetime import datetime, time, timezone, timedelta
+import logging
+import re
 
 
 # Checks for Open markets.
@@ -66,6 +68,61 @@ def get_open_session(now: datetime):
                 return open_market
     # Should never happen!        
     return open_market
+
+session_pairs = {  # candidate pairs the AI agent may choose from, per session
+    "sydney": ["AUD_USD", "NZD_USD", "USD_JPY"],
+    "tokyo": ["USD_JPY", "AUD_USD", "EUR_JPY"],
+    "london": ["EUR_USD", "GBP_USD", "USD_CHF", "EUR_GBP"],
+    "new_york": ["GBP_USD", "EUR_USD", "USD_CAD", "USD_JPY"],
+}
+
+_CURRENCIES = {"USD", "EUR", "GBP", "JPY", "AUD", "NZD", "CAD", "CHF"}
+_QUOTE_CURRENCIES = {"USD", "JPY", "CAD", "CHF", "AUD", "NZD", "GBP"}  # needed by get_quote_to_gbp
+
+def get_open_sessions(now: datetime) -> list:
+    """Return the names of ALL open sessions (overlaps give several; [] on weekends)."""
+    if is_weekend(now):
+        return []
+    hour = now.hour
+    names = []
+    for name, hours in market_sessions.items():
+        start = hours["open"]
+        end = hours["close"]
+        if (start <= hour < end) if start <= end else (hour >= start or hour < end):
+            names.append(name)
+    return names
+
+def valid_session_pairs() -> dict:
+    """Return session_pairs, logging an error and dropping any pair that fails its checks."""
+    import pyTrade_instruments as instruments
+    log = logging.getLogger("pyTrade.MarketSession")
+    valid = {}
+    for name, pairs in session_pairs.items():
+        valid[name] = []
+        for index, pair in enumerate(pairs):
+            problem = None
+            if not re.fullmatch(r"[A-Z]{3}_[A-Z]{3}", pair):
+                problem = "bad format"
+            else:
+                base, quote = pair.split("_")
+                expected_jpy = pair.endswith("_JPY")
+                if base not in _CURRENCIES or quote not in _CURRENCIES:
+                    problem = "unsupported currency"
+                elif quote not in _QUOTE_CURRENCIES:
+                    problem = "quote currency has no GBP conversion"
+                elif (
+                    instruments.pip_size(pair) != (0.01 if expected_jpy else 0.0001)
+                    or instruments.min_sl_dist(pair) <= 0
+                    or instruments.price_precision(pair) != (3 if expected_jpy else 5)
+                ):
+                    problem = "instrument settings do not match"
+                elif index == 0 and pair != market_instruments.get(name):
+                    problem = "first pair differs from the fixed session pair"
+            if problem:
+                log.error("Dropping %s from %s session pairs: %s", pair, name, problem)
+            else:
+                valid[name].append(pair)
+    return valid
 
 def is_market_closing(now: datetime, market: str, mins_before_closing=15):
 # TODO: This may need to be 15mins to make sure trade are closed the last cycle be closing.

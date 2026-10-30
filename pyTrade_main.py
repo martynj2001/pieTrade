@@ -1,5 +1,6 @@
 import logging
 import sys
+from html import escape as esc
 from PySide6 import QtWidgets as qtw
 from PySide6.QtCore import QThread, Qt, QTimer
 from PySide6.QtGui import QColor, QIcon, QPalette
@@ -14,7 +15,9 @@ from spinner_overlay import SpinnerOverlay
 from candle_chart import CandleChartPanel
 from pyTrade_logging import setup_logging
 import pyTrade_settings as settings
+from pyTrade_news_filter import NewsFilter, relevant_events
 from settings_panel import SettingsPanel
+from agent_card import AgentCard
 
 log = logging.getLogger("pyTrade.main")
 
@@ -96,6 +99,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
         self.stackedWidget.setCurrentWidget(self.pg_output)
         
+        self._init_news_card()
         self.show()
 
     # Without a title bar, allow dragging the window by its background
@@ -117,6 +121,81 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         """Show 'Selected Strategy' in single mode, otherwise 'Primary Strategy'."""
         single = values.get("strategy_mode") == "single"
         self.label_11.setText("Selected Strategy" if single else "Primary Strategy")
+
+    def _init_news_card(self) -> None:
+        """Build the news list inside the news_ai frame and load today's cached events."""
+        layout = self.news_ai.layout() or qtw.QVBoxLayout(self.news_ai)
+        self._news_body = qtw.QWidget()
+        self._news_body.setObjectName("newsBody")
+        self._news_body.setStyleSheet("QWidget#newsBody { background: transparent; background-image: none; }")
+        self._news_layout = qtw.QVBoxLayout(self._news_body)
+        self._news_layout.setContentsMargins(6, 6, 6, 6)
+        self._news_layout.setSpacing(2)
+        scroll = qtw.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(qtw.QFrame.Shape.NoFrame)
+        scroll.setStyleSheet("QScrollArea, QScrollArea > QWidget > QWidget { background: transparent; background-image: none; }")
+        scroll.setWidget(self._news_body)
+        # News card and AI agent card sit side by side inside news_ai
+        container = qtw.QWidget()
+        container.setObjectName("newsAgentRow")
+        container.setStyleSheet("QWidget#newsAgentRow { background: transparent; background-image: none; }")
+        row = qtw.QHBoxLayout(container)
+        row.setContentsMargins(0, 0, 0, 0)
+        self.agent_card = AgentCard()
+        row.addWidget(scroll, 1)
+        row.addWidget(self.agent_card, 1)
+        layout.addWidget(container)
+        self.settings_panel.settings_applied.connect(
+            lambda values: self.agent_card.set_enabled(bool(values.get("ai_agent_enabled")))
+        )
+        self.agent_card.show_idle(bool(settings.get("ai_agent_enabled")))
+        self._news_events = NewsFilter().events_today(datetime.now(timezone.utc), fetch=False)
+        self._news_instrument = None
+        self._render_news()
+        self._news_timer = QTimer(self)
+        self._news_timer.setInterval(60000)  # re-dim past events while the bot is stopped
+        self._news_timer.timeout.connect(self._render_news)
+        self._news_timer.start()
+
+    def update_news(self, events: list) -> None:
+        """Store the latest events from the bot and redraw the card."""
+        self._news_events = events
+        self._render_news()
+
+    def _render_news(self) -> None:
+        """Draw today's events (UTC), colour coded by impact; past events are dimmed."""
+        colours = {"High": "#E01B24", "Medium": "#F19E39", "Low": "#8C8C8C", "Holiday": "#5DADE2"}
+        now = datetime.now(timezone.utc)
+        while self._news_layout.count():
+            item = self._news_layout.takeAt(0)
+            if item.widget() is not None:
+                item.widget().deleteLater()
+        instrument = self._news_instrument or market.get_open_session(now)["instrument"]
+        events = relevant_events(self._news_events, instrument, now)
+        pair = instrument.replace("_", "/") if instrument else "no active market"
+        header = qtw.QLabel(f"News for {pair} this hour (UTC) - {now:%d/%m/%y %H:%M}")
+        header.setStyleSheet("color: #e6e6e6; font-weight: bold; background: transparent;")
+        self._news_layout.addWidget(header)
+        if not events:
+            empty = qtw.QLabel("No news affecting this pair this hour")
+            empty.setStyleSheet("color: #888888; background: transparent;")
+            self._news_layout.addWidget(empty)
+        for event in events:
+            when = datetime.fromisoformat(event["time"])
+            colour = colours.get(event["impact"], "#8C8C8C")
+            past = when < now
+            text_colour = "#666666" if past else "#e6e6e6"
+            detail = f' (F: {esc(event["forecast"])} P: {esc(event["previous"])})' if event["forecast"] or event["previous"] else ""
+            label = qtw.QLabel(
+                f'<span style="color:{colour}">&#9679;</span> '
+                f'<span style="color:{text_colour}">{when:%H:%M} <b>{event["currency"]}</b> {esc(event["title"])}{detail}</span>'
+            )
+            label.setToolTip(f'{event["impact"]} impact')
+            label.setStyleSheet("background: transparent;")
+            label.setWordWrap(True)
+            self._news_layout.addWidget(label)
+        self._news_layout.addStretch(1)
 
     def btn_Start_Clicked(self):
     
@@ -151,6 +230,8 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.worker.positions.connect(self.position_panel.update_positions)
         self.worker.candles.connect(self.candle_chart.update_candles)
         self.worker.trade_levels.connect(self.candle_chart.update_trade_levels)
+        self.worker.news_events.connect(self.update_news)
+        self.worker.agent_plan.connect(self.agent_card.update_plan)
 
         self.thread.finished.connect(self._on_thread_finished)
         self.thread.start()
@@ -184,6 +265,7 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
         self.log_spinner.stop()
         self.settings_panel.set_running(False)
+        self.agent_card.show_idle(bool(settings.get("ai_agent_enabled")))
         if self._stopping:
             self._stopping = False
             self.pb_Start.setStyleSheet(" ")
@@ -231,6 +313,8 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
 
     def update_market_info(self, market_info):
 
+        self._news_instrument = market_info["instrument"]
+        self._render_news()
         if market_info["market"] is None:
             self.lb_market.setText("N/A")
             self.lb_instr.setText("N/A")

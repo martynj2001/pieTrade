@@ -590,6 +590,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
             <property name="frameShape">
              <enum>QFrame::Shape::Box</enum>
             </property>
@@ -599,6 +602,9 @@
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QFrame" name="frame_9">
+               <property name="styleSheet">
+                <string notr="true">background: transparent</string>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::Shape::NoFrame</enum>
                </property>
@@ -608,6 +614,9 @@
                <layout class="QVBoxLayout" name="verticalLayout_4">
                 <item>
                  <widget class="QLabel" name="label_2">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Open Market:</string>
                   </property>
@@ -618,6 +627,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_3">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Current Instrument:</string>
                   </property>
@@ -628,6 +640,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_5">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Open Positions</string>
                   </property>
@@ -635,6 +650,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_8">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Open Trades</string>
                   </property>
@@ -657,6 +675,9 @@
                  <height>0</height>
                 </size>
                </property>
+               <property name="styleSheet">
+                <string notr="true">background: transparent</string>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::Shape::NoFrame</enum>
                </property>
@@ -666,6 +687,9 @@
                <layout class="QVBoxLayout" name="verticalLayout_3">
                 <item>
                  <widget class="QLabel" name="lb_market">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -673,6 +697,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="lb_instr">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -680,6 +707,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="lb_openpos">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -687,6 +717,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="lb_opentrades">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -697,6 +730,9 @@
              </item>
              <item>
               <widget class="QFrame" name="frame_7">
+               <property name="styleSheet">
+                <string notr="true">background: transparent</string>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::Shape::NoFrame</enum>
                </property>
@@ -706,6 +742,9 @@
                <layout class="QVBoxLayout" name="verticalLayout_2">
                 <item>
                  <widget class="QLabel" name="label_4">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Account Balance:</string>
                   </property>
@@ -716,6 +755,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_12">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>NAV:</string>
                   </property>
@@ -723,6 +765,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_7">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Unrealised P/L:</string>
                   </property>
@@ -733,6 +778,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_6">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>Realised P/L:</string>
                   </property>
@@ -758,6 +806,9 @@
                  <height>0</height>
                 </size>
                </property>
+               <property name="styleSheet">
+                <string notr="true">background: transparent</string>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::Shape::NoFrame</enum>
                </property>
@@ -767,6 +818,9 @@
                <layout class="QVBoxLayout" name="verticalLayout_5">
                 <item>
                  <widget class="QLabel" name="lb_ac_balance">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -774,6 +828,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="lb_ac_NAV">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -781,6 +838,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="lb_ac_unrealPL">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -788,6 +848,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="lb_ac_realPL">
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
                   <property name="text">
                    <string>..</string>
                   </property>
@@ -885,12 +948,20 @@
              <item>
               <widget class="QStackedWidget" name="stackedWidget">
                <property name="currentIndex">
-                <number>3</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="pg_openpositions">
+                <property name="styleSheet">
+                 <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_10">
                  <item alignment="Qt::AlignmentFlag::AlignTop">
                   <widget class="QFrame" name="frame_23">
+                   <property name="styleSheet">
+                    <string notr="true">background:transparent</string>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
@@ -905,6 +976,9 @@
                         <pointsize>12</pointsize>
                         <bold>true</bold>
                        </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background:transparent</string>
                       </property>
                       <property name="text">
                        <string>Open Positions</string>
@@ -926,9 +1000,7 @@
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
-background-repeat: no-repeat;
-background-position: center;</string>
+                    <string notr="true">background:transparent</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
@@ -951,6 +1023,9 @@ background-position: center;</string>
                     </property>
                     <item>
                      <widget class="QScrollArea" name="positions_cards">
+                      <property name="styleSheet">
+                       <string notr="true">background:transparent</string>
+                      </property>
                       <property name="frameShape">
                        <enum>QFrame::Shape::NoFrame</enum>
                       </property>
@@ -975,9 +1050,17 @@ background-position: center;</string>
                 </layout>
                </widget>
                <widget class="QWidget" name="pg_candles">
+                <property name="styleSheet">
+                 <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_13">
                  <item>
                   <widget class="QFrame" name="frame_25">
+                   <property name="styleSheet">
+                    <string notr="true">background:transparent</string>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
@@ -992,6 +1075,9 @@ background-position: center;</string>
                         <pointsize>12</pointsize>
                         <bold>true</bold>
                        </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background:transparent</string>
                       </property>
                       <property name="text">
                        <string>Candles</string>
@@ -1013,9 +1099,7 @@ background-position: center;</string>
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
-background-repeat: no-repeat;
-background-position: center;</string>
+                    <string notr="true">background:transparent</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
@@ -1028,6 +1112,11 @@ background-position: center;</string>
                 </layout>
                </widget>
                <widget class="QWidget" name="pg_output">
+                <property name="styleSheet">
+                 <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_15">
                  <item alignment="Qt::AlignmentFlag::AlignTop">
                   <widget class="QFrame" name="frame_27">
@@ -1035,6 +1124,9 @@ background-position: center;</string>
                     <font>
                      <bold>true</bold>
                     </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background: transparent</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
@@ -1051,6 +1143,9 @@ background-position: center;</string>
                         <bold>true</bold>
                        </font>
                       </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: transparent</string>
+                      </property>
                       <property name="text">
                        <string>Output/Log</string>
                       </property>
@@ -1063,6 +1158,40 @@ background-position: center;</string>
                   </widget>
                  </item>
                  <item>
+                  <widget class="QFrame" name="news_ai">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background: transparent</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Shape::Box</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Shadow::Sunken</enum>
+                   </property>
+                   <property name="lineWidth">
+                    <number>2</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QFrame" name="frame_28">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -1071,15 +1200,13 @@ background-position: center;</string>
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">background-image: url(:/images/images/Icon_trans.png);
-background-repeat: no-repeat;
-background-position: center;</string>
+                    <string notr="true">background: transparent</string>
                    </property>
                    <property name="frameShape">
-                    <enum>QFrame::Shape::NoFrame</enum>
+                    <enum>QFrame::Shape::Box</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Shadow::Raised</enum>
+                    <enum>QFrame::Shadow::Sunken</enum>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_17">
                     <item>
@@ -1094,6 +1221,9 @@ background-position: center;</string>
                        <string notr="true">background: transparent;
 border: line 1px;</string>
                       </property>
+                      <property name="frameShape">
+                       <enum>QFrame::Shape::Box</enum>
+                      </property>
                      </widget>
                     </item>
                    </layout>
@@ -1102,9 +1232,17 @@ border: line 1px;</string>
                 </layout>
                </widget>
                <widget class="QWidget" name="pg_settings">
+                <property name="styleSheet">
+                 <string notr="true">background-image: url(:/images/images/Icon_trans.png);
+background-repeat: no-repeat;
+background-position: center;</string>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_17">
                  <item>
                   <widget class="QFrame" name="frame_29">
+                   <property name="styleSheet">
+                    <string>background:transparent</string>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
@@ -1119,6 +1257,9 @@ border: line 1px;</string>
                         <pointsize>12</pointsize>
                         <bold>true</bold>
                        </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string>background:transparent</string>
                       </property>
                       <property name="text">
                        <string>Bot Settings</string>
@@ -1140,7 +1281,7 @@ border: line 1px;</string>
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true"/>
+                    <string notr="true">background:transparent</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::Box</enum>

@@ -77,6 +77,56 @@ _SCHEMA = (
     )
     """,
     """
+    CREATE TABLE IF NOT EXISTS agent_decisions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        decision_time DATETIME,
+        target_hour DATETIME,
+        mode TEXT,
+        status TEXT,
+        error TEXT,
+        model TEXT,
+        market TEXT,
+        instrument TEXT,
+        reason TEXT,
+        fixed_market TEXT,
+        fixed_instrument TEXT,
+        baseline_instrument TEXT,
+        candidates TEXT,
+        excluded_news TEXT,
+        latency_s REAL,
+        input_tokens INTEGER,
+        output_tokens INTEGER
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS agent_outcomes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        decision_id INTEGER,
+        instrument TEXT,
+        range_pips REAL,
+        net_move_pips REAL,
+        efficiency REAL,
+        range_atr REAL,
+        candles INTEGER,
+        UNIQUE(decision_id, instrument)
+    )
+    """,
+    """
+    CREATE VIEW IF NOT EXISTS v_agent_eval AS
+    SELECT d.id, d.target_hour, d.mode, d.market, d.instrument AS agent_pair,
+        d.fixed_instrument, d.baseline_instrument,
+        a.efficiency AS agent_eff, a.range_atr AS agent_range_atr, a.net_move_pips AS agent_net,
+        f.efficiency AS fixed_eff, f.range_atr AS fixed_range_atr,
+        b.efficiency AS base_eff, b.range_atr AS base_range_atr,
+        (SELECT AVG(efficiency) FROM agent_outcomes WHERE decision_id=d.id) AS avg_eff,
+        (SELECT AVG(range_atr) FROM agent_outcomes WHERE decision_id=d.id) AS avg_range_atr
+    FROM agent_decisions d
+    LEFT JOIN agent_outcomes a ON a.decision_id=d.id AND a.instrument=d.instrument
+    LEFT JOIN agent_outcomes f ON f.decision_id=d.id AND f.instrument=d.fixed_instrument
+    LEFT JOIN agent_outcomes b ON b.decision_id=d.id AND b.instrument=d.baseline_instrument
+    WHERE d.status='ok'
+    """,
+    """
     CREATE TABLE IF NOT EXISTS trade_signals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         trade_id TEXT,
