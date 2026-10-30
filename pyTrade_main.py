@@ -137,7 +137,10 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self.comboBox.setEnabled(False)
         self.worker.on_set_strategy(self.comboBox.currentText())
         self.worker.apply_settings(settings.load())
-        self.settings_panel.settings_applied.connect(self.worker.apply_settings)
+        # Direct: the worker thread is busy in run_bot(), so a queued call would never run
+        self.settings_panel.settings_applied.connect(
+            self.worker.apply_settings, Qt.ConnectionType.DirectConnection
+        )
 
         self.thread.started.connect(self.worker.run_bot)
         self.worker.msg.connect(self.update_output)
