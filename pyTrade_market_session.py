@@ -72,7 +72,7 @@ def get_open_session(now: datetime):
 session_pairs = {  # candidate pairs the AI agent may choose from, per session
     "sydney": ["AUD_USD", "NZD_USD", "USD_JPY"],
     "tokyo": ["USD_JPY", "AUD_USD", "EUR_JPY"],
-    "london": ["EUR_USD", "GBP_USD", "USD_CHF", "EUR_GBP"],
+    "london": ["EUR_USD", "GBP_USD", "USD_CHF"], # Deleted EUR_GBP due to sL clipping
     "new_york": ["GBP_USD", "EUR_USD", "USD_CAD", "USD_JPY"],
 }
 

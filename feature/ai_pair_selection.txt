@@ -118,7 +118,7 @@ Behaviour:
  - Keep the line `if not position_closed:` and its surrounding structure unchanged,
    because later edits will anchor on it.
 
-//Prompt 1/Phase 2: News filter
+[x] Prompt 1/Phase 2: News filter
 
 Work in the current folder and branch. Do not create new
 branches or worktrees.

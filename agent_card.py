@@ -128,7 +128,7 @@ class AgentCard(QFrame):
         if not self._enabled:
             status, colour = "OFF", GREY
         elif shadow:
-            status, colour = "ON - shadow (not used for trading)", AMBER
+            status, colour = "ON - Shadow", AMBER
         else:
             status, colour = "ON - live", GREEN
         badge_text = status.split(" (")[0]
@@ -143,8 +143,8 @@ class AgentCard(QFrame):
         fixed = self._snapshot.get("fixed") if self._snapshot else None
         last = snapshot.get("last") if snapshot else None
 
-        self._labels["Market"].setText("Would trade market:" if shadow else "Market:")
-        self._labels["Pair"].setText("Would trade pair:" if shadow else "Pair:")
+        self._labels["Market"].setText("Market:")
+        self._labels["Pair"].setText("Pair:")
 
         values = {name: "-" for name in ROWS}
         colours = {name: TEXT for name in ROWS}

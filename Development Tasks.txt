@@ -23,6 +23,21 @@ TODO: Add an AI Pair selection ON/OFF to GUI (Setting Page).
 
 TODO: Optional AI upgrade: pass the model the upcoming events (time, currency, forecast vs previous) 
 so it can judge softer risk between the remaining pairs. Add that only after the hard rule is proven.
+
+TODO: EUR/GBP is clamped by SL logic and therefore SL/TP will never hit. Currently Intrument pair removed from table.
+ ***********************************************************************
+Prompt:
+
+Add a "stop clamp" filter to the AI agent. Make ONLY these changes: no refactors, tests or docs. Do not open config.py (use getattr(config, NAME, default)). Reply with a short summary.
+
+In pyTrade_agent.py _make_plan, where per-instrument stats are computed:
+- min_stop_pips = pyTrade_instruments.min_sl_dist(instr) / pyTrade_instruments.pip_size(instr)
+- stop_clamp_ratio = round(min_stop_pips / (atr_pips * 1.5), 2); skip if atr_pips is 0
+- add min_stop_pips and stop_clamp_ratio to the stats dict, so they appear in the candidates JSON and the model prompt
+- drop any candidate whose stop_clamp_ratio > getattr(config, "AGENT_MAX_STOP_CLAMP", 1.5) and log each dropped one at INFO
+- add one sentence to SYSTEM: "stop_clamp_ratio 1.0 is normal; higher means the bot's minimum stop is wider than the pair's natural stop, so avoid high values."
+************************************************************************
+
 -------------------------------------------------------------------------
 
 NOTES:

@@ -147,7 +147,7 @@ class AgentPlanner:
         except Exception as exc:
             row["status"] = "error"
             row["error"] = self._safe(f"{type(exc).__name__}: {exc}")
-            logger.error("Agent request failed: %s", row["error"])
+            logger.error("Agent request failed: %r | cause: %r", exc, exc.__cause__)
         try:
             trades_db.insert_row("agent_decisions", row)
         except (OSError, sqlite3.Error, ValueError):
@@ -186,6 +186,7 @@ class AgentPlanner:
         client = anthropic.Anthropic(
             api_key=getattr(config, "ANTHROPIC_API_KEY", None) or None,
             max_retries=1, timeout=30.0,
+            default_headers={"Accept-Encoding": "identity"}
         )
         started = time.monotonic()
         response = client.messages.create(
