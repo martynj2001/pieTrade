@@ -18,4 +18,6 @@ cd web && npm install && npx ng serve --host 0.0.0.0   # app at http://<host>:42
 
 - `PYTRADE_DB` overrides the database path; `CORS_ORIGINS` adds allowed origins (localhost and private LAN ranges are allowed by default).
 - The web app calls the API on the same hostname, port 8000 (see `web/src/environments/environment.ts`).
+- Run `python pyTrade_agent_report.py [--mode shadow] [--days 14]` for a read-only AI-agent analysis report.
+- AI-agent endpoints: `GET /api/agent/report` and `GET /api/agent/decisions`.
 - Tests: `pip install -r requirements-api-dev.txt && pytest tests`.

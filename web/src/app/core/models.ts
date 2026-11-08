@@ -38,3 +38,46 @@ export interface DrawdownResult {
   max_drawdown: number; max_drawdown_pct: number | null; peak_time: string | null; trough_time: string | null;
   curve: { time: string; trade_id: string; equity: number; drawdown: number }[];
 }
+
+export type AgentMode = 'all' | 'shadow' | 'live';
+
+export interface AgentComparison {
+  n: number;
+  agent_eff: number | null; fixed_eff: number | null; base_eff: number | null; any_eff: number | null;
+  agent_range_atr: number | null; fixed_range_atr: number | null;
+  base_range_atr: number | null; any_range_atr: number | null;
+  pct_beats_fixed_eff: number | null; pct_beats_base_eff: number | null;
+  pct_beats_fixed_range: number | null; pct_beats_base_range: number | null;
+}
+
+export interface AgentReliability {
+  total: number; ok_pct: number | null; avg_latency_s: number | null;
+  by_status: { status: string; count: number }[];
+}
+
+export interface AgentReportAvailable {
+  available: true; message: null; filters: { mode: AgentMode; days: number | null };
+  reliability: AgentReliability;
+  agreement: { n: number; pct_same_as_fixed: number | null; pct_same_as_baseline: number | null };
+  comparison: AgentComparison; disagreements: AgentComparison;
+  by_market: (AgentComparison & { market: string })[];
+  news_cost: {
+    decisions_with_news_exclusion: number; input_tokens: number;
+    output_tokens: number; est_cost_usd: number;
+  };
+  live_pnl: { market: string | null; trades: number; pnl: number | null; win_pct: number | null }[];
+  go_live: { ready: boolean; checks: { name: string; passed: boolean; value: string; target: string }[] };
+}
+
+export interface AgentReportUnavailable { available: false; message: string; }
+export type AgentReport = AgentReportAvailable | AgentReportUnavailable;
+
+export interface AgentDecision {
+  id: number; target_hour: string; mode: AgentMode; status: string; market: string | null;
+  instrument: string | null; fixed_instrument: string | null; baseline_instrument: string | null;
+  reason: string | null; latency_s: number | null; error: string | null;
+}
+
+export interface AgentDecisionPage {
+  total: number; limit: number; offset: number; items: AgentDecision[];
+}
