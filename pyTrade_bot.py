@@ -404,7 +404,11 @@ class pyTradeWorker(QObject):
         trade = False
 
         # Open API connection
-        client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
+        client = API(
+            access_token=config.OANDA_API_KEY.strip(),
+            environment=config.OANDA_ENVIRON,
+            request_params={"timeout": oanda.REQUEST_TIMEOUT},
+        )
      
                  
         while self.running:
@@ -452,10 +456,18 @@ class pyTradeWorker(QObject):
                     self._sleep(10)
                     continue
                 self.account.emit(summary)
-                # Check for new 15 min candle
-                if current_time.minute % 15 == 0 and current_time.second < 10:
-                    # Check if the 15 min interval has changed since the last check
-                    if last_checked != current_time.minute:
+                if self.running:
+                    # Check each new 15-minute bucket once, even if a request delayed the loop.
+                    candle_bucket = current_time.replace(
+                        minute=(current_time.minute // 15) * 15,
+                        second=0,
+                        microsecond=0,
+                    )
+                    if last_checked is None and not (
+                        current_time.minute % 15 == 0 and current_time.second < 10
+                    ):
+                        last_checked = candle_bucket
+                    if candle_bucket != last_checked:
                 
                         self.msg.emit("Checking for trade signals")
 
@@ -469,7 +481,7 @@ class pyTradeWorker(QObject):
                         else:
                             self.msg.emit("Failed to get Candles")
                             oanda_logger.error("API Call: Failed to get Candles")
-                            last_checked = current_time.minute
+                            last_checked = candle_bucket
                             self._sleep(10)
                             continue
                         
@@ -477,7 +489,7 @@ class pyTradeWorker(QObject):
                         if positions is None:
                             self.msg.emit("Failed to fetch open positions")
                             oanda_logger.error("API Call: Failed to get open positions")
-                            last_checked = current_time.minute
+                            last_checked = candle_bucket
                             self._sleep(10)
                             continue
 
@@ -613,6 +625,6 @@ class pyTradeWorker(QObject):
                             
                         self._publish_trade_levels()
 
-                        last_checked = current_time.minute # Update to prevent re-triggering
+                        last_checked = candle_bucket
             self._sleep(10)
         self.finished.emit()

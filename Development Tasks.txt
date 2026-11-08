@@ -49,3 +49,12 @@ adx is the M15 ADX(14) from the existing trade guards.
 
 trend_strength is defined as: |close − EMA50| / ATR. That is the same measure the trend filter uses.
 rejection_candle and pullback_detected are only filled for EMA Pullback trades.
+
+
+App Crash - -3 Nov 26:
+
+Recommended next steps
+
+Confirm the next run is launched through start_pytrade.sh and inspect app.log immediately afterward; it captures stderr, where an uncaught thread exception or Qt message may appear.
+Enable Python fault handling for the next run (PYTHONFAULTHANDLER=1) and add stage/heartbeat logging after the positions refresh and around the new-entry check. That would tell us whether the worker died or merely stopped logging.
+Investigate the intermittent OANDA 401 and connection-reset errors separately. They were followed by successful requests and don’t explain this abrupt cutoff by themselves.

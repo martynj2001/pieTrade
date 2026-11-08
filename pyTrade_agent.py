@@ -98,7 +98,11 @@ class AgentPlanner:
 
     def _client(self) -> API:
         if self._oanda is None:
-            self._oanda = API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
+            self._oanda = API(
+                access_token=config.OANDA_API_KEY.strip(),
+                environment=config.OANDA_ENVIRON,
+                request_params={"timeout": oanda.REQUEST_TIMEOUT},
+            )
         return self._oanda
 
     def _stats(self, instrument: str) -> Optional[dict]:

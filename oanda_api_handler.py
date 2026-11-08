@@ -19,6 +19,7 @@ import time
 import logging
 
 logger = logging.getLogger("oanda_api_handler")
+REQUEST_TIMEOUT = (5, 10)
 
 #define variables
 timeframe = config.TIMEFRAME    # will eventually be set by GUI & then AI
