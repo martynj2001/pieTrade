@@ -486,3 +486,25 @@ trades.entry_time looks like 2026-10-29T13:05:12.123456789Z.
 5. README.md: under the existing API section add two short bullets: the
    `python pyTrade_agent_report.py [--mode shadow] [--days 14]` command and the two new
    endpoints.
+
+
+
+
+[x] ***** Invalid Agent returns fix:
+
+Fix invalid AI replies in pyTrade_agent.py. Make ONLY these changes: no refactors,
+tests or docs. Do not open config.py. Reply with a short summary.
+
+In the Anthropic call inside _make_plan:
+- max_tokens=1500 (thinking tokens count toward it)
+- add output_config={"effort": "low"} to messages.create (if the SDK rejects that
+  keyword, pass extra_body={"output_config": {"effort": "low"}})
+- do NOT pass thinking, temperature, top_p or top_k
+- read the reply by joining ONLY content blocks where block.type == "text" (never
+  content[0], which may be a thinking block)
+- before validating the pick, normalise it: strip whitespace; lower-case the market and
+  replace spaces/hyphens with "_" ("New York" -> "new_york"); upper-case the instrument
+  and replace "/" with "_" ("eur/usd" -> "EUR_USD"). Validation against the real
+  candidate list stays exactly as it is.
+- when status is "invalid" or "error", store in the error column: the stop_reason, then
+  the first 300 characters of the raw text (never the API key)

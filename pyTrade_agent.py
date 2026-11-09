@@ -150,7 +150,8 @@ class AgentPlanner:
             plan = self._decide(target, model, row)
         except Exception as exc:
             row["status"] = "error"
-            row["error"] = self._safe(f"{type(exc).__name__}: {exc}")
+            stop_reason = getattr(exc, "stop_reason", type(exc).__name__)
+            row["error"] = self._safe(f"{stop_reason}: {str(exc)[:300]}")
             logger.error("Agent request failed: %r | cause: %r", exc, exc.__cause__)
         try:
             trades_db.insert_row("agent_decisions", row)
@@ -193,18 +194,24 @@ class AgentPlanner:
             default_headers={"Accept-Encoding": "identity"}
         )
         started = time.monotonic()
-        response = client.messages.create(
-            model=model,
-            max_tokens=300,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": json.dumps(
+        request = {
+            "model": model,
+            "max_tokens": 1500,
+            "system": SYSTEM,
+            "messages": [{"role": "user", "content": json.dumps(
                 {"hour_utc": target.isoformat(), "candidates": candidates})}],
-        )
+        }
+        try:
+            response = client.messages.create(**request, output_config={"effort": "low"})
+        except TypeError:
+            response = client.messages.create(
+                **request, extra_body={"output_config": {"effort": "low"}}
+            )
         row["latency_s"] = round(time.monotonic() - started, 2)
         row["input_tokens"] = response.usage.input_tokens
         row["output_tokens"] = response.usage.output_tokens
 
-        text = "".join(b.text for b in response.content if getattr(b, "type", "") == "text")
+        text = "".join(b.text for b in response.content if b.type == "text")
         cleaned = re.sub(r"```(?:json)?", "", text)
         start = cleaned.find("{")
         try:
@@ -213,14 +220,16 @@ class AgentPlanner:
             answer = None
         chosen = None
         if isinstance(answer, dict):
+            answer_market = str(answer.get("market", "")).strip().lower().replace(" ", "_").replace("-", "_")
+            answer_instrument = str(answer.get("instrument", "")).strip().upper().replace("/", "_")
             chosen = next(
                 (c for c in candidates
-                 if c["market"] == answer.get("market") and c["instrument"] == answer.get("instrument")),
+                 if c["market"] == answer_market and c["instrument"] == answer_instrument),
                 None,
             )
         if chosen is None:
             row["status"] = "invalid"
-            row["error"] = self._safe(text[:500])
+            row["error"] = self._safe(f"{response.stop_reason}: {text[:300]}")
             return None
 
         reason = str(answer.get("reason", ""))[:200]
