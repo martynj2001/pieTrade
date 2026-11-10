@@ -15,6 +15,8 @@ from pyTrade_trade_guards import TradeGuards
 from pyTrade_position_data import build_position_cards
 from pyTrade_trade_persistence import persist_filled_trades, persist_closed_trades, sync_closed_trades
 from pyTrade_signal_data import build_signal_data
+from pyTrade_news_filter import NewsFilter
+from pyTrade_agent import AgentPlanner
 import pyTrade_settings as settings
 
 import logging
@@ -44,6 +46,8 @@ class pyTradeWorker(QObject):
     positions = Signal(list)
     candles = Signal(str, object)
     trade_levels = Signal(list)
+    news_events = Signal(list)
+    agent_plan = Signal(dict)
    
     def __init__(
         self,
@@ -65,6 +69,11 @@ class pyTradeWorker(QObject):
             trade_guards if trade_guards is not None else TradeGuards()
         )
         self._pending_settings = None
+        self.strategy_mode = "dual"
+        self.news_filter = NewsFilter()
+        self.planner = AgentPlanner(self.trade_guards, self.news_filter)
+        self._agent_was_on = False
+        self._last_agent_snapshot = None
 
     def _strategy_engine(self, name):
         """Return the strategy engine matching a stored strategy name, or None."""
@@ -134,6 +143,49 @@ class pyTradeWorker(QObject):
             return
         self._pending_settings = None
         settings.apply_to_worker(values, self)
+
+    def select_market(self, now):
+        """Return the (market, instrument) to watch: the AI agent's pick, else the fixed session pair."""
+        fallback = market.get_open_session(now)
+        fallback["source"] = "fixed sessions"
+        enabled = bool(settings.get("ai_agent_enabled"))
+        if enabled != self._agent_was_on:
+            text = "AI agent enabled" if enabled else "AI agent disabled - using fixed market sessions"
+            self.msg.emit(text)
+            logging.getLogger("pyTrade").info(text)
+            self._agent_was_on = enabled
+        shadow = bool(getattr(config, "AGENT_SHADOW", True))
+        plan = None
+        if enabled and fallback["market"] is not None:
+            self.planner.tick(now)
+            plan = self.planner.current_plan(now)
+        chosen = fallback
+        if plan is not None and not shadow:
+            chosen = {
+                "market": plan["market"],
+                "instrument": plan["instrument"],
+                "source": "AI agent",
+                "reason": plan["reason"],
+            }
+        next_plan = self.planner.next_plan(now) if enabled else None
+        last = self.planner.last_result if enabled else None
+        snapshot = {
+            "enabled": enabled,
+            "shadow": shadow,
+            "market_open": fallback["market"] is not None,
+            "using": chosen["source"],
+            "current": dict(plan) if plan else None,
+            "next": dict(next_plan) if next_plan else None,
+            "fixed": (
+                {"market": fallback["market"], "instrument": fallback["instrument"]}
+                if fallback["market"] is not None else None
+            ),
+            "last": dict(last) if last else None,
+        }
+        if snapshot != self._last_agent_snapshot:
+            self._last_agent_snapshot = snapshot
+            self.agent_plan.emit({**snapshot, "updated": now.isoformat()})
+        return chosen
 
     def _try_entry(self, strategy, price, client, open_market, summary, logger, oanda_logger):
        
@@ -336,15 +388,27 @@ class pyTradeWorker(QObject):
 
         self.msg.emit(f"Primary Strategy: {self.strategy_primary.strategy_name}")
         logger.info("Primary Strategy: %s", self.strategy_primary.strategy_name)
-        self.msg.emit(f"Secondary Strategy: {self.strategy_secondary.strategy_name}")
-        logger.info("Secondary Strategy: %s", self.strategy_secondary.strategy_name)
+        last_mode = settings.load()["strategy_mode"]
+        self.msg.emit(f"Strategy mode: {last_mode}")
+        logger.info("Strategy mode: %s", last_mode)
+        if last_mode == "single":
+            secondary_line = "Secondary Strategy: not used (single-strategy mode)"
+        else:
+            secondary_line = f"Secondary Strategy: {self.strategy_secondary.strategy_name}"
+        self.msg.emit(secondary_line)
+        logger.info(secondary_line)
 
         last_checked = None
-        current_market = ""
+        last_news_minute = None
+        current_key = None
         trade = False
 
         # Open API connection
-        client =  API(access_token=config.OANDA_API_KEY.strip(), environment=config.OANDA_ENVIRON)
+        client = API(
+            access_token=config.OANDA_API_KEY.strip(),
+            environment=config.OANDA_ENVIRON,
+            request_params={"timeout": oanda.REQUEST_TIMEOUT},
+        )
      
                  
         while self.running:
@@ -353,27 +417,34 @@ class pyTradeWorker(QObject):
             current_time = datetime.now(timezone.utc)
             position_closed = False
         
+            # Refresh the GUI news card once a minute
+            if last_news_minute != current_time.strftime("%Y%m%d%H%M"):
+                last_news_minute = current_time.strftime("%Y%m%d%H%M")
+                self.news_events.emit(self.news_filter.events_today(current_time))
             # Get Open Market
-            open_market = market.get_open_session(current_time)
+            open_market = self.select_market(current_time)
             if open_market["market"] is not None:
-                if open_market["market"] != current_market:
-                    self.msg.emit(f"Trading {open_market['instrument']} in {open_market['market']}") 
-                    logger.info(f"Trading {open_market['instrument']} in {open_market['market']}")
+                market_key = (open_market["market"], open_market["instrument"])
+                if market_key != current_key:
+                    self.msg.emit(f"Trading {open_market['instrument']} in {open_market['market']} ({open_market['source']})") 
+                    logger.info(f"Trading {open_market['instrument']} in {open_market['market']} ({open_market['source']})")
                     self.market_info.emit(open_market)
-                    current_market = open_market["market"]
+                    current_key = market_key
                     self.market_open.emit(True)
                     trade = True
             elif open_market["market"] is None and trade:
-                self.msg.emit("Markets Closed")
-                logger.warning("Markets Closed: No active market session at %s UTC", str(current_time))
+                message = f"Markets Closed: No active market session at {current_time} UTC"
+                self.msg.emit(message)
+                logger.warning(message)
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
                 trade = False
+                current_key = None
             elif open_market["market"] is None and not trade:
                 self.market_info.emit({"market": None, "instrument": None})
                 self.market_open.emit(False)
-                self.msg.emit("Markets Closed")
                 trade = False
+                current_key = None
                 wait = (market.next_open(current_time) - current_time).total_seconds()
                 self._sleep(min(1000, max(1, wait)))
             if trade:
@@ -385,10 +456,18 @@ class pyTradeWorker(QObject):
                     self._sleep(10)
                     continue
                 self.account.emit(summary)
-                # Check for new 15 min candle
-                if current_time.minute % 15 == 0 and current_time.second < 10:
-                    # Check if the 15 min interval has changed since the last check
-                    if last_checked != current_time.minute:
+                if self.running:
+                    # Check each new 15-minute bucket once, even if a request delayed the loop.
+                    candle_bucket = current_time.replace(
+                        minute=(current_time.minute // 15) * 15,
+                        second=0,
+                        microsecond=0,
+                    )
+                    if last_checked is None and not (
+                        current_time.minute % 15 == 0 and current_time.second < 10
+                    ):
+                        last_checked = candle_bucket
+                    if candle_bucket != last_checked:
                 
                         self.msg.emit("Checking for trade signals")
 
@@ -402,7 +481,7 @@ class pyTradeWorker(QObject):
                         else:
                             self.msg.emit("Failed to get Candles")
                             oanda_logger.error("API Call: Failed to get Candles")
-                            last_checked = current_time.minute
+                            last_checked = candle_bucket
                             self._sleep(10)
                             continue
                         
@@ -410,7 +489,7 @@ class pyTradeWorker(QObject):
                         if positions is None:
                             self.msg.emit("Failed to fetch open positions")
                             oanda_logger.error("API Call: Failed to get open positions")
-                            last_checked = current_time.minute
+                            last_checked = candle_bucket
                             self._sleep(10)
                             continue
 
@@ -422,7 +501,8 @@ class pyTradeWorker(QObject):
                             )
                             oanda_logger.debug(f"Open positions: {positions}")
                             position_closed = False
-                            indicator_cache = {self.strategy_primary.strategy_name: price}
+                            raw_cache = {open_market["instrument"]: raw_price}
+                            indicator_cache = {(open_market["instrument"], self.strategy_primary.strategy_name): price}
                             for position in positions:
                                 pos = self.validator.extract_position_data(position)
 
@@ -449,9 +529,18 @@ class pyTradeWorker(QObject):
                                     )
                                 pos["strategy"] = pos_strategy.strategy_name
 
-                                if pos_strategy.strategy_name not in indicator_cache:
-                                    indicator_cache[pos_strategy.strategy_name] = pos_strategy.add_indicators(raw_price.copy())
-                                pos_price = indicator_cache[pos_strategy.strategy_name]
+                                # Validate each position on its OWN instrument's candles
+                                pos_instrument = pos["instrument"]
+                                if pos_instrument not in raw_cache:
+                                    raw_cache[pos_instrument] = oanda.get_Candles(client, pos_instrument)
+                                if raw_cache[pos_instrument] is None:
+                                    self.msg.emit(f"Skipping validation: no candles for {pos_instrument}")
+                                    oanda_logger.error("API Call: Failed to get candles for %s", pos_instrument)
+                                    continue
+                                cache_key = (pos_instrument, pos_strategy.strategy_name)
+                                if cache_key not in indicator_cache:
+                                    indicator_cache[cache_key] = pos_strategy.add_indicators(raw_cache[pos_instrument].copy())
+                                pos_price = indicator_cache[cache_key]
 
                                 pos["trade_time"] = oanda.getTradeTime(client, pos["tradeID"])
                                 if pos["trade_time"] is None:
@@ -490,16 +579,28 @@ class pyTradeWorker(QObject):
                                             self.msg.emit(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             logger.info(f'Position Closed - {pos["instrument"]}: {validity["reason"]}')
                                             position_closed = True
-                                break
 
                         if position_closed:
                             positions = oanda.open_positions(client)
                         if positions is not None:
                             self._publish_positions(client, positions)
 
-                        if not position_closed:  # No positions closed, check this candle for new entry signals
+                        if self.news_filter.is_pair_blocked(open_market["instrument"], current_time):
+                            message = f'News blackout - no new entries for {open_market["instrument"]}'
+                            self.msg.emit(message)
+                            logger.info(message)
+                        elif not position_closed:  # No positions closed, check this candle for new entry signals
 
-                            for index, strategy in enumerate((self.strategy_primary, self.strategy_secondary)):
+                            mode = self.strategy_mode
+                            if mode != last_mode:
+                                self.msg.emit(f"Strategy mode changed to: {mode}")
+                                logger.info("Strategy mode changed to: %s", mode)
+                                last_mode = mode
+                            strategies = (
+                                (self.strategy_primary,) if mode == "single"
+                                else (self.strategy_primary, self.strategy_secondary)
+                            )
+                            for index, strategy in enumerate(strategies):
                                 if index == 0:
                                     strat_price = price
                                 else:
@@ -510,7 +611,9 @@ class pyTradeWorker(QObject):
                                         break
                                 if self._try_entry(strategy, strat_price, client, open_market, summary, logger, oanda_logger):
                                     break
-                                if index == 0:
+                                if mode == "single":
+                                    self.msg.emit(f"Strategy conditions not met ({strategy.strategy_name})")
+                                elif index == 0:
                                     msg = (
                                         f"No trade signal from primary strategy ({strategy.strategy_name}) "
                                         f"- moving to secondary strategy ({self.strategy_secondary.strategy_name})"
@@ -522,6 +625,6 @@ class pyTradeWorker(QObject):
                             
                         self._publish_trade_levels()
 
-                        last_checked = current_time.minute # Update to prevent re-triggering
+                        last_checked = candle_bucket
             self._sleep(10)
         self.finished.emit()

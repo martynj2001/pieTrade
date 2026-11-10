@@ -24,22 +24,22 @@ const bar = (labels: string[], data: (number | null)[], label: string, color = '
     @if (summary) {
       <div class="cards">
         <div class="card"><span>Trades</span><b>{{ summary.trades }}</b></div>
-        <div class="card"><span>Win rate</span><b>{{ summary.win_rate | number: '1.1-1' }}%</b></div>
-        <div class="card"><span>Profit factor</span><b>{{ summary.profit_factor === null ? '∞ / n/a' : (summary.profit_factor | number: '1.2-2') }}</b></div>
+        <div class="card"><span>Win Rate</span><b>{{ summary.win_rate | number: '1.1-1' }}%</b></div>
+        <div class="card"><span>Profit Factor</span><b>{{ summary.profit_factor === null ? '∞ / n/a' : (summary.profit_factor | number: '1.2-2') }}</b></div>
         <div class="card"><span>Total P&amp;L</span><b>{{ summary.total_pnl | number: '1.2-2' }}</b></div>
-        <div class="card"><span>Avg hold (min)</span><b>{{ holding?.overall?.avg_minutes | number: '1.0-0' }}</b></div>
-        <div class="card"><span>Take profit hit</span><b>{{ exits?.take_profit?.pct | number: '1.1-1' }}%</b></div>
-        <div class="card"><span>Stop loss hit</span><b>{{ exits?.stop_loss?.pct | number: '1.1-1' }}%</b></div>
-        <div class="card"><span>Max drawdown</span>
+        <div class="card"><span>Avg Hold (min)</span><b>{{ holding?.overall?.avg_minutes | number: '1.0-0' }}</b></div>
+        <div class="card"><span>Take Profit Hit</span><b>{{ exits?.take_profit?.pct | number: '1.1-1' }}%</b></div>
+        <div class="card"><span>Stop Loss Hit</span><b>{{ exits?.stop_loss?.pct | number: '1.1-1' }}%</b></div>
+        <div class="card"><span>Max Drawdown</span>
           <b>{{ dd?.max_drawdown | number: '1.2-2' }}@if (dd?.max_drawdown_pct !== null) { ({{ dd?.max_drawdown_pct }}%) }</b></div>
       </div>
     }
     <div class="grid">
-      @if (equity) { <section class="wide"><h3>Equity &amp; drawdown</h3><app-chart [config]="equity" /></section> }
-      @if (pair) { <section><h3>Win rate by pair (%)</h3><app-chart [config]="pair" /></section> }
-      @if (session) { <section><h3>Win rate by session (%)</h3><app-chart [config]="session" /></section> }
+      @if (equity) { <section class="wide"><h3>Equity &amp; Drawdown</h3><app-chart [config]="equity" /></section> }
+      @if (pair) { <section><h3>Win Rate by Pair (%)</h3><app-chart [config]="pair" /></section> }
+      @if (session) { <section><h3>Win Rate by Session (%)</h3><app-chart [config]="session" /></section> }
       @if (direction) { <section><h3>Long vs short — P&amp;L</h3><app-chart [config]="direction" /></section> }
-      <section><h3>Win rate by ATR range (%)</h3>
+      <section><h3>Win Rate by ATR Range (%)</h3>
         @if (atr) { <app-chart [config]="atr" /> } @else { <p>No ATR data yet — signals are not being recorded by the bot.</p> }
       </section>
     </div>`,

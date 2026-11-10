@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import analytics, trades
+from .routers import agent, analytics, trades
 
 app = FastAPI(title="pyTrade API", version="0.1.0")
 
@@ -22,3 +22,4 @@ app.add_middleware(
 
 app.include_router(trades.router)
 app.include_router(analytics.router)
+app.include_router(agent.router)

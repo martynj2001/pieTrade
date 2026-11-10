@@ -10,6 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       <img class="logo" src="/images/logo_gui.png" alt="pyTrade">
       <nav>
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/agent" routerLinkActive="active">AI Agent</a>
         <a routerLink="/trades" routerLinkActive="active">Trades</a>
       </nav>
     </header>

@@ -2,28 +2,42 @@
 Development Pathway for pyTrade Bot
 
 
-TODO: Use FAST API & IONIC to develop a remote app that can monitor the Outputs from the Main app.
-
-This will require a fixed IP address or dynamic DNS subscription (noIP.com) and settign up the Startlink router to work with it.
-
-TODO: Add Logging output to GUI - use tabs on main page.
+TODO: Use FAST API & IONIC to develop a remote app that can monitor the Outputs from the Main app through Tailscale. 
 
 TODO: Automate strategy switching. Current Strategy switching is automatic - If the primairy Startegy (set by the GUI) does not find a
 entry signal then the secondary strategy is used. next step os probably to use an AI Agent to determine best startegy on the current 15M candle.
 
 TODO: Develop AI Agent to speed up and broaden automation -link to above.
 
-TODO: Build a Candles graph into the GUI - start to make the GUI look like a tradign dashboard. Use pyQtGraph library.
-
-TODO: Display time left in current Market/Time until Market closes/Time unstil swap market - display on GUI.
-
 TODO: Compile text files and build a concise README.md
 
-TODO: Refine market Session Engine to a) more accurate timings, b) stay in more productive markets longer.
+TODO: Add AI Agent to refine market Session Engine to a) more accurate timings, b) stay in more productive markets longer.
 
-TODO: Add an Account summery refresh button.
+TODO: Add an Account summery refresh button. REfresh the account details when pressed.
 
 TODO: Update position cards when we update the Account summery (inc. the Refresh Btn)
+
+TODO: Add AI Output (Pairs Plan) & News Events panels to teh Output/Log Page.
+
+TODO: Add an AI Pair selection ON/OFF to GUI (Setting Page).
+
+TODO: Optional AI upgrade: pass the model the upcoming events (time, currency, forecast vs previous) 
+so it can judge softer risk between the remaining pairs. Add that only after the hard rule is proven.
+
+TODO: EUR/GBP is clamped by SL logic and therefore SL/TP will never hit. Currently Intrument pair removed from table.
+ ***********************************************************************
+Prompt:
+
+Add a "stop clamp" filter to the AI agent. Make ONLY these changes: no refactors, tests or docs. Do not open config.py (use getattr(config, NAME, default)). Reply with a short summary.
+
+In pyTrade_agent.py _make_plan, where per-instrument stats are computed:
+- min_stop_pips = pyTrade_instruments.min_sl_dist(instr) / pyTrade_instruments.pip_size(instr)
+- stop_clamp_ratio = round(min_stop_pips / (atr_pips * 1.5), 2); skip if atr_pips is 0
+- add min_stop_pips and stop_clamp_ratio to the stats dict, so they appear in the candidates JSON and the model prompt
+- drop any candidate whose stop_clamp_ratio > getattr(config, "AGENT_MAX_STOP_CLAMP", 1.5) and log each dropped one at INFO
+- add one sentence to SYSTEM: "stop_clamp_ratio 1.0 is normal; higher means the bot's minimum stop is wider than the pair's natural stop, so avoid high values."
+************************************************************************
+
 -------------------------------------------------------------------------
 
 NOTES:
@@ -35,3 +49,12 @@ adx is the M15 ADX(14) from the existing trade guards.
 
 trend_strength is defined as: |close − EMA50| / ATR. That is the same measure the trend filter uses.
 rejection_candle and pullback_detected are only filled for EMA Pullback trades.
+
+
+App Crash - -3 Nov 26:
+
+Recommended next steps
+
+Confirm the next run is launched through start_pytrade.sh and inspect app.log immediately afterward; it captures stderr, where an uncaught thread exception or Qt message may appear.
+Enable Python fault handling for the next run (PYTHONFAULTHANDLER=1) and add stage/heartbeat logging after the positions refresh and around the new-entry check. That would tell us whether the worker died or merely stopped logging.
+Investigate the intermittent OANDA 401 and connection-reset errors separately. They were followed by successful requests and don’t explain this abrupt cutoff by themselves.

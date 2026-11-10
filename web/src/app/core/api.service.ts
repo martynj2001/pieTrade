@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   DrawdownResult, ExitReasons, Filters, GroupStat, HoldingTime, Meta, Summary, TradeDetail, TradePage,
-  AtrBucket,
+  AtrBucket, AgentDecisionPage, AgentMode, AgentReport,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -45,5 +45,17 @@ export class ApiService {
   exitReasons(f: Filters) { return this.analytics<ExitReasons>('exit-reasons', f); }
   drawdown(f: Filters, startingBalance?: number) {
     return this.analytics<DrawdownResult>('drawdown', f, { starting_balance: startingBalance });
+  }
+
+  agentReport(mode: AgentMode, days?: number): Observable<AgentReport> {
+    return this.http.get<AgentReport>(`${this.base}/api/agent/report`, {
+      params: this.params({ mode, days }),
+    });
+  }
+
+  agentDecisions(mode: AgentMode, days: number | undefined, limit: number, offset: number) {
+    return this.http.get<AgentDecisionPage>(`${this.base}/api/agent/decisions`, {
+      params: this.params({ mode, days, limit, offset }),
+    });
   }
 }
