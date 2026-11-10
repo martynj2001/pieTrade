@@ -50,7 +50,14 @@ def group_by(trades: list[dict], key: str) -> list[dict]:
 def overall(trades: list[dict]) -> dict:
     gp = sum(t["pnl_currency"] for t in trades if (t.get("pnl_currency") or 0) > 0)
     gl = -sum(t["pnl_currency"] for t in trades if (t.get("pnl_currency") or 0) < 0)
-    return {**_summarise(trades), "gross_profit": round(gp, 4), "gross_loss": round(gl, 4)}
+    trading_days = {t["entry_time"][:10] for t in trades if t.get("entry_time")}
+    avg_trades_per_day = round(len(trades) / len(trading_days), 2) if trading_days else None
+    return {
+        **_summarise(trades),
+        "gross_profit": round(gp, 4),
+        "gross_loss": round(gl, 4),
+        "avg_trades_per_day": avg_trades_per_day,
+    }
 
 
 def holding_time(trades: list[dict], key: Optional[str] = None) -> dict:

@@ -74,6 +74,7 @@ def test_db_is_read_only(client):
 def test_analytics_endpoints(client):
     s = client.get("/api/analytics/summary").json()
     assert s["trades"] == 3 and s["win_rate"] == 33.33 and s["profit_factor"] == 0.5
+    assert s["avg_trades_per_day"] == 1.0
     inst = {r["instrument"]: r for r in client.get("/api/analytics/by-instrument").json()}
     assert inst["EUR_USD"]["win_rate"] == 50.0
     assert client.get("/api/analytics/holding-time").json()["overall"]["avg_minutes"] == 140
@@ -87,3 +88,53 @@ def test_analytics_endpoints(client):
 
 def test_profit_factor_no_losses():
     assert an.profit_factor([{"pnl_currency": 5}]) is None
+
+
+def test_account_endpoint_is_lazy_and_cached(client, monkeypatch):
+    import sys
+    import types
+
+    from api.routers import account
+
+    calls = {"client": 0, "summary": 0}
+
+    def make_client(**kwargs):
+        calls["client"] += 1
+        assert kwargs == {"access_token": "token", "environment": "practice"}
+        return object()
+
+    def summary(_client, retries):
+        calls["summary"] += 1
+        assert retries == 1
+        return {
+            "balance": 10.0, "NAV": 11.0, "unrealizedPL": 1.0, "pl": 2.0,
+            "marginAvailable": 9.0, "marginUsed": 1.0,
+            "openPositionCount": 1, "openTradeCount": 2,
+        }
+
+    config = types.ModuleType("config")
+    config.OANDA_API_KEY = " token "
+    config.OANDA_ENVIRON = "practice"
+    handler = types.ModuleType("oanda_api_handler")
+    handler.account_summery = summary
+    oanda = types.ModuleType("oandapyV20")
+    oanda.API = make_client
+    monkeypatch.setitem(sys.modules, "config", config)
+    monkeypatch.setitem(sys.modules, "oanda_api_handler", handler)
+    monkeypatch.setitem(sys.modules, "oandapyV20", oanda)
+    monkeypatch.setattr(account, "_client", None)
+    monkeypatch.setattr(account, "_cache", {"value": None, "expires_at": 0.0})
+
+    first = client.get("/api/account")
+    second = client.get("/api/account")
+    assert first.status_code == 200 and first.json()["openTradeCount"] == 2
+    assert second.json() == first.json()
+    assert calls == {"client": 1, "summary": 1}
+
+
+def test_agent_outcomes_readme_endpoint(client):
+    from pathlib import Path
+
+    response = client.get("/api/agent/outcomes-readme")
+    assert response.status_code == 200
+    assert response.json()["markdown"] == Path("AI_Outcomes_README.md").read_text(encoding="utf-8")

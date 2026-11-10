@@ -33,7 +33,7 @@ Wait: 1-2 days, then check. Run SELECT status, COUNT(*) FROM agent_decisions GRO
 
 // Phase 4: Analysis report and web page (Prompt 4)
 
-Run Prompt 4 once a few days of shadow data exist, so you can check it against real numbers.
+[x] Run Prompt 4 once a few days of shadow data exist, so you can check it against real numbers.
 Verify: python pyTrade_agent_report.py --mode shadow, the /api/agent/report endpoint in /docs, and the /agent page.
 
 // Phase 5: Shadow run and analysis

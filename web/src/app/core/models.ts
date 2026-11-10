@@ -24,6 +24,7 @@ export interface TradeDetail { trade: Trade; signals: Signal[]; events: TradeEve
 export interface Summary {
   trades: number; wins: number; losses: number; win_rate: number | null; total_pnl: number;
   avg_pnl: number | null; profit_factor: number | null; gross_profit: number; gross_loss: number;
+  avg_trades_per_day: number | null;
 }
 export interface GroupStat extends Omit<Summary, 'gross_profit' | 'gross_loss'> { [key: string]: string | number | null; }
 export interface HoldingTime { overall: { trades: number; avg_minutes: number | null; median_minutes: number | null }; }
@@ -63,7 +64,7 @@ export interface AgentReportAvailable {
   by_market: (AgentComparison & { market: string })[];
   news_cost: {
     decisions_with_news_exclusion: number; input_tokens: number;
-    output_tokens: number; est_cost_usd: number;
+    output_tokens: number; est_cost_usd: number; est_cost_gbp: number;
   };
   live_pnl: { market: string | null; trades: number; pnl: number | null; win_pct: number | null }[];
   go_live: { ready: boolean; checks: { name: string; passed: boolean; value: string; target: string }[] };
@@ -80,4 +81,9 @@ export interface AgentDecision {
 
 export interface AgentDecisionPage {
   total: number; limit: number; offset: number; items: AgentDecision[];
+}
+
+export interface Account {
+  balance: number; NAV: number; unrealizedPL: number; pl: number;
+  marginAvailable: number; marginUsed: number; openPositionCount: number; openTradeCount: number;
 }

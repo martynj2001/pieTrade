@@ -7,7 +7,7 @@ Chart.register(...registerables);
   selector: 'app-chart',
   standalone: true,
   template: `<div class="box"><canvas #canvas></canvas></div>`,
-  styles: [`.box { position: relative; height: 260px; }`],
+  styles: [`.box { position: relative; height: 260px; } @media (max-width: 600px) { .box { height: 220px; } }`],
 })
 export class ChartComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) config!: ChartConfiguration;

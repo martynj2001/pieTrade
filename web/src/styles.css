@@ -1,1 +1,14 @@
-body{margin:0;font-family:system-ui,sans-serif}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; overflow-x: hidden; }
+select, input, button { min-height: 44px; font-size: 16px; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+main { padding: 1.5rem max(1rem, env(safe-area-inset-right)) 1.5rem max(1rem, env(safe-area-inset-left)); }
+.md table { border-collapse: collapse; width: 100%; }
+.md th, .md td { border: 1px solid #d1d5db; padding: .45rem .6rem; text-align: left; }
+.md pre, .md code { background: #f1f3f5; }
+.md pre { overflow: auto; padding: .75rem; }
+.md pre code { background: transparent; }
+@media (max-width: 600px) {
+	main { padding: 1rem max(1rem, env(safe-area-inset-right)) 1rem max(1rem, env(safe-area-inset-left)); }
+	h2 { font-size: 1.3rem; }
+}
