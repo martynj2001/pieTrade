@@ -24,7 +24,11 @@ import { Filters, Meta } from '../core/models';
   styles: [`
     .bar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; margin-bottom: 1rem; }
     label { display: flex; flex-direction: column; font-size: .8rem; color: #555; gap: .2rem; }
-    select, input, button { padding: .35rem .5rem; }`],
+    select, input, button { padding: .35rem .5rem; }
+    @media (max-width: 600px) {
+      label { flex: 1 1 140px; }
+      select, input { width: 100%; }
+    }`],
 })
 export class FilterBarComponent implements OnInit {
   private api = inject(ApiService);

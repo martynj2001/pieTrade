@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
-  DrawdownResult, ExitReasons, Filters, GroupStat, HoldingTime, Meta, Summary, TradeDetail, TradePage,
+  Account, DrawdownResult, ExitReasons, Filters, GroupStat, HoldingTime, Meta, Summary, TradeDetail, TradePage,
   AtrBucket, AgentDecisionPage, AgentMode, AgentReport,
 } from './models';
 
@@ -57,5 +57,11 @@ export class ApiService {
     return this.http.get<AgentDecisionPage>(`${this.base}/api/agent/decisions`, {
       params: this.params({ mode, days, limit, offset }),
     });
+  }
+
+  account() { return this.http.get<Account>(`${this.base}/api/account`); }
+
+  outcomesReadme() {
+    return this.http.get<{ markdown: string }>(`${this.base}/api/agent/outcomes-readme`);
   }
 }

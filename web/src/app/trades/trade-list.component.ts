@@ -13,7 +13,7 @@ import { FilterBarComponent } from '../shared/filter-bar.component';
     <h2>Trades</h2>
     <app-filter-bar (changed)="onFilters($event)" />
     @if (error) { <p class="err">{{ error }}</p> }
-    <table>
+    <div class="table-wrap"><table>
       <thead><tr>
         @for (c of cols; track c.key) {
           <th (click)="sortBy(c.key)">{{ c.label }}{{ sort === c.key ? (order === 'asc' ? ' ▲' : ' ▼') : '' }}</th>
@@ -36,9 +36,9 @@ import { FilterBarComponent } from '../shared/filter-bar.component';
             <td>{{ t.pnl_pips | number: '1.1-1' }}</td>
             <td>{{ t.duration_minutes }}</td>
           </tr>
-        } @empty { <tr><td colspan="12">No trades.</td></tr> }
+        } @empty { <tr><td colspan="12">No Trades.</td></tr> }
       </tbody>
-    </table>
+    </table></div>
     <div class="pager">
       <button (click)="go(-1)" [disabled]="offset === 0">Prev</button>
       <span>{{ page ? offset + 1 : 0 }}–{{ offset + (page?.items?.length ?? 0) }} of {{ page?.total ?? 0 }}</span>
@@ -46,7 +46,7 @@ import { FilterBarComponent } from '../shared/filter-bar.component';
     </div>`,
   styles: [`
     table { border-collapse: collapse; width: 100%; font-size: .9rem; }
-    th, td { padding: .4rem .6rem; border-bottom: 1px solid #ddd; text-align: left; }
+    th, td { padding: .4rem .6rem; border-bottom: 1px solid #ddd; text-align: left; white-space: nowrap; }
     th { cursor: pointer; background: #f4f4f4; white-space: nowrap; }
     .pos { color: #0a7d2c; } .neg { color: #c0392b; } .err { color: #c0392b; }
     .pager { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }`],
@@ -62,11 +62,11 @@ export class TradeListComponent {
   offset = 0;
   cols = [
     { key: 'trade_id', label: 'ID' }, { key: 'instrument', label: 'Pair' },
-    { key: 'direction', label: 'Dir' }, { key: 'session', label: 'Session' },
-    { key: 'entry_time', label: 'Entry' }, { key: 'exit_time', label: 'Exit' },
-    { key: 'entry_price', label: 'Entry px' }, { key: 'exit_price', label: 'Exit px' },
+    { key: 'direction', label: 'Direction' }, { key: 'session', label: 'Session' },
+    { key: 'entry_time', label: 'Entry Time' }, { key: 'exit_time', label: 'Exit Time' },
+    { key: 'entry_price', label: 'Entry Px' }, { key: 'exit_price', label: 'Exit Px' },
     { key: 'status', label: 'Status' }, { key: 'pnl_currency', label: 'P&L' },
-    { key: 'pnl_pips', label: 'Pips' }, { key: 'duration_minutes', label: 'Mins' },
+    { key: 'pnl_pips', label: 'Pips' }, { key: 'duration_minutes', label: 'Duration (Min)' },
   ];
 
   onFilters(f: Filters) { this.filters = f; this.offset = 0; this.load(); }

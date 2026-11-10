@@ -7,6 +7,7 @@ MIN_HOURS = 150
 MIN_OK_PCT = 95
 MIN_BEAT_FIXED_PCT = 55
 MIN_SESSION_HOURS = 20
+USD_TO_GBP = 0.76  # update manually
 
 _UNAVAILABLE_MESSAGE = (
     "AI-agent analysis data is not available. Run the bot with the AI agent toggle ON, "
@@ -295,6 +296,7 @@ def build_report(conn: sqlite3.Connection, mode: str = "all", days: int | None =
                 6,
             ),
         }
+        news_cost["est_cost_gbp"] = round(news_cost["est_cost_usd"] * USD_TO_GBP, 6)
 
         decision_day_clause = ""
         live_params: list[Any] = [mode, mode]
