@@ -370,8 +370,8 @@ class pyTradeWorker(QObject):
         # ----------------------------------------------------------------------------------
 
         # Change the version after every major modification, change or update 
-        self.msg.emit("pyTrade version 1.3 last modified 29 Oct 2026")
-        logger.info("pyTrade version 1.3 last modified 29 Oct 2026")
+        self.msg.emit("pyTrade version 2.1 last modified 10 Nov 2026")
+        logger.info("pyTrade version 2.1 last modified 10 Nov 2026")
 
         self.msg.emit("pyTrade Bot started and Log created.")
         logger.info("pyTrade Bot started and Log created")
