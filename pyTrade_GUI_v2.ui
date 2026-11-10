@@ -1037,8 +1037,8 @@ background-position: center;</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>619</width>
-                         <height>527</height>
+                         <width>100</width>
+                         <height>30</height>
                         </rect>
                        </property>
                       </widget>
@@ -1160,7 +1160,7 @@ background-position: center;</string>
                  <item>
                   <widget class="QFrame" name="news_ai">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -1174,7 +1174,7 @@ background-position: center;</string>
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
-                     <height>150</height>
+                     <height>400</height>
                     </size>
                    </property>
                    <property name="styleSheet">
@@ -1403,6 +1403,7 @@ background-position: center;</string>
  </widget>
  <resources>
   <include location="resources.qrc"/>
+  <include location="../.designer/backup/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pyTrade_GUI_v2LnDQpj.ui'
+## Form generated from reading UI file 'pyTrade_GUI_v2YRxruP.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QHBoxLayout,
     QLabel, QMainWindow, QPlainTextEdit, QPushButton,
     QScrollArea, QSizePolicy, QStackedWidget, QVBoxLayout,
     QWidget)
+import resources_rc
 import resources_rc
 
 class Ui_pyTrade_v2(object):
@@ -586,7 +587,7 @@ class Ui_pyTrade_v2(object):
         self.positions_cards.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 619, 527))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 100, 30))
         self.positions_cards.setWidget(self.scrollAreaWidgetContents)
 
         self.horizontalLayout_15.addWidget(self.positions_cards)
@@ -661,13 +662,10 @@ class Ui_pyTrade_v2(object):
 
         self.news_ai = QFrame(self.pg_output)
         self.news_ai.setObjectName(u"news_ai")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        sizePolicy7.setHorizontalStretch(0)
-        sizePolicy7.setVerticalStretch(0)
-        sizePolicy7.setHeightForWidth(self.news_ai.sizePolicy().hasHeightForWidth())
-        self.news_ai.setSizePolicy(sizePolicy7)
+        sizePolicy2.setHeightForWidth(self.news_ai.sizePolicy().hasHeightForWidth())
+        self.news_ai.setSizePolicy(sizePolicy2)
         self.news_ai.setMinimumSize(QSize(0, 150))
-        self.news_ai.setMaximumSize(QSize(16777215, 150))
+        self.news_ai.setMaximumSize(QSize(16777215, 400))
         self.news_ai.setStyleSheet(u"background: transparent")
         self.news_ai.setFrameShape(QFrame.Shape.Box)
         self.news_ai.setFrameShadow(QFrame.Shadow.Sunken)
@@ -740,11 +738,11 @@ class Ui_pyTrade_v2(object):
 
         self.frame_20 = QFrame(self.frame_11)
         self.frame_20.setObjectName(u"frame_20")
-        sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-        sizePolicy8.setHorizontalStretch(0)
-        sizePolicy8.setVerticalStretch(0)
-        sizePolicy8.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
-        self.frame_20.setSizePolicy(sizePolicy8)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.frame_20.sizePolicy().hasHeightForWidth())
+        self.frame_20.setSizePolicy(sizePolicy7)
         self.frame_20.setMaximumSize(QSize(16777215, 30))
         self.frame_20.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_20.setFrameShadow(QFrame.Shadow.Raised)

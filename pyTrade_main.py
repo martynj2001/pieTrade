@@ -125,6 +125,9 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
     def _init_news_card(self) -> None:
         """Build the news list inside the news_ai frame and load today's cached events."""
         layout = self.news_ai.layout() or qtw.QVBoxLayout(self.news_ai)
+        news_policy = self.news_ai.sizePolicy()
+        news_policy.setVerticalPolicy(qtw.QSizePolicy.Policy.Preferred)
+        self.news_ai.setSizePolicy(news_policy)
         self._news_body = qtw.QWidget()
         self._news_body.setObjectName("newsBody")
         self._news_body.setStyleSheet("QWidget#newsBody { background: transparent; background-image: none; }")
@@ -133,18 +136,20 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
         self._news_layout.setSpacing(2)
         scroll = qtw.QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setSizeAdjustPolicy(qtw.QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
         scroll.setFrameShape(qtw.QFrame.Shape.NoFrame)
         scroll.setStyleSheet("QScrollArea, QScrollArea > QWidget > QWidget { background: transparent; background-image: none; }")
         scroll.setWidget(self._news_body)
+        self._news_scroll = scroll
         # News card and AI agent card sit side by side inside news_ai
         container = qtw.QWidget()
         container.setObjectName("newsAgentRow")
         container.setStyleSheet("QWidget#newsAgentRow { background: transparent; background-image: none; }")
-        row = qtw.QHBoxLayout(container)
-        row.setContentsMargins(0, 0, 0, 0)
+        column = qtw.QVBoxLayout(container)
+        column.setContentsMargins(0, 0, 0, 0)
         self.agent_card = AgentCard()
-        row.addWidget(scroll, 1)
-        row.addWidget(self.agent_card, 1)
+        column.addWidget(scroll)
+        column.addWidget(self.agent_card, 1)
         layout.addWidget(container)
         self.settings_panel.settings_applied.connect(
             lambda values: self.agent_card.set_enabled(bool(values.get("ai_agent_enabled")))
@@ -195,7 +200,9 @@ class App_pyTrade(qtw.QMainWindow, Ui_pyTrade_v2):
             label.setStyleSheet("background: transparent;")
             label.setWordWrap(True)
             self._news_layout.addWidget(label)
-        self._news_layout.addStretch(1)
+        self._news_layout.addSpacing(header.fontMetrics().height())
+        self._news_body.adjustSize()
+        self._news_scroll.updateGeometry()
 
     def btn_Start_Clicked(self):
     
