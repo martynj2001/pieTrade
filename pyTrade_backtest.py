@@ -101,11 +101,11 @@ def _guard_passes(guards: TradeGuards, engine: Any, candles: pd.DataFrame,
 
 
 def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: list[Any],
-             guards: TradeGuards, split: pd.Timestamp) -> list[dict[str, Any]]:
+             guards: TradeGuards, split: pd.Timestamp, spread_mult: float = 1.0) -> list[dict[str, Any]]:
     """Simulate one position at a time, using only candles available at each decision."""
     frames = [engine.add_indicators(candles.copy()) for engine in engines]
     hourly_close_times = hourly["time"] + pd.Timedelta(hours=1)
-    half_spread = SPREAD_PIPS.get(pair, 1.2) * pyTrade_instruments.pip_size(pair) / 2
+    half_spread = SPREAD_PIPS.get(pair, 1.2) * spread_mult * pyTrade_instruments.pip_size(pair) / 2
     trades: list[dict[str, Any]] = []
     position = None
 
@@ -200,6 +200,7 @@ def main() -> int:
     parser.add_argument("--months", type=int, default=12)
     parser.add_argument("--oos-months", type=int, default=4)
     parser.add_argument("--secondary", choices=("none", "breakout", "breakout_v2", "range"), default="none")
+    parser.add_argument("--spread-mult", type=float, default=1.0)
     args = parser.parse_args()
     pairs = [pair.strip().upper() for pair in args.pairs.split(",")]
     if not pairs or any(not re.fullmatch(r"[A-Z]{3}_[A-Z]{3}", pair) for pair in pairs):
@@ -208,6 +209,8 @@ def main() -> int:
         parser.error("--pairs must not contain duplicates")
     if args.months <= 1 or not 0 < args.oos_months < args.months:
         parser.error("--months must exceed --oos-months, and both must be positive")
+    if not math.isfinite(args.spread_mult) or args.spread_mult < 0:
+        parser.error("--spread-mult must be a finite non-negative number")
     try:
         engines = make_engines(args.secondary)
         end = pd.Timestamp.now(tz="UTC").floor("15min")
@@ -220,7 +223,7 @@ def main() -> int:
             hourly = load_candles(pair, "H1", start, end)
             if candles.empty or hourly.empty:
                 raise ValueError(f"No complete candle history for {pair}")
-            trades.extend(run_pair(pair, candles, hourly, engines, TradeGuards(), split))
+            trades.extend(run_pair(pair, candles, hourly, engines, TradeGuards(), split, args.spread_mult))
         path = Path("results") / f"{args.secondary}.csv"
         path.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(trades, columns=RESULT_COLUMNS).sort_values("exit_time").to_csv(path, index=False)
