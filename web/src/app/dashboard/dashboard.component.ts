@@ -5,14 +5,16 @@ import { forkJoin } from 'rxjs';
 import { ApiService } from '../core/api.service';
 import { DrawdownResult, ExitReasons, Filters, HoldingTime, Summary } from '../core/models';
 import { AccountSummaryComponent } from '../shared/account-summary.component';
+import { BotStatusComponent } from '../shared/bot-status.component';
 import { ChartComponent } from '../shared/chart.component';
 import { FilterBarComponent } from '../shared/filter-bar.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FilterBarComponent, ChartComponent, DecimalPipe, AccountSummaryComponent],
+  imports: [FilterBarComponent, ChartComponent, DecimalPipe, AccountSummaryComponent, BotStatusComponent],
   template: `
+    <app-bot-status />
     <app-account-summary />
     <h2>Performance Dashboard</h2>
     <app-filter-bar (changed)="load($event)" />

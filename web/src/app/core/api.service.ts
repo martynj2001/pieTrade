@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Account, DrawdownResult, ExitReasons, Filters, GroupStat, HoldingTime, Meta, Summary, TradeDetail, TradePage,
-  AtrBucket, AgentDecisionPage, AgentMode, AgentReport,
+  AtrBucket, AgentDecisionPage, AgentMode, AgentReport, BotStatus,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -60,6 +60,8 @@ export class ApiService {
   }
 
   account() { return this.http.get<Account>(`${this.base}/api/account`); }
+
+  botStatus() { return this.http.get<BotStatus>(`${this.base}/api/bot-status`); }
 
   outcomesReadme() {
     return this.http.get<{ markdown: string }>(`${this.base}/api/agent/outcomes-readme`);

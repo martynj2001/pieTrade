@@ -109,10 +109,21 @@ class pyTradeWorker(QObject):
             })
         self.trade_levels.emit(levels)
 
+    def _heartbeat(self, force: bool = False) -> None:
+        """Publish the current bot state at most once every 15 seconds."""
+        now = time.monotonic()
+        if force or self._last_heartbeat is None or now - self._last_heartbeat >= 15:
+            trades_db.write_heartbeat(
+                self._hb["state"], market=self._hb["market"], instrument=self._hb["instrument"],
+                last_signal_check=self._hb["last_check"], started_at=self._started_at,
+            )
+            self._last_heartbeat = now
+
     def _sleep(self, seconds):
         # Sleep in short slices so stop_bot() takes effect promptly
         end = time.monotonic() + seconds
         while self.running and time.monotonic() < end:
+            self._heartbeat()
             time.sleep(min(0.2, max(0, end - time.monotonic())))
 
     def stop_bot(self):
@@ -356,6 +367,10 @@ class pyTradeWorker(QObject):
 
 
     def run_bot(self):
+        self._started_at = datetime.now(timezone.utc).isoformat()
+        self._hb = {"state": "starting", "market": None, "instrument": None, "last_check": None}
+        self._last_heartbeat = None
+        self._heartbeat()
 
         # Logging is configured by pyTrade_logging.setup_logging() at app startup ----------
 
@@ -412,6 +427,7 @@ class pyTradeWorker(QObject):
      
                  
         while self.running:
+            self._heartbeat()
             self._apply_pending_settings()
 
             current_time = datetime.now(timezone.utc)
@@ -423,6 +439,10 @@ class pyTradeWorker(QObject):
                 self.news_events.emit(self.news_filter.events_today(current_time))
             # Get Open Market
             open_market = self.select_market(current_time)
+            if open_market["market"] is not None:
+                self._hb.update(state="trading", market=open_market["market"], instrument=open_market["instrument"])
+            else:
+                self._hb.update(state="markets_closed", market=None, instrument=None)
             if open_market["market"] is not None:
                 market_key = (open_market["market"], open_market["instrument"])
                 if market_key != current_key:
@@ -467,6 +487,7 @@ class pyTradeWorker(QObject):
                         current_time.minute % 15 == 0 and current_time.second < 10
                     ):
                         last_checked = candle_bucket
+                        self._hb["last_check"] = datetime.now(timezone.utc).isoformat()
                     if candle_bucket != last_checked:
                 
                         self.msg.emit("Checking for trade signals")
@@ -482,6 +503,7 @@ class pyTradeWorker(QObject):
                             self.msg.emit("Failed to get Candles")
                             oanda_logger.error("API Call: Failed to get Candles")
                             last_checked = candle_bucket
+                            self._hb["last_check"] = datetime.now(timezone.utc).isoformat()
                             self._sleep(10)
                             continue
                         
@@ -490,6 +512,7 @@ class pyTradeWorker(QObject):
                             self.msg.emit("Failed to fetch open positions")
                             oanda_logger.error("API Call: Failed to get open positions")
                             last_checked = candle_bucket
+                            self._hb["last_check"] = datetime.now(timezone.utc).isoformat()
                             self._sleep(10)
                             continue
 
@@ -626,5 +649,8 @@ class pyTradeWorker(QObject):
                         self._publish_trade_levels()
 
                         last_checked = candle_bucket
+                        self._hb["last_check"] = datetime.now(timezone.utc).isoformat()
             self._sleep(10)
+        self._hb["state"] = "stopped"
+        self._heartbeat(force=True)
         self.finished.emit()
