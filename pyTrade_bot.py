@@ -268,6 +268,8 @@ class pyTradeWorker(QObject):
                         signal,
                     )
                 )
+            elif strategy_name == "Range_Reversion":
+                guard_passed = self.trade_guards.validate_range(price, h1_price, signal)
             else:
                 guard_passed = False
                 logger.error(

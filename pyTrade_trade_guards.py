@@ -1,9 +1,13 @@
 """Central qualification checks for pyTrade entry signals."""
 
 import logging
+import math
 from typing import Optional
 
 import pandas as pd
+import pandas_ta_classic as ta
+
+import config
 
 
 class TradeGuards:
@@ -288,3 +292,32 @@ class TradeGuards:
 
         self.logger.info("%s breakout signal passed all guards", normalized)
         return True
+
+    def validate_range(
+        self,
+        m15_df: pd.DataFrame,
+        h1_df: pd.DataFrame,
+        direction: str,
+    ) -> bool:
+        """Require weak M15 ADX and H1 price close to its EMA50."""
+        if self._normalize_direction(direction) is None:
+            return False
+        if not isinstance(h1_df, pd.DataFrame) or h1_df.empty or not {"high", "low", "close"}.issubset(h1_df.columns):
+            return False
+        try:
+            adx = self.calculate_adx(m15_df, length=getattr(config, "RANGE_ADX_LENGTH", 14)).iloc[-1]
+            high = pd.to_numeric(h1_df["high"], errors="raise")
+            low = pd.to_numeric(h1_df["low"], errors="raise")
+            close = pd.to_numeric(h1_df["close"], errors="raise")
+            ema = close.ewm(span=50, adjust=False, min_periods=50).mean().iloc[-1]
+            atr_series = ta.atr(high, low, close, length=14)
+            if atr_series is None:
+                return False
+            atr = atr_series.iloc[-1]
+            latest = close.iloc[-1]
+            if not all(math.isfinite(float(value)) for value in (adx, ema, atr, latest)) or atr <= 0:
+                return False
+            return bool(adx < getattr(config, "RANGE_ADX_MAX", 20.0) and
+                        abs(latest - ema) <= getattr(config, "RANGE_H1_ATR_MULTIPLIER", 1.5) * atr)
+        except (TypeError, ValueError, KeyError, IndexError):
+            return False

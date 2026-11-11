@@ -95,7 +95,7 @@ def _guard_passes(guards: TradeGuards, engine: Any, candles: pd.DataFrame,
         if column not in candles or pd.isna(candles[column].iloc[-1]):
             return False
         return guards.validate_breakout(candles, hourly, float(candles[column].iloc[-1]), direction)
-    if name == "Range_Reversion" and hasattr(guards, "validate_range"):
+    if name == "Range_Reversion":
         return guards.validate_range(candles, hourly, direction)
     raise ValueError(f"No trade guard configured for strategy {name}")
 
