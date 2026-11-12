@@ -14,6 +14,15 @@ import matplotlib.pyplot as plt
 
 
 PRIMARY_STRATEGIES = {"EMA_TrendFollowing", "TrendFollowing"}
+SECONDARIES = ("breakout_v2", "breakout", "range", "none")
+
+
+def _run_parts(name: str) -> tuple[str | None, str]:
+    """Split a run name into its secondary and optional group suffix."""
+    for secondary in SECONDARIES:
+        if name == secondary or name.startswith(f"{secondary}_"):
+            return secondary, name[len(secondary):]
+    return None, ""
 
 
 def metrics(trades: pd.DataFrame, weeks: float | None) -> dict[str, Any]:
@@ -146,7 +155,7 @@ def main() -> int:
     secondary_rows = []
     breakdowns = []
     for name, trades in runs.items():
-        if name == "none":
+        if _run_parts(name)[0] == "none":
             continue
         secondary = trades.loc[~trades["strategy"].isin(PRIMARY_STRATEGIES)]
         secondary_pass[name] = not secondary.empty
@@ -171,12 +180,15 @@ def main() -> int:
     _table(["Run", "Strategy", *metric_headers, "Break-even %", "Avg R >= 0.10", "PF >= 1.2", "Trades >= 60"], secondary_rows)
 
     print("\nVersus none")
-    baseline = run_results.get("none")
     comparisons = []
     eligible = []
+    zero_baselines = set()
     for name, result in run_results.items():
-        if name == "none":
+        secondary, group = _run_parts(name)
+        if secondary == "none":
             continue
+        baseline_name = f"none{group}" if secondary is not None else None
+        baseline = run_results.get(baseline_name) if baseline_name else None
         difference = ratio = None
         if baseline and baseline["trades"] and result["trades"]:
             difference = result["total_r"] - baseline["total_r"]
@@ -184,13 +196,15 @@ def main() -> int:
                 ratio = result["drawdown"] / baseline["drawdown"]
             elif result["drawdown"] > 0:
                 ratio = math.inf
+            if baseline["drawdown"] == 0:
+                zero_baselines.add(baseline_name)
         passed = difference is not None and difference > 0 and ratio is not None and ratio <= 1.5
-        comparisons.append([name, _number(difference), _number(ratio), "PASS" if passed else "FAIL"])
+        comparisons.append([name, baseline_name or "-", _number(difference), _number(ratio), "PASS" if passed else "FAIL"])
         if passed and secondary_pass.get(name, False):
             eligible.append((result["total_r"], name))
-    _table(["Run", "Total R difference", "Drawdown ratio", "Result"], comparisons)
-    if baseline and baseline["drawdown"] == 0:
-        print("A zero baseline drawdown makes the ratio undefined or infinite; comparison fails.")
+    _table(["Run", "Baseline", "Total R difference", "Drawdown ratio", "Result"], comparisons)
+    if zero_baselines:
+        print("A zero baseline drawdown makes the ratio undefined or infinite; comparison fails: " + ", ".join(sorted(zero_baselines)))
 
     print("\nSecondary breakdowns")
     _table(["Run", "Strategy", "Group", "Value", "Trades", "Avg R"], breakdowns)

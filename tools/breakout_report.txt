@@ -1,0 +1,69 @@
+
+Breakout
+--------
+Closed trades: 37
+Win rate: 27.0% (n=37)
+Average R: -0.10 (n=37)
+Average minutes held (wins): 35.60 (n=10)
+Average minutes held (losses): 15.42 (n=24)
+Losses closed within 60 minutes: 100.0% (n=24)
+Win rate by UTC entry hour:
+  00:00: 0.0% (n=2)
+  01:00: 0.0% (n=2)
+  02:00: 60.0% (n=5)
+  03:00: 0.0% (n=1)
+  04:00: 0.0% (n=1)
+  07:00: 0.0% (n=2)
+  08:00: 0.0% (n=1)
+  09:00: 33.3% (n=3)
+  10:00: 33.3% (n=3)
+  11:00: 0.0% (n=3)
+  12:00: 100.0% (n=1)
+  13:00: 16.7% (n=6)
+  14:00: 0.0% (n=2)
+  15:00: 100.0% (n=2)
+  16:00: 0.0% (n=1)
+  17:00: 50.0% (n=2)
+Win rate by ADX:
+  <25: 0.0% (n=1)
+  25-35: 31.6% (n=19)
+  >35: 23.5% (n=17)
+Win rate by Trend strength:
+  <1: - (n=0)
+  1-2: 50.0% (n=2)
+  >2: 25.7% (n=35)
+
+EMA_TrendFollowing
+------------------
+Closed trades: 27
+Win rate: 48.1% (n=27)
+Average R: 0.11 (n=27)
+Average minutes held (wins): 130.08 (n=13)
+Average minutes held (losses): 198.79 (n=14)
+Losses closed within 60 minutes: 14.3% (n=14)
+Win rate by UTC entry hour:
+  00:00: 100.0% (n=1)
+  01:00: 0.0% (n=1)
+  02:00: 0.0% (n=2)
+  06:00: 0.0% (n=1)
+  07:00: 0.0% (n=2)
+  08:00: 33.3% (n=3)
+  09:00: 0.0% (n=1)
+  10:00: 100.0% (n=1)
+  11:00: 100.0% (n=3)
+  12:00: 100.0% (n=2)
+  13:00: 100.0% (n=1)
+  14:00: 100.0% (n=1)
+  15:00: 50.0% (n=2)
+  16:00: 0.0% (n=2)
+  17:00: 50.0% (n=2)
+  20:00: 0.0% (n=1)
+  22:00: 100.0% (n=1)
+Win rate by ADX:
+  <25: 0.0% (n=1)
+  25-35: 50.0% (n=10)
+  >35: 100.0% (n=3)
+Win rate by Trend strength:
+  <1: 33.3% (n=3)
+  1-2: 66.7% (n=9)
+  >2: 50.0% (n=2)

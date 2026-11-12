@@ -14,8 +14,10 @@ from oandapyV20.contrib.factories import InstrumentsCandlesFactory
 
 import config
 import pyTrade_instruments
+import pyTrade_market_session as market
 from pyTrade_TrendFollowing_Strategy import TrendFollowingEngine
 from pyTrade_trade_guards import TradeGuards
+from pyTrade_validation import Validation
 
 
 SPREAD_PIPS: dict[str, float] = {}
@@ -26,6 +28,20 @@ SECONDARIES = {
     "range": ("pyTrade_RangeReversion_Strategy", "RangeReversionEngine"),
 }
 RESULT_COLUMNS = ["pair", "strategy", "direction", "entry_time", "exit_time", "r", "bars_held", "exit_reason", "sample"]
+
+
+class BacktestValidation(Validation):
+    """Use the simulated candle close for time and session checks."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.candle_close = None
+
+    def check_time_invalidation(self, pos, candle_time=None):
+        return super().check_time_invalidation(pos, self.candle_close)
+
+    def check_session_invalidation(self, current_market, utc_now=None):
+        return super().check_session_invalidation(current_market, self.candle_close)
 
 
 def load_candles(pair: str, granularity: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
@@ -101,13 +117,15 @@ def _guard_passes(guards: TradeGuards, engine: Any, candles: pd.DataFrame,
 
 
 def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: list[Any],
-             guards: TradeGuards, split: pd.Timestamp, spread_mult: float = 1.0) -> list[dict[str, Any]]:
+             guards: TradeGuards, split: pd.Timestamp, spread_mult: float = 1.0,
+             live_validation: bool = False) -> list[dict[str, Any]]:
     """Simulate one position at a time, using only candles available at each decision."""
     frames = [engine.add_indicators(candles.copy()) for engine in engines]
     hourly_close_times = hourly["time"] + pd.Timedelta(hours=1)
     half_spread = SPREAD_PIPS.get(pair, 1.2) * spread_mult * pyTrade_instruments.pip_size(pair) / 2
     trades: list[dict[str, Any]] = []
     position = None
+    validator = BacktestValidation() if live_validation else None
 
     for index in range(len(candles)):
         candle = candles.iloc[index]
@@ -122,6 +140,20 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
             reason = "sl" if stop_hit else "tp" if target_hit else None
             exit_price = position["stop"] if stop_hit else position["target"] if target_hit else None
             engine = position["engine"]
+            if reason is None and validator is not None:
+                validator.candle_close = candle["time"] + pd.Timedelta(minutes=15)
+                pos = {
+                    "instrument": pair, "direction": "long" if direction == "BUY" else "short",
+                    "units": 1 if direction == "BUY" else -1, "entry_price": position["entry_price"],
+                    "tradeID": None, "strategy": engine.strategy_name,
+                    "trade_time": position["entry_time"].isoformat(),
+                }
+                current_market = market.get_open_session(validator.candle_close)["market"]
+                validity = validator.validate_position(
+                    pos, frames[position["engine_index"]].iloc[:index + 1], current_market, engine.strategy_name,
+                )
+                if not validity["validity"]:
+                    reason, exit_price = validity["reason"][:40], float(candle["close"]) + adjustment
             if reason is None and callable(getattr(engine, "manage", None)):
                 if engine.manage(position, frames[position["engine_index"]].iloc[:index + 1]) == "close":
                     reason, exit_price = "manage", float(candle["close"]) + adjustment
@@ -139,10 +171,14 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
                 position = None
             continue
 
+        if index < 200:
+            continue
         if index + 1 >= len(candles):
             break
         closed_at = candle["time"] + pd.Timedelta(minutes=15)
         h1_slice = hourly.iloc[:hourly_close_times.searchsorted(closed_at, side="right")]
+        if len(h1_slice) < 60:
+            continue
         for engine_index, engine in enumerate(engines):
             frame = frames[engine_index].iloc[:index + 1]
             original_add_indicators = engine.add_indicators
@@ -201,6 +237,8 @@ def main() -> int:
     parser.add_argument("--oos-months", type=int, default=4)
     parser.add_argument("--secondary", choices=("none", "breakout", "breakout_v2", "range"), default="none")
     parser.add_argument("--spread-mult", type=float, default=1.0)
+    parser.add_argument("--live-validation", action="store_true")
+    parser.add_argument("--tag", default="")
     args = parser.parse_args()
     pairs = [pair.strip().upper() for pair in args.pairs.split(",")]
     if not pairs or any(not re.fullmatch(r"[A-Z]{3}_[A-Z]{3}", pair) for pair in pairs):
@@ -211,6 +249,8 @@ def main() -> int:
         parser.error("--months must exceed --oos-months, and both must be positive")
     if not math.isfinite(args.spread_mult) or args.spread_mult < 0:
         parser.error("--spread-mult must be a finite non-negative number")
+    if "/" in args.tag or "\\" in args.tag:
+        parser.error("--tag must not contain path separators")
     try:
         engines = make_engines(args.secondary)
         end = pd.Timestamp.now(tz="UTC").floor("15min")
@@ -223,8 +263,10 @@ def main() -> int:
             hourly = load_candles(pair, "H1", start, end)
             if candles.empty or hourly.empty:
                 raise ValueError(f"No complete candle history for {pair}")
-            trades.extend(run_pair(pair, candles, hourly, engines, TradeGuards(), split, args.spread_mult))
-        path = Path("results") / f"{args.secondary}.csv"
+            trades.extend(run_pair(pair, candles, hourly, engines, TradeGuards(), split, args.spread_mult,
+                                   args.live_validation))
+        suffix = f"_{args.tag}" if args.tag else ""
+        path = Path("results") / f"{args.secondary}{suffix}.csv"
         path.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(trades, columns=RESULT_COLUMNS).sort_values("exit_time").to_csv(path, index=False)
         print_summary(trades, engines, start, split, end)
