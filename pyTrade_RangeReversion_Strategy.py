@@ -16,7 +16,8 @@ class RangeReversionEngine:
     def __init__(self, adx_max: float | None = None,
                  rsi_level: float | None = getattr(config, "RANGE_RSI_OVERSOLD", 35.0),
                  bb_std: float | None = None, need_confirm_candle: bool = True,
-                 h1_max_dist_atr: float | None = None) -> None:
+                 h1_max_dist_atr: float | None = None, tp_target: str = "mid",
+                 sl_atr: float = 0.5, max_bars: int | None = None) -> None:
         self.strategy_name = "Range_Reversion"
         self.guards = TradeGuards()
         self.adx_max = getattr(config, "RANGE_ADX_MAX", 20.0) if adx_max is None else adx_max
@@ -27,6 +28,11 @@ class RangeReversionEngine:
             getattr(config, "RANGE_H1_ATR_MULTIPLIER", 1.5)
             if h1_max_dist_atr is None else h1_max_dist_atr
         )
+        if tp_target not in {"mid", "band"}:
+            raise ValueError("tp_target must be 'mid' or 'band'")
+        self.tp_target = tp_target
+        self.sl_atr = sl_atr
+        self.max_bars = getattr(config, "RANGE_MAX_BARS", 8) if max_bars is None else max_bars
 
     def add_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add Bollinger Bands, RSI, ATR, EMA and ADX to candle data."""
@@ -81,16 +87,17 @@ class RangeReversionEngine:
             return "NONE", None, None, None
 
         minimum = pyTrade_instruments.min_sl_dist(instrument) if instrument else getattr(config, "RANGE_MIN_SL_DIST", 0.05)
-        stop = extreme - sign * getattr(config, "RANGE_STOP_ATR", 0.5) * atr
+        stop = extreme - sign * self.sl_atr * atr
         stop = min(stop, entry - minimum) if sign == 1 else max(stop, entry + minimum)
-        target = float(current["BB_Mid"])
+        target_column = "BB_Mid" if self.tp_target == "mid" else "BB_Upper" if sign == 1 else "BB_Lower"
+        target = float(current[target_column])
         if sign * (target - entry) < getattr(config, "RANGE_MIN_REWARD_R", 0.8) * abs(entry - stop):
             return "NONE", None, None, None
         return direction, entry, stop, target
 
     def manage(self, trade: dict[str, Any], df: pd.DataFrame) -> Optional[str]:
         """Close if the range becomes a trend or the trade times out."""
-        if int(trade["bars_held"]) >= getattr(config, "RANGE_MAX_BARS", 8):
+        if int(trade["bars_held"]) >= self.max_bars:
             return "close"
         if df is not None and not df.empty and "ADX_14" in df.columns:
             adx = df["ADX_14"].iloc[-1]

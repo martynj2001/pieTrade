@@ -63,7 +63,7 @@ def _add_months(value: date, months: int) -> date:
     return date(year, month, min(value.day, calendar.monthrange(year, month)[1]))
 
 
-def _read_grid(path: Path) -> tuple[str, dict[str, Any], list[dict[str, Any]]]:
+def _read_grid(path: Path) -> tuple[str, dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
     with path.open(encoding="utf-8") as grid_file:
         grid = json.load(grid_file)
     if not isinstance(grid, dict):
@@ -93,13 +93,25 @@ def _read_grid(path: Path) -> tuple[str, dict[str, Any], list[dict[str, Any]]]:
 
     base = grid.get("base", {})
     steps = grid.get("steps", [])
-    if not isinstance(base, dict) or not isinstance(steps, list):
-        raise ValueError("base must be an object and steps must be an array")
+    backtest_args = grid.get("args", {})
+    if not isinstance(base, dict) or not isinstance(steps, list) or not isinstance(backtest_args, dict):
+        raise ValueError("base and args must be objects and steps must be an array")
+    normalized_args = {}
+    reserved_args = {"pairs", "months", "secondary", "jobs", "live-validation", "params", "from", "to", "tag"}
+    for key, value in backtest_args.items():
+        if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", key):
+            raise ValueError(f"Invalid backtest arg key: {key!r}")
+        option = key.replace("_", "-")
+        if option in reserved_args or option in normalized_args:
+            raise ValueError(f"Backtest arg {option!r} is reserved or duplicated")
+        if isinstance(value, (dict, list)) or value is None:
+            raise ValueError(f"Backtest arg {option!r} must have a scalar value")
+        normalized_args[option] = value
     for step in steps:
         if (not isinstance(step, dict) or not isinstance(step.get("path"), str)
                 or not isinstance(step.get("values"), list) or not step["values"]):
             raise ValueError("Each step requires a dotted path and a non-empty values array")
-    return secondary, _merge(base_from, base), steps
+    return secondary, _merge(base_from, base), steps, normalized_args
 
 
 def _read_trades(path: Path) -> list[dict[str, str]]:
@@ -156,6 +168,7 @@ def _run_backtest(
     start: date,
     end: date,
     params_path: Path,
+    backtest_args: dict[str, Any],
 ) -> list[dict[str, str]]:
     params_path.write_text(json.dumps(params, indent=2), encoding="utf-8")
     command = [
@@ -164,6 +177,8 @@ def _run_backtest(
         "--jobs", str(jobs), "--live-validation", "--params", str(params_path),
         "--from", start.isoformat(), "--to", end.isoformat(), "--tag", "wf_tmp",
     ]
+    for key, value in backtest_args.items():
+        command.extend((f"--{key}", str(value)))
     completed = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     if completed.returncode:
         detail = (completed.stderr or completed.stdout)[-3000:]
@@ -230,7 +245,7 @@ def main() -> int:
 
     try:
         grid_path = Path(args.grid).expanduser().resolve()
-        secondary, base, steps = _read_grid(grid_path)
+        secondary, base, steps, backtest_args = _read_grid(grid_path)
         secondary_names = [] if secondary == "none" else secondary.split("+")
         score_strategy = (
             "EMA_TrendFollowing" if not secondary_names
@@ -270,7 +285,7 @@ def main() -> int:
                             _set_path(candidate, step["path"], value)
                             rows = _run_backtest(
                                 secondary, args.pairs, args.months, args.jobs,
-                                candidate, train_start, train_end, params_path,
+                                candidate, train_start, train_end, params_path, backtest_args,
                             )
                             score = _score(_summarize(
                                 [row for row in rows if row.get("strategy") == score_strategy]
@@ -281,11 +296,11 @@ def main() -> int:
 
                     train_rows = _run_backtest(
                         secondary, args.pairs, args.months, args.jobs,
-                        chosen, train_start, train_end, params_path,
+                        chosen, train_start, train_end, params_path, backtest_args,
                     )
                     test_rows = _run_backtest(
                         secondary, args.pairs, args.months, args.jobs,
-                        chosen, test_start, test_end, params_path,
+                        chosen, test_start, test_end, params_path, backtest_args,
                     )
                     window_number = index + 1
                     for trade in test_rows:

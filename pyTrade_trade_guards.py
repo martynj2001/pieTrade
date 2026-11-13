@@ -234,6 +234,7 @@ class TradeGuards:
         breakout_level: float,
         direction: str,
         skip_adx: bool = False,
+        require_h1_trend: bool = True,
     ) -> bool:
         """Validate a breakout signal against its level, M15 ADX, and H1 trend.
 
@@ -279,6 +280,10 @@ class TradeGuards:
             return False
         if not skip_adx and not self._adx_passes(m15_df):
             return False
+
+        if not require_h1_trend:
+            self.logger.info("%s breakout signal passed without H1 trend check", normalized)
+            return True
 
         h1_bullish = self._latest_h1_trend(h1_df)
         if h1_bullish is None:

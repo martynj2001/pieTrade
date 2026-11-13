@@ -1,7 +1,10 @@
 from PySide6.QtCore import QObject, Signal
 from datetime import datetime, timezone
+import inspect
+import json
 import sqlite3
 import time
+from pathlib import Path
 from oandapyV20 import API
 
 import oanda_api_handler as oanda
@@ -21,6 +24,9 @@ import pyTrade_settings as settings
 
 import logging
 import config
+
+
+STRATEGY_PARAMS_PATH = Path(__file__).with_name("strategy_params.json")
 
 
 class OandaInfoFilter(logging.Filter):
@@ -58,15 +64,16 @@ class pyTradeWorker(QObject):
     ):
         super().__init__()
         self.running = True
-        self.strategy_primary = strategy if strategy is not None else TrendFollowingEngine()
+        self.strategy_params = self._load_strategy_params()
+        self.strategy_primary = strategy if strategy is not None else self._build_engine(TrendFollowingEngine, "primary")
         self.strategy_secondary = (
-            BreakoutEngine() if isinstance(self.strategy_primary, TrendFollowingEngine)
-            else TrendFollowingEngine()
+            self._build_engine(BreakoutEngine, "secondary") if isinstance(self.strategy_primary, TrendFollowingEngine)
+            else self._build_engine(TrendFollowingEngine, "secondary")
         )
-        self.validator = validator if validator is not None else Validation()
+        self.validator = validator if validator is not None else Validation(**self.strategy_params.get("validation", {}))
         self.order_manager = order_manager if order_manager is not None else OrderManager()
         self.trade_guards = (
-            trade_guards if trade_guards is not None else TradeGuards()
+            trade_guards if trade_guards is not None else TradeGuards(**self.strategy_params.get("guards", {}))
         )
         self._pending_settings = None
         self.strategy_mode = "dual"
@@ -74,6 +81,39 @@ class pyTradeWorker(QObject):
         self.planner = AgentPlanner(self.trade_guards, self.news_filter)
         self._agent_was_on = False
         self._last_agent_snapshot = None
+
+    def _load_strategy_params(self):
+        """Load optional strategy constructor kwargs and config overrides."""
+        if not STRATEGY_PARAMS_PATH.is_file():
+            return {}
+        try:
+            with STRATEGY_PARAMS_PATH.open(encoding="utf-8") as params_file:
+                params = json.load(params_file)
+            if not isinstance(params, dict):
+                raise ValueError("strategy parameters must be a JSON object")
+            for key in ("primary", "secondary", "guards", "validation", "config"):
+                if key in params and not isinstance(params[key], dict):
+                    raise ValueError(f"strategy parameter section {key!r} must be an object")
+            for name, value in params.get("config", {}).items():
+                setattr(config, name, value)
+        except (OSError, ValueError, json.JSONDecodeError):
+            logging.getLogger("pyTrade_bot").exception("Could not load strategy_params.json")
+            return {}
+        logging.getLogger("pyTrade_bot").info("Loaded strategy_params.json")
+        return params
+
+    def _build_engine(self, engine_type, section):
+        """Construct an engine with the applicable saved kwargs."""
+        values = self.strategy_params.get(section, {})
+        if section == "secondary" and values and all(
+            key in {"breakout", "breakout_v2", "range"} and isinstance(kwargs, dict)
+            for key, kwargs in values.items()
+        ):
+            name = "breakout" if engine_type is BreakoutEngine else None
+            values = values.get(name, {}) if name else {}
+        accepted = inspect.signature(engine_type).parameters
+        kwargs = {key: value for key, value in values.items() if key in accepted}
+        return engine_type(**kwargs)
 
     def _strategy_engine(self, name):
         """Return the strategy engine matching a stored strategy name, or None."""
@@ -138,9 +178,9 @@ class pyTradeWorker(QObject):
 
         # Reuse existing engines; only construct when the strategy actually changes
         if not isinstance(self.strategy_primary, primary_type):
-            self.strategy_primary = primary_type()
+            self.strategy_primary = self._build_engine(primary_type, "primary")
         if not isinstance(self.strategy_secondary, secondary_type):
-            self.strategy_secondary = secondary_type()
+            self.strategy_secondary = self._build_engine(secondary_type, "secondary")
         self._pending_settings = settings.load()
 
     def apply_settings(self, values: dict) -> None:
@@ -256,6 +296,7 @@ class pyTradeWorker(QObject):
                             ),
                             signal,
                             skip_adx=getattr(strategy, "adx_mode", "threshold") == "rising",
+                            require_h1_trend=getattr(strategy, "require_h1_trend", True),
                         )
                     )
             elif strategy_name in {

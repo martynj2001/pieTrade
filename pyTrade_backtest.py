@@ -54,7 +54,14 @@ def load_candles(pair: str, granularity: str, start: pd.Timestamp, end: pd.Times
     columns = ["time", "open", "high", "low", "close"]
     cached = pd.read_csv(path, parse_dates=["time"]) if path.exists() else pd.DataFrame(columns=columns)
     cached["time"] = pd.to_datetime(cached["time"], utc=True)
-    interval = pd.Timedelta(minutes=15) if granularity == "M15" else pd.Timedelta(hours=1)
+    intervals = {
+        "M15": pd.Timedelta(minutes=15),
+        "H1": pd.Timedelta(hours=1),
+        "H4": pd.Timedelta(hours=4),
+    }
+    if granularity not in intervals:
+        raise ValueError(f"Unsupported candle granularity: {granularity}")
+    interval = intervals[granularity]
     ranges = []
     if cached.empty:
         ranges.append((start, end))
@@ -129,6 +136,7 @@ def _guard_passes(guards: TradeGuards, engine: Any, candles: pd.DataFrame,
         return guards.validate_breakout(
             candles, hourly, float(candles[column].iloc[-1]), direction,
             skip_adx=getattr(engine, "adx_mode", "threshold") == "rising",
+            require_h1_trend=getattr(engine, "require_h1_trend", True),
         )
     if name == "Range_Reversion":
         return guards.validate_range(
@@ -141,10 +149,12 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
              guards: TradeGuards, split: pd.Timestamp, spread_mult: float = 1.0,
              live_validation: bool = False, validation_kwargs: dict[str, Any] | None = None,
              trade_start: pd.Timestamp | None = None, trade_end: pd.Timestamp | None = None,
-             funnel_counts: dict[str, int] | None = None) -> list[dict[str, Any]]:
+             funnel_counts: dict[str, int] | None = None, granularity: str = "M15") -> list[dict[str, Any]]:
     """Simulate one position at a time, using only candles available at each decision."""
     frames = [engine.add_indicators(candles.copy()) for engine in engines]
-    hourly_close_times = hourly["time"] + pd.Timedelta(hours=1)
+    candle_interval = {"M15": pd.Timedelta(minutes=15), "H1": pd.Timedelta(hours=1)}[granularity]
+    higher_interval = pd.Timedelta(hours=1 if granularity == "M15" else 4)
+    higher_close_times = hourly["time"] + higher_interval
     half_spread = SPREAD_PIPS.get(pair, 1.2) * spread_mult * pyTrade_instruments.pip_size(pair) / 2
     trades: list[dict[str, Any]] = []
     position = None
@@ -176,7 +186,7 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
             exit_price = position["stop"] if stop_hit else position["target"] if target_hit else None
             engine = position["engine"]
             if reason is None and validator is not None:
-                validator.candle_close = candle["time"] + pd.Timedelta(minutes=15)
+                validator.candle_close = candle["time"] + candle_interval
                 pos = {
                     "instrument": pair, "direction": "long" if direction == "BUY" else "short",
                     "units": 1 if direction == "BUY" else -1, "entry_price": position["entry_price"],
@@ -189,7 +199,8 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
                 )
                 if not validity["validity"]:
                     reason, exit_price = validity["reason"][:40], float(candle["close"]) + adjustment
-            if reason is None and callable(getattr(engine, "manage", None)):
+            if (reason is None and callable(getattr(engine, "manage", None))
+                    and getattr(engine, "manage_exits", True)):
                 if engine.manage(position, frames[position["engine_index"]].iloc[:index + 1]) == "close":
                     reason, exit_price = "manage", float(candle["close"]) + adjustment
             if reason is None and index == len(candles) - 1:
@@ -198,7 +209,7 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
                 sign = 1 if direction == "BUY" else -1
                 trades.append({
                     "pair": pair, "strategy": engine.strategy_name, "direction": direction,
-                    "entry_time": position["entry_time"], "exit_time": candle["time"] + pd.Timedelta(minutes=15),
+                    "entry_time": position["entry_time"], "exit_time": candle["time"] + candle_interval,
                     "r": sign * (exit_price - position["entry_price"]) / position["risk"],
                     "bars_held": position["bars_held"], "exit_reason": reason,
                     "sample": "out" if position["entry_time"] >= split else "in",
@@ -212,8 +223,8 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
             continue
         if index + 1 >= len(candles):
             break
-        closed_at = candle["time"] + pd.Timedelta(minutes=15)
-        h1_slice = hourly.iloc[:hourly_close_times.searchsorted(closed_at, side="right")]
+        closed_at = candle["time"] + candle_interval
+        h1_slice = hourly.iloc[:higher_close_times.searchsorted(closed_at, side="right")]
         if len(h1_slice) < 60:
             continue
         for engine_index, engine in enumerate(engines):
@@ -285,6 +296,7 @@ def _run_pair_job(job: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, 
         job["pair"], job["candles"], job["hourly"], engines, guards, job["split"],
         job["spread_mult"], job["live_validation"], job["validation_kwargs"],
         job["trade_start"], job["trade_end"], funnel if job["funnel"] else None,
+        job["granularity"],
     )
     return trades, funnel
 
@@ -351,6 +363,7 @@ def main() -> int:
     parser.add_argument("--months", type=int, default=12)
     parser.add_argument("--oos-months", type=int, default=4)
     parser.add_argument("--secondary", default="none")
+    parser.add_argument("--granularity", choices=("M15", "H1"), default="M15")
     parser.add_argument("--params")
     parser.add_argument("--from", dest="from_date")
     parser.add_argument("--to", dest="to_date")
@@ -400,8 +413,9 @@ def main() -> int:
         jobs: list[dict[str, Any]] = []
         for pair in pairs:
             print(f"Loading {pair} candles...", flush=True)
-            candles = load_candles(pair, "M15", warmup_start, end)
-            hourly = load_candles(pair, "H1", warmup_start, end)
+            higher_granularity = "H1" if args.granularity == "M15" else "H4"
+            candles = load_candles(pair, args.granularity, warmup_start, end)
+            hourly = load_candles(pair, higher_granularity, warmup_start, end)
             if candles.empty or hourly.empty:
                 raise ValueError(f"No complete candle history for {pair}")
             jobs.append({
@@ -410,7 +424,7 @@ def main() -> int:
                 "guard_kwargs": params["guards"], "validation_kwargs": params["validation"],
                 "config_kwargs": params["config"], "split": split, "spread_mult": args.spread_mult,
                 "live_validation": args.live_validation, "trade_start": start, "trade_end": end,
-                "funnel": args.funnel,
+                "funnel": args.funnel, "granularity": args.granularity,
             })
         if args.jobs == 1:
             results = map(_run_pair_job, jobs)

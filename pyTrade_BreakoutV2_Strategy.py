@@ -15,7 +15,8 @@ class BreakoutV2Engine(BreakoutEngine):
 
     def __init__(self, squeeze_pct: float | None = None, hours: list[int] | tuple[int, ...] | None = None,
                  max_ema_dist_atr: float | None = None, rr_ratio: float | None = None,
-                 adx_mode: str = "threshold") -> None:
+                 adx_mode: str = "threshold", manage_exits: bool = True,
+                 require_h1_trend: bool = True) -> None:
         effective_rr = getattr(config, "BO_RR", 1.5) if rr_ratio is None else rr_ratio
         super().__init__(rr_ratio=effective_rr)
         self.strategy_name = "Breakout_V2"
@@ -29,6 +30,8 @@ class BreakoutV2Engine(BreakoutEngine):
         if self.adx_mode not in {"threshold", "rising"}:
             raise ValueError("adx_mode must be 'threshold' or 'rising'")
         self.adx_calculator = TradeGuards()
+        self.manage_exits = manage_exits
+        self.require_h1_trend = require_h1_trend
 
     def add_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add the prior-channel width and its rolling squeeze threshold."""
