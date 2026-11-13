@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -48,6 +49,37 @@ def client(tmp_path, monkeypatch):
 def test_health_and_meta(client):
     assert client.get("/api/health").json() == {"status": "ok"}
     assert client.get("/api/meta").json()["instrument"] == ["EUR_USD", "USD_JPY"]
+
+
+def test_bot_status_thresholds(client, monkeypatch):
+    import os
+    from api.routers import status
+
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
+
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return now
+
+    monkeypatch.setattr(status, "datetime", FixedDatetime)
+    assert client.get("/api/bot-status").json() == {"status": "unknown"}
+    with sqlite3.connect(os.environ["PYTRADE_DB"]) as conn:
+        conn.execute("CREATE TABLE bot_status (id INTEGER PRIMARY KEY, updated_at TEXT, started_at TEXT, "
+                     "state TEXT, market TEXT, instrument TEXT, last_signal_check TEXT, pid INTEGER)")
+        assert client.get("/api/bot-status").json() == {"status": "unknown"}
+        for age, expected in ((0, "running"), (45, "running"), (46, "delayed"),
+                              (120, "delayed"), (121, "offline")):
+            conn.execute("INSERT OR REPLACE INTO bot_status VALUES (1, ?, ?, 'trading', 'london', 'EUR_USD', ?, 1)",
+                         ((now - timedelta(seconds=age)).isoformat(), (now - timedelta(hours=3)).isoformat(), now.isoformat()))
+            conn.commit()
+            result = client.get("/api/bot-status").json()
+            assert result["status"] == expected and result["age_seconds"] == age
+            assert result["uptime_seconds"] == 10800 and result["instrument"] == "EUR_USD"
+        conn.execute("UPDATE bot_status SET state = 'stopped'")
+        conn.commit()
+        result = client.get("/api/bot-status").json()
+        assert result["status"] == "stopped" and result["uptime_seconds"] is None
 
 
 def test_list_filter_sort_page(client):

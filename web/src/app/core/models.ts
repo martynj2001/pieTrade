@@ -87,3 +87,9 @@ export interface Account {
   balance: number; NAV: number; unrealizedPL: number; pl: number;
   marginAvailable: number; marginUsed: number; openPositionCount: number; openTradeCount: number;
 }
+
+export interface BotStatus {
+  status: 'running' | 'delayed' | 'offline' | 'stopped' | 'unknown';
+  state?: string; age_seconds?: number; uptime_seconds?: number | null;
+  market?: string | null; instrument?: string | null; last_signal_check?: string | null; updated_at?: string;
+}

@@ -615,17 +615,20 @@ class Validation:
         :param pos: Position data dictionary
         :param df: Candles DataFrame
         :param explicit_strategy: Strategy name passed to validate_position
-        :return: Resolved strategy string ('breakout', 'trend_following', or 'all')
+        :return: Resolved strategy string ('breakout', 'range', 'trend_following', or 'all')
         """
+        aliases = {"breakout_v2": "breakout", "range_reversion": "range"}
         if explicit_strategy and explicit_strategy.lower() != "auto":
-            return explicit_strategy.lower()
+            strategy = explicit_strategy.lower()
+            return aliases.get(strategy, strategy)
 
         pos_strat = pos.get("strategy") or pos.get("strategy_type")
         if pos_strat and str(pos_strat).lower() != "auto":
-            return str(pos_strat).lower()
+            strategy = str(pos_strat).lower()
+            return aliases.get(strategy, strategy)
 
         if self.strategy_type != "auto":
-            return self.strategy_type
+            return aliases.get(self.strategy_type, self.strategy_type)
 
         # Auto-detect based on available indicator columns in DataFrame
         cols = set(df.columns) if df is not None else set()

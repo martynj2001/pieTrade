@@ -7,3 +7,5 @@
 *.db
 #Do not commit .json files
 *.json
+/data/
+/results/

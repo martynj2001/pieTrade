@@ -40,7 +40,7 @@ import logging
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any, Dict, Iterator, List, Mapping, Optional, Union
 
 
@@ -52,6 +52,13 @@ RowData = Mapping[str, Any]
 _DEFAULT_DB_PATH = "/home/martyn/pieTrade/Trades_db/pytrade.db"
 
 _SCHEMA = (
+    """
+    CREATE TABLE IF NOT EXISTS bot_status (
+        id INTEGER PRIMARY KEY CHECK(id=1),
+        updated_at TEXT, started_at TEXT, state TEXT, market TEXT,
+        instrument TEXT, last_signal_check TEXT, pid INTEGER
+    )
+    """,
     """
     CREATE TABLE IF NOT EXISTS trades (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -157,7 +164,7 @@ _SCHEMA = (
 
 def _resolve_db_path(db_path: DatabasePath) -> str:
     """Return the absolute path, defaulting to this module's folder."""
-    path = os.fspath(db_path) if db_path is not None else _DEFAULT_DB_PATH
+    path = os.fspath(db_path) if db_path is not None else os.environ.get("PYTRADE_DB", _DEFAULT_DB_PATH)
     return os.path.abspath(path)
 
 
@@ -231,6 +238,24 @@ def create_database(db_path: DatabasePath = None) -> str:
         pass
     logger.info("Trade database ready: %s", path)
     return path
+
+
+def write_heartbeat(state: str, market: Optional[str] = None, instrument: Optional[str] = None,
+                    last_signal_check: Optional[str] = None, started_at: Optional[str] = None) -> None:
+    """Record the latest bot status without interrupting the bot on database errors."""
+    try:
+        with _connection() as connection:
+            connection.execute(
+                """INSERT INTO bot_status (id, updated_at, started_at, state, market, instrument, last_signal_check, pid)
+                   VALUES (1, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(id) DO UPDATE SET updated_at=excluded.updated_at, started_at=excluded.started_at,
+                   state=excluded.state, market=excluded.market, instrument=excluded.instrument,
+                   last_signal_check=excluded.last_signal_check, pid=excluded.pid""",
+                (datetime.now(timezone.utc).isoformat(), started_at, state, market, instrument,
+                 last_signal_check, os.getpid()),
+            )
+    except (OSError, sqlite3.Error):
+        logger.exception("Could not write bot heartbeat")
 
 
 def insert_row(

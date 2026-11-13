@@ -1,7 +1,6 @@
-PYTRADE: COPILOT + GIT WORKFLOW (VS Code)
-==========================================
-Keep this file in the repo root. Run all commands in the VS Code
-terminal (Ctrl+`) with /home/martyn/pieTrade open as the folder.
+# pyTrade: COPILOT + GIT WORKFLOW (VS Code)
+
+Keep this file in the `~/pieTrade/README` . Run all commands in the VS Code terminal (Ctrl+) with `/home/martyn/pieTrade` open as the folder.
 
 KEY IDEAS
 - A branch is not a folder. Your folder shows ONE branch at a time.
@@ -11,8 +10,7 @@ KEY IDEAS
 - A pull request (PR) is only the checkpoint before merging into main.
   You do not need a PR to test code. Test on the branch first.
 
-
-1. START OF EVERY COPILOT SESSION
+1. START OF EVERY COPILOT SESSION.
 ---------------------------------
   git branch --show-current     -> must show your feature branch
   git status                    -> must be clean (commit first if not)
