@@ -681,6 +681,14 @@ class Validation:
             if not is_valid:
                 return {"instrument": instrument, "reason": reason, "validity": False}
 
+        strategy_key = str(active_strategy).lower().replace(" ", "").replace("_", "")
+        if strategy_key == "openingrange":
+            return {
+                "instrument": instrument,
+                "reason": f"Position still valid ({active_strategy}; time check only)",
+                "validity": True,
+            }
+
         if self.enable_session_check:
             is_valid, reason = self.check_session_invalidation(current_market)
             if not is_valid:
@@ -689,7 +697,6 @@ class Validation:
         # ---------------------------------------------------------------------
         # 2. Strategy-Specific Checks: Breakout vs Trend Following
         # ---------------------------------------------------------------------
-        strategy_key = str(active_strategy).lower().replace(" ", "").replace("_", "")
         run_breakout = strategy_key in ("breakout", "all")
         run_trend = strategy_key in ("trendfollowing", "ematrend", "ematrendfollowing", "emapullback", "all")
 

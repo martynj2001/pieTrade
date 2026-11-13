@@ -20,6 +20,7 @@ import config
 import pyTrade_instruments
 import pyTrade_market_session as market
 from pyTrade_TrendFollowing_Strategy import TrendFollowingEngine
+from pyTrade_ORB_Strategy import OpeningRangeEngine
 from pyTrade_trade_guards import TradeGuards
 from pyTrade_validation import Validation
 
@@ -30,6 +31,7 @@ SECONDARIES = {
     "breakout": ("pyTrade_Breakout_Strategy", "BreakoutEngine"),
     "breakout_v2": ("pyTrade_BreakoutV2_Strategy", "BreakoutV2Engine"),
     "range": ("pyTrade_RangeReversion_Strategy", "RangeReversionEngine"),
+    "orb": ("pyTrade_ORB_Strategy", "OpeningRangeEngine"),
 }
 RESULT_COLUMNS = ["pair", "strategy", "direction", "entry_time", "exit_time", "r", "bars_held", "exit_reason", "sample"]
 
@@ -98,20 +100,28 @@ def load_candles(pair: str, granularity: str, start: pd.Timestamp, end: pd.Times
     return cached.loc[(cached["time"] >= start) & (cached["time"] + interval <= end)].reset_index(drop=True)
 
 
+def _make_engine(name: str, kwargs: dict[str, Any]) -> Any:
+    if name == "ema":
+        return TrendFollowingEngine(**kwargs)
+    module_name, class_name = SECONDARIES[name]
+    try:
+        module = importlib.import_module(module_name)
+        engine_class = getattr(module, class_name)
+    except (ModuleNotFoundError, AttributeError) as exc:
+        raise ValueError(f"Strategy {name!r} is unavailable: expected {module_name}.{class_name}") from exc
+    return engine_class(**kwargs)
+
+
 def make_engines(secondary: list[str] | str, primary_kwargs: dict[str, Any] | None = None,
-                 secondary_kwargs: dict[str, Any] | None = None) -> list[Any]:
+                 secondary_kwargs: dict[str, Any] | None = None, primary: str = "ema") -> list[Any]:
     """Create the primary and requested secondary engines in fallback order."""
     if isinstance(secondary, str):
         secondary = [] if secondary == "none" else [secondary]
-    engines: list[Any] = [TrendFollowingEngine(**(primary_kwargs or {}))]
+    if primary not in {"ema", *SECONDARIES}:
+        raise ValueError(f"Unknown primary strategy: {primary}")
+    engines: list[Any] = [_make_engine(primary, primary_kwargs or {})]
     for name in secondary:
-        module_name, class_name = SECONDARIES[name]
-        try:
-            module = importlib.import_module(module_name)
-            engine_class = getattr(module, class_name)
-        except (ModuleNotFoundError, AttributeError) as exc:
-            raise ValueError(f"Secondary engine {name!r} is unavailable: expected {module_name}.{class_name}") from exc
-        engines.append(engine_class(**((secondary_kwargs or {}).get(name, {}))))
+        engines.append(_make_engine(name, (secondary_kwargs or {}).get(name, {})))
     return engines
 
 
@@ -127,6 +137,8 @@ def _guard_passes(guards: TradeGuards, engine: Any, candles: pd.DataFrame,
                   hourly: pd.DataFrame, direction: str) -> bool:
     """Apply the same qualification checks as the live bot."""
     name = engine.strategy_name
+    if name == "Opening_Range":
+        return True
     if name in {"EMA_TrendFollowing", "TrendFollowing"}:
         return guards.validate_trend_following(candles, hourly, direction)
     if name in {"Breakout", "Breakout_V2"}:
@@ -289,7 +301,9 @@ def _summary_metrics(trades: list[dict[str, Any]]) -> dict[str, Any]:
 def _run_pair_job(job: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, int]]:
     for name, value in job["config_kwargs"].items():
         setattr(config, name, value)
-    engines = make_engines(job["secondary"], job["primary_kwargs"], job["secondary_kwargs"])
+    engines = make_engines(
+        job["secondary"], job["primary_kwargs"], job["secondary_kwargs"], job["primary"],
+    )
     guards = TradeGuards(**job["guard_kwargs"])
     funnel: dict[str, int] = {}
     trades = run_pair(
@@ -363,6 +377,7 @@ def main() -> int:
     parser.add_argument("--months", type=int, default=12)
     parser.add_argument("--oos-months", type=int, default=4)
     parser.add_argument("--secondary", default="none")
+    parser.add_argument("--primary", choices=("ema", "breakout", "breakout_v2", "range", "orb"), default="ema")
     parser.add_argument("--granularity", choices=("M15", "H1"), default="M15")
     parser.add_argument("--params")
     parser.add_argument("--from", dest="from_date")
@@ -384,7 +399,7 @@ def main() -> int:
     if secondary == ["none"]:
         secondary = []
     if any(name not in SECONDARIES for name in secondary):
-        parser.error("--secondary must be a comma-separated list of breakout, breakout_v2, and range")
+        parser.error("--secondary must be a comma-separated list of breakout, breakout_v2, range, and orb")
     if len(set(secondary)) != len(secondary):
         parser.error("--secondary must not contain duplicates")
     if args.jobs < 1:
@@ -398,7 +413,7 @@ def main() -> int:
         for name, value in params["config"].items():
             setattr(config, name, value)
         secondary_kwargs = _secondary_options(params["secondary"], secondary)
-        engines = make_engines(secondary, params["primary"], secondary_kwargs)
+        engines = make_engines(secondary, params["primary"], secondary_kwargs, args.primary)
         now = pd.Timestamp.now(tz="UTC").floor("15min")
         period_end = _date_bound(args.to_date, end=True) if args.to_date else now
         period_start = _date_bound(args.from_date) if args.from_date else period_end - pd.DateOffset(months=args.months)
@@ -420,6 +435,7 @@ def main() -> int:
                 raise ValueError(f"No complete candle history for {pair}")
             jobs.append({
                 "pair": pair, "candles": candles, "hourly": hourly, "secondary": secondary,
+                "primary": args.primary,
                 "primary_kwargs": params["primary"], "secondary_kwargs": secondary_kwargs,
                 "guard_kwargs": params["guards"], "validation_kwargs": params["validation"],
                 "config_kwargs": params["config"], "split": split, "spread_mult": args.spread_mult,

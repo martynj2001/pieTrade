@@ -252,12 +252,13 @@ class pyTradeWorker(QObject):
         if signal not in ("BUY", "SELL") or entry is None or stop is None or tp is None:
             return False
 
-        h1_price = oanda.get_Candles(
+        strategy_name = strategy.strategy_name
+        h1_price = None if strategy_name == "Opening_Range" else oanda.get_Candles(
             client,
             open_market["instrument"],
             granularity="H1",
         )
-        if h1_price is None:
+        if h1_price is None and strategy_name != "Opening_Range":
             self.msg.emit(
                 "Failed to get H1 candles; entry rejected"
             )
@@ -267,8 +268,9 @@ class pyTradeWorker(QObject):
                 open_market["instrument"],
             )
         else:
-            strategy_name = strategy.strategy_name
-            if strategy_name in {"Breakout", "Breakout_V2"}:
+            if strategy_name == "Opening_Range":
+                guard_passed = True
+            elif strategy_name in {"Breakout", "Breakout_V2"}:
                 level_column = (
                     "DC_Upper"
                     if signal == "BUY"
