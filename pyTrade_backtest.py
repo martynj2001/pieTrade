@@ -60,6 +60,7 @@ def load_candles(pair: str, granularity: str, start: pd.Timestamp, end: pd.Times
         "M15": pd.Timedelta(minutes=15),
         "H1": pd.Timedelta(hours=1),
         "H4": pd.Timedelta(hours=4),
+        "D": pd.Timedelta(days=1),
     }
     if granularity not in intervals:
         raise ValueError(f"Unsupported candle granularity: {granularity}")
@@ -161,11 +162,12 @@ def run_pair(pair: str, candles: pd.DataFrame, hourly: pd.DataFrame, engines: li
              guards: TradeGuards, split: pd.Timestamp, spread_mult: float = 1.0,
              live_validation: bool = False, validation_kwargs: dict[str, Any] | None = None,
              trade_start: pd.Timestamp | None = None, trade_end: pd.Timestamp | None = None,
-             funnel_counts: dict[str, int] | None = None, granularity: str = "M15") -> list[dict[str, Any]]:
+             funnel_counts: dict[str, int] | None = None, granularity: str = "M15",
+             trend_tf: str = "H1") -> list[dict[str, Any]]:
     """Simulate one position at a time, using only candles available at each decision."""
     frames = [engine.add_indicators(candles.copy()) for engine in engines]
     candle_interval = {"M15": pd.Timedelta(minutes=15), "H1": pd.Timedelta(hours=1)}[granularity]
-    higher_interval = pd.Timedelta(hours=1 if granularity == "M15" else 4)
+    higher_interval = pd.Timedelta(days=1) if trend_tf == "D" else pd.Timedelta(hours=1 if granularity == "M15" else 4)
     higher_close_times = hourly["time"] + higher_interval
     half_spread = SPREAD_PIPS.get(pair, 1.2) * spread_mult * pyTrade_instruments.pip_size(pair) / 2
     trades: list[dict[str, Any]] = []
@@ -310,7 +312,7 @@ def _run_pair_job(job: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, 
         job["pair"], job["candles"], job["hourly"], engines, guards, job["split"],
         job["spread_mult"], job["live_validation"], job["validation_kwargs"],
         job["trade_start"], job["trade_end"], funnel if job["funnel"] else None,
-        job["granularity"],
+        job["granularity"], job["trend_tf"],
     )
     return trades, funnel
 
@@ -422,13 +424,14 @@ def main() -> int:
         start = period_start
         end = period_end
         split = min(max(end - pd.DateOffset(months=args.oos_months), start), end)
-        warmup_start = start - pd.Timedelta(days=10)
+        trend_tf = params["guards"].get("trend_tf", "H1").upper()
+        warmup_start = start - pd.Timedelta(days=100 if trend_tf == "D" else 10)
         trades: list[dict[str, Any]] = []
         funnel_totals: dict[str, int] = {}
         jobs: list[dict[str, Any]] = []
         for pair in pairs:
             print(f"Loading {pair} candles...", flush=True)
-            higher_granularity = "H1" if args.granularity == "M15" else "H4"
+            higher_granularity = "D" if trend_tf == "D" else "H1" if args.granularity == "M15" else "H4"
             candles = load_candles(pair, args.granularity, warmup_start, end)
             hourly = load_candles(pair, higher_granularity, warmup_start, end)
             if candles.empty or hourly.empty:
@@ -441,6 +444,7 @@ def main() -> int:
                 "config_kwargs": params["config"], "split": split, "spread_mult": args.spread_mult,
                 "live_validation": args.live_validation, "trade_start": start, "trade_end": end,
                 "funnel": args.funnel, "granularity": args.granularity,
+                "trend_tf": trend_tf,
             })
         if args.jobs == 1:
             results = map(_run_pair_job, jobs)

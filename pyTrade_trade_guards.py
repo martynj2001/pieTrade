@@ -13,13 +13,18 @@ import config
 class TradeGuards:
     """Validate strategy signals against M15 strength and H1 trend."""
 
-    def __init__(self, adx_threshold: float = 24.0) -> None:
+    def __init__(self, adx_threshold: float = 24.0, trend_tf: str = "H1") -> None:
         """Initialize guards.
 
         Args:
             adx_threshold: Minimum M15 ADX required to allow an entry.
+            trend_tf: Higher-timeframe trend source, either H1 or D.
         """
+        trend_tf = trend_tf.upper()
+        if trend_tf not in {"H1", "D"}:
+            raise ValueError("trend_tf must be 'H1' or 'D'")
         self.adx_threshold = adx_threshold
+        self.trend_tf = trend_tf
         self.logger = logging.getLogger("Trade-Guard")
 
     def calculate_adx(self, df: pd.DataFrame, length: int = 14) -> pd.Series:
@@ -111,13 +116,13 @@ class TradeGuards:
         return None
 
     def _latest_h1_trend(self, h1_df: pd.DataFrame) -> Optional[bool]:
-        """Return whether H1 is bullish; None indicates invalid candle data."""
+        """Return whether the configured higher timeframe is bullish."""
         if (
             not isinstance(h1_df, pd.DataFrame)
             or h1_df.empty
             or "close" not in h1_df.columns
         ):
-            self.logger.error("H1 candles must be non-empty and include close")
+            self.logger.error("%s candles must be non-empty and include close", self.trend_tf)
             return None
 
         close = pd.to_numeric(h1_df["close"], errors="coerce")
@@ -130,9 +135,20 @@ class TradeGuards:
         latest_ema50 = ema50.iloc[-1]
         if pd.isna(latest_close) or pd.isna(latest_ema50):
             self.logger.error(
-                "Insufficient valid H1 candles to confirm EMA50 trend"
+                "Insufficient valid %s candles to confirm EMA50 trend", self.trend_tf
             )
             return None
+        if self.trend_tf == "D":
+            if len(close) < 61 or pd.isna(close.iloc[-61]):
+                self.logger.error("Insufficient closed D candles for the 60-day trend check")
+                return None
+            prior_close = close.iloc[-61]
+            bullish = latest_close > latest_ema50 and latest_close > prior_close
+            bearish = latest_close < latest_ema50 and latest_close < prior_close
+            if not bullish and not bearish:
+                self.logger.info("D close does not agree with both EMA50 and the 60-day direction")
+                return None
+            return bool(bullish)
         if latest_close == latest_ema50:
             self.logger.warning(
                 "H1 close equals EMA50; trend direction is unclear"

@@ -256,7 +256,7 @@ class pyTradeWorker(QObject):
         h1_price = None if strategy_name == "Opening_Range" else oanda.get_Candles(
             client,
             open_market["instrument"],
-            granularity="H1",
+            granularity=self.trade_guards.trend_tf,
         )
         if h1_price is None and strategy_name != "Opening_Range":
             self.msg.emit(
