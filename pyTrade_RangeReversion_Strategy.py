@@ -13,18 +13,28 @@ from pyTrade_trade_guards import TradeGuards
 class RangeReversionEngine:
     """Trade a return inside Bollinger Bands when trend strength is weak."""
 
-    def __init__(self) -> None:
+    def __init__(self, adx_max: float | None = None,
+                 rsi_level: float | None = getattr(config, "RANGE_RSI_OVERSOLD", 35.0),
+                 bb_std: float | None = None, need_confirm_candle: bool = True,
+                 h1_max_dist_atr: float | None = None) -> None:
         self.strategy_name = "Range_Reversion"
         self.guards = TradeGuards()
+        self.adx_max = getattr(config, "RANGE_ADX_MAX", 20.0) if adx_max is None else adx_max
+        self.rsi_level = rsi_level
+        self.bb_std = getattr(config, "RANGE_BB_STD", 2.0) if bb_std is None else bb_std
+        self.need_confirm_candle = need_confirm_candle
+        self.h1_max_dist_atr = (
+            getattr(config, "RANGE_H1_ATR_MULTIPLIER", 1.5)
+            if h1_max_dist_atr is None else h1_max_dist_atr
+        )
 
     def add_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add Bollinger Bands, RSI, ATR, EMA and ADX to candle data."""
         if df is None or df.empty or not {"open", "high", "low", "close"}.issubset(df.columns):
             return df
         bb_length = getattr(config, "RANGE_BB_LENGTH", 20)
-        bb_std = getattr(config, "RANGE_BB_STD", 2.0)
         df["BB_Mid"] = df["close"].rolling(bb_length).mean()
-        deviation = df["close"].rolling(bb_length).std(ddof=0) * bb_std
+        deviation = df["close"].rolling(bb_length).std(ddof=0) * self.bb_std
         df["BB_Lower"] = df["BB_Mid"] - deviation
         df["BB_Upper"] = df["BB_Mid"] + deviation
         df["RSI_14"] = ta.rsi(df["close"], length=getattr(config, "RANGE_RSI_LENGTH", 14))
@@ -54,18 +64,18 @@ class RangeReversionEngine:
         if any(pd.isna(value) for value in values):
             return "NONE", None, None, None
         adx, atr = float(current["ADX_14"]), float(current["ATR_14"])
-        if adx >= getattr(config, "RANGE_ADX_MAX", 20.0) or adx > float(earlier["ADX_14"]) or atr <= 0:
+        if adx >= self.adx_max or adx > float(earlier["ADX_14"]) or atr <= 0:
             return "NONE", None, None, None
 
         entry = float(current["close"])
         rsi_values = [float(value) for value in (previous["RSI_14"], current["RSI_14"]) if not pd.isna(value)]
-        oversold = getattr(config, "RANGE_RSI_OVERSOLD", 35.0)
-        overbought = getattr(config, "RANGE_RSI_OVERBOUGHT", 65.0)
+        buy_rsi_ok = self.rsi_level is None or any(value < self.rsi_level for value in rsi_values)
+        sell_rsi_ok = self.rsi_level is None or any(value > 100 - self.rsi_level for value in rsi_values)
         if (previous["low"] <= previous["BB_Lower"] and entry > current["BB_Lower"]
-                and entry > current["open"] and any(value < oversold for value in rsi_values)):
+                and (not self.need_confirm_candle or entry > current["open"]) and buy_rsi_ok):
             direction, sign, extreme = "BUY", 1, float(current["low"])
         elif (previous["high"] >= previous["BB_Upper"] and entry < current["BB_Upper"]
-              and entry < current["open"] and any(value > overbought for value in rsi_values)):
+              and (not self.need_confirm_candle or entry < current["open"]) and sell_rsi_ok):
             direction, sign, extreme = "SELL", -1, float(current["high"])
         else:
             return "NONE", None, None, None

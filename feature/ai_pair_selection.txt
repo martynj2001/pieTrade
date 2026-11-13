@@ -377,7 +377,7 @@ precision only by the "_JPY" suffix (JPY: 0.01/0.05/3dp; others 0.0001/0.0005/5d
    setting; connect the existing settings change notification (from section 6) for key
    "ai_agent_enabled" to self.agent_card.set_enabled; at startup call show_idle(...).
 
-//Prompt 4/Phase 4
+[x] //Prompt 4/Phase 4
 
 Work in the current folder and branch. Do not create new
 branches or worktrees.

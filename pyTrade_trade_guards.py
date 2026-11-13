@@ -233,6 +233,7 @@ class TradeGuards:
         h1_df: pd.DataFrame,
         breakout_level: float,
         direction: str,
+        skip_adx: bool = False,
     ) -> bool:
         """Validate a breakout signal against its level, M15 ADX, and H1 trend.
 
@@ -276,7 +277,7 @@ class TradeGuards:
                 level,
             )
             return False
-        if not self._adx_passes(m15_df):
+        if not skip_adx and not self._adx_passes(m15_df):
             return False
 
         h1_bullish = self._latest_h1_trend(h1_df)
@@ -298,6 +299,7 @@ class TradeGuards:
         m15_df: pd.DataFrame,
         h1_df: pd.DataFrame,
         direction: str,
+        h1_max_dist_atr: float | None = None,
     ) -> bool:
         """Require weak M15 ADX and H1 price close to its EMA50."""
         if self._normalize_direction(direction) is None:
@@ -317,7 +319,11 @@ class TradeGuards:
             latest = close.iloc[-1]
             if not all(math.isfinite(float(value)) for value in (adx, ema, atr, latest)) or atr <= 0:
                 return False
+            max_distance = (
+                getattr(config, "RANGE_H1_ATR_MULTIPLIER", 1.5)
+                if h1_max_dist_atr is None else h1_max_dist_atr
+            )
             return bool(adx < getattr(config, "RANGE_ADX_MAX", 20.0) and
-                        abs(latest - ema) <= getattr(config, "RANGE_H1_ATR_MULTIPLIER", 1.5) * atr)
+                        abs(latest - ema) <= max_distance * atr)
         except (TypeError, ValueError, KeyError, IndexError):
             return False

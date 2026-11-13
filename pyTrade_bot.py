@@ -228,7 +228,7 @@ class pyTradeWorker(QObject):
             )
         else:
             strategy_name = strategy.strategy_name
-            if strategy_name == "Breakout":
+            if strategy_name in {"Breakout", "Breakout_V2"}:
                 level_column = (
                     "DC_Upper"
                     if signal == "BUY"
@@ -255,6 +255,7 @@ class pyTradeWorker(QObject):
                                 price[level_column].iloc[-1]
                             ),
                             signal,
+                            skip_adx=getattr(strategy, "adx_mode", "threshold") == "rising",
                         )
                     )
             elif strategy_name in {
@@ -269,7 +270,10 @@ class pyTradeWorker(QObject):
                     )
                 )
             elif strategy_name == "Range_Reversion":
-                guard_passed = self.trade_guards.validate_range(price, h1_price, signal)
+                guard_passed = self.trade_guards.validate_range(
+                    price, h1_price, signal,
+                    h1_max_dist_atr=getattr(strategy, "h1_max_dist_atr", None),
+                )
             else:
                 guard_passed = False
                 logger.error(

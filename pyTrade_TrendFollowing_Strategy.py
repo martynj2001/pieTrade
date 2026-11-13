@@ -32,6 +32,8 @@ class TrendFollowingEngine:
         trend_filter_k: float = 0.5,
         pullback_tolerance_k: float = 0.25,
         wick_factor: float = 1.5,
+        allowed_hours: Optional[list[int]] = None,
+        max_trend_k: Optional[float] = None,
     ) -> None:
         """
         Initialize the TrendFollowingEngine with strategy parameters.
@@ -55,6 +57,8 @@ class TrendFollowingEngine:
         self.trend_filter_k = trend_filter_k
         self.pullback_tolerance_k = pullback_tolerance_k
         self.wick_factor = wick_factor
+        self.allowed_hours = allowed_hours
+        self.max_trend_k = max_trend_k
 
         self.strategy_name = "EMA_TrendFollowing"
 
@@ -134,8 +138,9 @@ class TrendFollowingEngine:
         ema_high_col = f"EMA_{self.ema_high_len}"
         atr_col = f"ATR_{self.atr_len}"
         distance = abs(float(row["close"]) - float(row[ema_high_col]))
-        threshold = self.trend_filter_k * float(row[atr_col])
-        return distance > threshold
+        atr = float(row[atr_col])
+        threshold = self.trend_filter_k * atr
+        return distance > threshold and (self.max_trend_k is None or distance <= self.max_trend_k * atr)
 
     def pullback_to_ema20(self, row: pd.Series) -> bool:
         """
@@ -192,6 +197,10 @@ class TrendFollowingEngine:
             return "NONE"
 
         last_row = df.iloc[-1]
+        if self.allowed_hours is not None:
+            timestamp = pd.to_datetime(last_row.get("time"), utc=True, errors="coerce")
+            if pd.isna(timestamp) or (timestamp + pd.Timedelta(minutes=15)).hour not in self.allowed_hours:
+                return "NONE"
         ema_low_col = f"EMA_{self.ema_low_len}"
         ema_high_col = f"EMA_{self.ema_high_len}"
         atr_col = f"ATR_{self.atr_len}"

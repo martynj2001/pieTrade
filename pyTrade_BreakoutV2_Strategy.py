@@ -7,14 +7,28 @@ import pandas as pd
 import config
 import pyTrade_instruments
 from pyTrade_Breakout_Strategy import BreakoutEngine
+from pyTrade_trade_guards import TradeGuards
 
 
 class BreakoutV2Engine(BreakoutEngine):
     """Trade strong breakouts from a narrow prior Donchian channel."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, squeeze_pct: float | None = None, hours: list[int] | tuple[int, ...] | None = None,
+                 max_ema_dist_atr: float | None = None, rr_ratio: float | None = None,
+                 adx_mode: str = "threshold") -> None:
+        effective_rr = getattr(config, "BO_RR", 1.5) if rr_ratio is None else rr_ratio
+        super().__init__(rr_ratio=effective_rr)
         self.strategy_name = "Breakout_V2"
+        self.squeeze_pct = getattr(config, "BO_SQUEEZE_PCT", 0.3) if squeeze_pct is None else squeeze_pct
+        self.hours = tuple(getattr(config, "BO_HOURS", (7, 8, 9, 12, 13, 14))) if hours is None else tuple(hours)
+        self.max_ema_dist_atr = (
+            getattr(config, "BO_MAX_EMA_DISTANCE_ATR", 3.0)
+            if max_ema_dist_atr is None else max_ema_dist_atr
+        )
+        self.adx_mode = adx_mode.lower()
+        if self.adx_mode not in {"threshold", "rising"}:
+            raise ValueError("adx_mode must be 'threshold' or 'rising'")
+        self.adx_calculator = TradeGuards()
 
     def add_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add the prior-channel width and its rolling squeeze threshold."""
@@ -23,7 +37,7 @@ class BreakoutV2Engine(BreakoutEngine):
             df["DC_Width"] = df["DC_Upper"] - df["DC_Lower"]
             window = getattr(config, "BO_SQUEEZE_WINDOW", 100)
             df["DC_Squeeze"] = df["DC_Width"].rolling(window, min_periods=window).quantile(
-                getattr(config, "BO_SQUEEZE_PCT", 0.3)
+                self.squeeze_pct
             )
         return df
 
@@ -37,9 +51,7 @@ class BreakoutV2Engine(BreakoutEngine):
         if any(column not in row or pd.isna(row[column]) for column in required):
             return "NONE"
         timestamp = pd.to_datetime(row["time"], utc=True, errors="coerce")
-        if pd.isna(timestamp) or (timestamp + pd.Timedelta(minutes=15)).hour not in getattr(
-            config, "BO_HOURS", (7, 8, 9, 12, 13, 14)
-        ):
+        if pd.isna(timestamp) or (timestamp + pd.Timedelta(minutes=15)).hour not in self.hours:
             return "NONE"
 
         open_price, high, low, close = (float(row[column]) for column in ("open", "high", "low", "close"))
@@ -48,8 +60,12 @@ class BreakoutV2Engine(BreakoutEngine):
         if (atr <= 0 or candle_range <= 0 or float(row["DC_Width"]) > float(row["DC_Squeeze"])
                 or abs(close - open_price) < getattr(config, "BO_MIN_BODY_RATIO", 0.5) * candle_range
                 or candle_range > getattr(config, "BO_MAX_RANGE_ATR", 2.0) * atr
-                or abs(close - ema) > getattr(config, "BO_MAX_EMA_DISTANCE_ATR", 3.0) * atr):
+                or abs(close - ema) > self.max_ema_dist_atr * atr):
             return "NONE"
+        if self.adx_mode == "rising":
+            adx = self.adx_calculator.calculate_adx(df)
+            if len(adx) < 4 or pd.isna(adx.iloc[-1]) or pd.isna(adx.iloc[-4]) or adx.iloc[-1] <= adx.iloc[-4]:
+                return "NONE"
 
         margin = getattr(config, "BO_MIN_BREAKOUT_ATR", 0.1) * atr
         if close >= float(row["DC_Upper"]) + margin:
@@ -76,7 +92,7 @@ class BreakoutV2Engine(BreakoutEngine):
         minimum = pyTrade_instruments.min_sl_dist(instrument) if instrument else self.min_sl_dist
         stop = level - sign * getattr(config, "BO_STOP_ATR", 0.5) * atr
         stop = min(stop, entry - minimum) if direction == "BUY" else max(stop, entry + minimum)
-        target = entry + sign * getattr(config, "BO_RR", 1.5) * abs(entry - stop)
+        target = entry + sign * self.rr_ratio * abs(entry - stop)
         return direction, entry, stop, target
 
     def manage(self, trade: dict[str, Any], df: pd.DataFrame) -> Optional[str]:
